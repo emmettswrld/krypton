@@ -1,0 +1,19 @@
+@font-face {
+    font-family: 'SF Compact';
+    src: url('../fonts/SF-Compact-Text-Regular.otf')
+}
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body {
+    height:100vh;
+}
+
+#bg {
+    width:100%;
+    height:100%;
+}
