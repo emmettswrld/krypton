@@ -6,5 +6,7 @@ VANTA.FOG({
     baseColor:0x090c12,
     blurFactor:0.8,
     zoom:0.6,
-    speed:0.8
+    speed:2
 });
+
+lucide.createIcons();
