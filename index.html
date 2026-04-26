@@ -9,30 +9,45 @@
     </head>
     <body>
         <div id="bg">
+            <div id="blur-overlay"></div>
+
+            <div id="clock">
+                <span id="clock-hrs"></span><span class="clock-sep">:</span><span id="clock-mins"></span><span class="clock-sep">:</span><span id="clock-secs"></span>
+                <span class="clock-div"></span>
+                <span class="clock-label">v2 alpha</span>
+            </div>
             <div id="center">
                 <h1>krypton</h1>
                 <div id="tagline"></div>
-                <div id="search-bar">
-                    <i data-lucide="search" width="16" height="16"></i>
-                    <input type="text" placeholder="search or enter a URL...">
-                </div>
             </div>
 
-            <div id="navbar">
-                <button class="nav-btn" data-tooltip="Home"><i data-lucide="house" width="18" height="18"></i></button>
-                <div class="nav-div"></div>
-                <button class="nav-btn" data-tooltip="Games"><i data-lucide="gamepad-2" width="18" height="18"></i></button>
-                <button class="nav-btn" data-tooltip="Apps"><i data-lucide="grid-2x2" width="18" height="18"></i></button>
-                <button class="nav-btn" data-tooltip="Movies"><i data-lucide="clapperboard" width="18" height="18"></i></button>
-                <button class="nav-btn" data-tooltip="Music"><i data-lucide="music" width="18" height="18"></i></button>
-                <button class="nav-btn" data-tooltip="AI"><i data-lucide="sparkles" width="18" height="18"></i></button>
-                <button class="nav-btn" data-tooltip="Chat"><i data-lucide="message-circle" width="18" height="18"></i></button>
-                <div class="nav-div"></div>
-                <button class="nav-btn" data-tooltip="Settings"><i data-lucide="settings" width="18" height="18"></i></button>
+            <div id="engine-dropdown">
+                <div class="engine-opt active" data-engine="ddg">DuckDuckGo</div>
+                <div class="engine-opt" data-engine="bing">Bing</div>
+                <div class="engine-opt" data-engine="google">Google</div>
             </div>
         </div>
-        
 
+        <div id="search-bar">
+            <i data-lucide="search" width="16" height="16"></i>
+            <input type="text" placeholder="search or enter a URL...">
+            <button id="engine-btn">DDG <i data-lucide="chevron-down" width="14" height="14"></i></button>
+        </div>
+
+        <div id="navbar">
+            <button class="nav-btn" data-tooltip="Home"><i data-lucide="house" width="20" height="20"></i></button>
+            <div class="nav-div"></div>
+            <button class="nav-btn" data-tooltip="Games"><i data-lucide="gamepad-2" width="20" height="20"></i></button>
+            <button class="nav-btn" data-tooltip="Browser"><i data-lucide="earth" width="20" height="20"></i></button>
+            <button class="nav-btn" data-tooltip="Apps"><i data-lucide="layout-grid" width="20" height="20"></i></button>
+            <button class="nav-btn" data-tooltip="Movies"><i data-lucide="clapperboard" width="20" height="20"></i></button>
+            <button class="nav-btn" data-tooltip="Music"><i data-lucide="music" width="20" height="20"></i></button>
+            <button class="nav-btn" data-tooltip="AI"><i data-lucide="sparkles" width="20" height="20"></i></button>
+            <button class="nav-btn" data-tooltip="Chat"><i data-lucide="message-circle" width="20" height="20"></i></button>
+            <div class="nav-div"></div>
+            <button class="nav-btn" data-tooltip="Settings"><i data-lucide="settings" width="20" height="20"></i></button>
+        </div>
+        
         <script src="./scripts/main/script.js"></script>
     </body>
 </html>
