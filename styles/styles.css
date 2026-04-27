@@ -1,0 +1,106 @@
+@font-face {
+    font-family: 'SF Compact Thin';
+    src: url('../fonts/SF-Compact-Text-Thin.otf');
+}
+
+@font-face {
+    font-family: 'SF Compact';
+    src: url('../fonts/SF-Compact-Text-Regular.otf');
+}
+
+@font-face {
+    font-family: 'SF Compact Medium';
+    src: url('../fonts/SF-Compact-Text-Medium.otf');
+}
+
+@font-face {
+    font-family: 'SF Compact Bold';
+    src: url('../fonts/SF-Compact-Text-Bold.otf');
+}
+
+* {
+    box-sizing: border-box;
+    margin:0;
+    padding:0;
+}
+
+body {
+    display:flex;
+}
+
+.navbar {
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+    background: #1f2123;
+    border-radius:999px;
+    padding:3px;
+}
+
+.nb-btn {
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    border:none;
+    background:transparent;
+    outline:none;
+    transition:background 0.15s;
+    flex-shrink:0;
+}
+
+.nb-btn svg {
+    width:14px;
+    height:14px;
+    stroke:#e4e4e4;
+    transition:stroke 0.15s;
+    stroke-width:2;
+    fill:none;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.nb-btn.active {
+    background:#93c5fd;
+}
+
+.nb-btn.active svg {
+    stroke:#1e3a5f;
+}
+
+.nb-btn:not(.active):hover {
+    background:rgba(255,255,255,0.07);
+}
+
+.topbar {
+    width:100%;
+    background:#101214;
+    display:flex;
+    justify-content:center;
+    padding:4px 0;
+    position:relative;
+}
+
+.topbar::before,
+.topbar::after {
+    content:'';
+    position:absolute;
+    bottom:-20px;
+    width:20px;
+    height:20px;
+    background:transparent;
+    box-shadow:0 -10px 0 0 #101214;
+}
+
+.topbar::before {
+    left:0;
+    border-top-left-radius:50%;
+}
+
+.topbar::after {
+    right:0;
+    border-top-right-radius:50%;
+}
