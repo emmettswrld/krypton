@@ -5,20 +5,43 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <title>Home - Classroom</title>
         <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.fog.min.js"></script>
         <link rel="stylesheet" href="./styles/styles.css">
     </head>
     <body>
         <div class="topbar">
             <nav class="navbar" id="navbar">
-                <button class="nb-btn active"><i data-lucide="house"></i></button>
-                <button class="nb-btn"><i data-lucide="gamepad-2"></i></button>
-                <button class="nb-btn"><i data-lucide="earth"></i></button>
-                <button class="nb-btn"><i data-lucide="clapperboard"></i></button>
-                <button class="nb-btn"><i data-lucide="brain"></i></button>
-                <button class="nb-btn"><i data-lucide="message-circle"></i></button>
-                <button class="nb-btn"><i data-lucide="settings"></i></button>
+                <button class="nb-btn active" data-tooltip="Home"><i data-lucide="house"></i></button>
+                <button class="nb-btn" data-tooltip="Games"><i data-lucide="gamepad-2"></i></button>
+                <button class="nb-btn" data-tooltip="Browser"><i data-lucide="earth"></i></button>
+                <button class="nb-btn" data-tooltip="Movies"><i data-lucide="clapperboard"></i></button>
+                <button class="nb-btn" data-tooltip="AI"><i data-lucide="brain"></i></button>
+                <button class="nb-btn" data-tooltip="Chat"><i data-lucide="message-circle"></i></button>
+                <button class="nb-btn" data-tooltip="Settings"><i data-lucide="settings"></i></button>
+            </nav>
+            <nav class="dotbar">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
             </nav>
         </div>
+
+        <main class="home" id="home">
+            <h1 class="home-tl">krypton</h1>
+            <div class="tagline-wpr">
+                <p class="tagline"></p>
+            </div>
+
+            <span class="version">v2 alpha</span>
+        </main>
         <script src="./scripts/main/script.js"></script>
     </body>
 </html>

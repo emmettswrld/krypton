@@ -26,6 +26,8 @@
 
 body {
     display:flex;
+    flex-direction: column;
+    min-height:100vh;
 }
 
 .navbar {
@@ -48,8 +50,37 @@ body {
     border:none;
     background:transparent;
     outline:none;
-    transition:background 0.15s;
+    transition:background 0.15s, scale 0.1s;
     flex-shrink:0;
+    position:relative;
+}
+
+.nb-btn::after {
+    content:attr(data-tooltip);
+    position:absolute;
+    top:calc(100% + 10px);
+    left:50%;
+    transform:translateX(-50%) scale(0.85);
+    background:#101214;
+    color:#e4e4e4;
+    font-family:'SF Compact';
+    font-size:0.65rem;
+    padding:3px 7px;
+    border-radius:6px;
+    white-space:nowrap;
+    pointer-events:none;
+    z-index:5;
+    opacity:0;
+    transition:opacity 0.15s ease, transform 0.15s ease;
+}
+
+.nb-btn:hover::after {
+    opacity:1 !important;
+    transform:translateX(-50%) scale(1);
+}
+
+.nb-btn.pressing {
+    scale:0.82;
 }
 
 .nb-btn svg {
@@ -80,6 +111,7 @@ body {
     background:#101214;
     display:flex;
     justify-content:center;
+    align-items:center;
     padding:4px 0;
     position:relative;
 }
@@ -88,11 +120,12 @@ body {
 .topbar::after {
     content:'';
     position:absolute;
-    bottom:-20px;
-    width:20px;
-    height:20px;
+    bottom:-40px;
+    width:40px;
+    height:40px;
     background:transparent;
-    box-shadow:0 -10px 0 0 #101214;
+    box-shadow:0 -20px 0 0 #101214;
+    z-index:1;
 }
 
 .topbar::before {
@@ -103,4 +136,77 @@ body {
 .topbar::after {
     right:0;
     border-top-right-radius:50%;
+}
+
+.dotbar {
+    position:absolute;
+    right:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#1f2123;
+    border-radius:999px;
+    padding:0 10px;
+    height:32px;
+    z-index:2;
+}
+
+.dot {
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    display:block;
+}
+
+main.home {
+    width:100%;
+    background-color:#93c5fd;
+    display:flex;
+    flex:1;
+    justify-content: center;
+    align-items:center;
+    position:relative;
+    flex-direction:column;
+}
+
+.home-tl {
+    font-family:'SF Compact Bold';
+    color:#93c5fd;
+    font-size:3.2rem;
+    z-index:1;
+    position:relative;
+}
+
+.tagline-wpr {
+    overflow:hidden;
+    height:1.4em;
+    margin-top:8px;
+    text-align:center;
+}
+
+.tagline {
+    font-family:'SF Compact';
+    font-size:1rem;
+    color:rgba(255,255,255,0.35);
+    transition:transform 0.4s ease, opacity 0.4s ease;
+}
+
+.tagline.slide-out {
+    transform:translateY(-100%);
+    opacity: 0;
+}
+
+.tagline.slide-in {
+    transform:translateY(100%);
+    opacity:0;
+    transition:none;
+}
+
+.version {
+    position:absolute;
+    bottom:12px;
+    font-family:'SF Compact';
+    font-size:1rem;
+    color:rgba(255,255,255,0.2);
 }
