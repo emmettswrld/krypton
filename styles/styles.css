@@ -210,3 +210,67 @@ main.home {
     font-size:1rem;
     color:rgba(255,255,255,0.2);
 }
+
+.search-wpr {
+    margin-top:20px;
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+}
+
+.search {
+    background:#1f2123;
+    border:1.5px solid #93c4fd38;
+    border-radius:999px;
+    padding:12px 22px 12px 38px;
+    color:#e4e4e4;
+    font-family:'SF Compact';
+    font-size:0.95rem;
+    width:400px;
+    outline:none;
+    transition:background 0.2s, border-width 0.2s;
+    caret-color:#93c5fd;
+    position:relative;
+    caret-color:transparent;
+    cursor:text;
+}
+
+.search:empty::before {
+    content:attr(data-placeholder);
+    color:rgba(255,255,255,0.25);
+    pointer-events:none;
+}
+
+.other-caret {
+    position:absolute;
+    width:2px;
+    height:1.1em;
+    background:#60a5fa;
+    pointer-events:none;
+    opacity:0;
+    transition:height 0.1s;
+    top:50%;
+    transform:translateY(-50%);
+    border-radius:2px;
+}
+
+.search-icon {
+    position:absolute;
+    left:14px;
+    width:15px;
+    height:15px;
+    stroke:rgba(255,255,255,0.3);
+    pointer-events:none;
+    z-index:2;
+}
+
+.search::placeholder {
+    color:rgba(255,255,255,0.25);
+}
+
+.search:focus {
+    background:#2a2d30;
+    border-color:#93c5fd;
+    border-width:3px;
+}
