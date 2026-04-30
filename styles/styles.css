@@ -362,9 +362,73 @@ main.home {
     overflow-y:auto;
 }
 
-.ctrl-panel-hdr {
-    font-family:'SF Compact Bold';
-    font-size:1.5rem;
+.qs-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.qs-tile {
+    background:#1f2123;
+    border:none;
+    border-radius:16px;
+    padding:16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+    transition:background 0.2s, scale 0.1s;
+    outline:none;
+}
+
+.qs-tile:hover {
+    background:#2a2d30;
+}
+
+.qs-tile:active {
+    background:#93c5fd;
+}
+
+.qs-tile svg {
+    width:20px;
+    height:20px;
+    stroke:#e4e4e4;
+    stroke-width:2;
+    flex-shrink:0;
+}
+
+.qs-tile.active svg {
+    stroke:#1e3a5f;
+}
+
+.qs-tile.active {
+    background:#93c5fd;
+}
+
+.qs-text {
+    display:flex;
+    flex-direction: column;
+    align-items:flex-start;
+    gap:2px;
+    flex:1;
+}
+
+.qs-label {
+    font-family:'SF Compact Medium';
+    font-size:0.9rem;
     color:#e4e4e4;
-    margin-bottom:20px;
+}
+
+.qs-tile.active .qs-label {
+    color:#1e3a5f;
+}
+
+.qs-sub {
+    font-family:'SF Compact';
+    font-size:0.75rem;
+    color:rgba(255,255,255,0.5);
+}
+
+.qs-tile.active .qs-sub {
+    color:rgba(30,58,95,0.7);
 }

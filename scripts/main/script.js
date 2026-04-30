@@ -1,14 +1,14 @@
 //beautification
 lucide.createIcons();
 
-VANTA.FOG({
+VANTA.DOTS({
     el: '#home',
-    baseColor: 0x111518,
-    lowlightColor: 0x161c24,
-    midtoneColor: 0x1e2d3d,
-    highlightColor: 0x2e4a6a,
-    speed: 0.8,
-    zoom: 0.1,
+    color: 0x1e3a5f,
+    color2: 0x93c5fd,
+    backgroundColor: 0x101214,
+    size: 3.5,
+    spacing: 28,
+    showLines: false,
 });
 
 //functionality
@@ -139,9 +139,26 @@ const ctrlPanel=document.createElement('div');
 ctrlPanel.className='ctrl-panel';
 ctrlPanel.innerHTML=`
 <div class="ctrl-panel-cont">
-    <h2 class="ctrl-panel-hdr">control panel</h2>
+    <div class="qs-grid">
+        <button class="qs-tile active">
+            <i data-lucide="a-large-small"></i>
+            <div class="qs-text">
+                <span class="qs-label">test</span>
+                <span class="qs-sub">test text</span>
+            </div>
+        </button>
+
+        <button class="qs-tile">
+            <i data-lucide="a-large-small"></i>
+            <div class="qs-text">
+                <span class="qs-label">test</span>
+                <span class="qs-sub">test inactive</span>
+            </div>
+        </button>
+    </div>
 </div>`;
 document.body.appendChild(ctrlPanel);
+lucide.createIcons();
 
 ctrlBtn.addEventListener('click',(e)=>{
     e.stopPropagation();
