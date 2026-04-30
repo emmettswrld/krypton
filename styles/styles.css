@@ -140,7 +140,7 @@ body {
 
 .dotbar {
     position:absolute;
-    right:12px;
+    right:50px;
     display:flex;
     align-items:center;
     gap:10px;
@@ -148,7 +148,7 @@ body {
     border-radius:999px;
     padding:0 10px;
     height:32px;
-    z-index:2;
+    z-index:500;
 }
 
 .dot {
@@ -240,13 +240,15 @@ main.home {
     content:attr(data-placeholder);
     color:rgba(255,255,255,0.25);
     pointer-events:none;
+    position:absolute;
+    left:38px;
 }
 
 .other-caret {
     position:absolute;
     width:2px;
     height:1.1em;
-    background:#60a5fa;
+    background:#93c5fd;
     pointer-events:none;
     opacity:0;
     transition:height 0.1s;
@@ -273,4 +275,96 @@ main.home {
     background:#2a2d30;
     border-color:#93c5fd;
     border-width:3px;
+}
+
+.ctrl-btn {
+    position:absolute;
+    right:10px;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:#1f2123;
+    border:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:5000;
+    transition: scale 0.15s;
+    pointer-events:auto;
+}
+
+.ctrl-btn:hover {
+    background:#2a2d30;
+}
+
+.ctrl-btn:active {
+    scale:0.9;
+}
+
+.ctrl-btn.active {
+    scale:0.8;
+    background-color:#93c5fd;
+}
+
+.ctrl-btn.active svg {
+    color:#1e3a5f;
+    stroke:#1e3a5f;
+}
+
+.ctrl-btn svg {
+    width:14px;
+    height:14px;
+    stroke:#e4e4e4;
+    stroke-width:2;
+}
+
+.ctrl-panel {
+    position:fixed;
+    right:0;
+    top:40px;
+    width:320px;
+    height:100vh;
+    background:#101214;
+    z-index:10;
+    transform:translateX(100%);
+    transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.ctrl-panel.open {
+    transform:translateX(0);
+}
+
+.ctrl-panel::before,
+.ctrl-panel::after {
+    content:'';
+    position:absolute;
+    left:-40px;
+    width:40px;
+    height:40px;
+    background:transparent;
+    box-shadow:20px 0 0 0 #101214;
+}
+
+.ctrl-panel::before {
+    top:0;
+    border-top-right-radius: 50%;
+}
+
+.ctrl-panel::after {
+    bottom:0;
+    border-bottom-right-radius:50%;
+}
+
+.ctrl-panel-cont {
+    padding:20px;
+    height:100%;
+    overflow-y:auto;
+}
+
+.ctrl-panel-hdr {
+    font-family:'SF Compact Bold';
+    font-size:1.5rem;
+    color:#e4e4e4;
+    margin-bottom:20px;
 }

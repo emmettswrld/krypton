@@ -97,10 +97,12 @@ function animateCaret() {
 searchEl.addEventListener('focus',()=>{
     oCaret.style.opacity='1';
     animating=true;
-    updateCaret();
-    currentX=realX;
-    oCaret.style.left=(currentX-searchEl.getBoundingClientRect().left)+'px';
-    animateCaret();
+    requestAnimationFrame(()=>{
+        updateCaret();
+        currentX=realX;
+        oCaret.style.left=(currentX-searchEl.getBoundingClientRect().left)+'px';
+        animateCaret();
+    });
 });
 
 searchEl.addEventListener('blur',()=>{
@@ -116,4 +118,40 @@ searchEl.addEventListener('mouseup',()=>{
 searchEl.addEventListener('input',()=>{
     updateCaret();
     requestAnimationFrame(animateCaret);
+});
+
+searchEl.classList.add('empty');
+
+searchEl.addEventListener('input',()=>{
+    if (searchEl.textContent.length>0) {
+        searchEl.classList.remove('empty');
+    } else {
+        searchEl.classList.add('empty');
+        searchEl.innerHTML='';
+    }
+    updateCaret();
+    requestAnimationFrame(animateCaret);
+});
+
+//control pnl handling
+const ctrlBtn=document.getElementById('ctrlBtn');
+const ctrlPanel=document.createElement('div');
+ctrlPanel.className='ctrl-panel';
+ctrlPanel.innerHTML=`
+<div class="ctrl-panel-cont">
+    <h2 class="ctrl-panel-hdr">control panel</h2>
+</div>`;
+document.body.appendChild(ctrlPanel);
+
+ctrlBtn.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    ctrlPanel.classList.toggle('open');
+    ctrlBtn.classList.toggle('active');
+});
+
+document.addEventListener('click',(e)=>{
+    if (!ctrlPanel.contains(e.target)&&!ctrlBtn.contains(e.target)&&ctrlPanel.classList.contains('open')) {
+        ctrlPanel.classList.remove('open');
+        ctrlBtn.classList.remove('active');
+    }
 });
