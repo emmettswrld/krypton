@@ -133,6 +133,17 @@ searchEl.addEventListener('input',()=>{
     requestAnimationFrame(animateCaret);
 });
 
+const searchBtn=document.querySelector('.search-btn');
+searchBtn.classList.add('disabled');
+
+searchEl.addEventListener('input',()=>{
+    if (searchEl.textContent.length>0) {
+        searchBtn.classList.remove('disabled');
+    } else {
+        searchBtn.classList.add('disabled');
+    }
+});
+
 //control pnl handling
 const ctrlBtn=document.getElementById('ctrlBtn');
 const ctrlPanel=document.createElement('div');
