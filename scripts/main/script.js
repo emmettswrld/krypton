@@ -13,11 +13,24 @@ VANTA.DOTS({
 
 //functionality
 //event handling for navbar
+const appCont=document.getElementById('appCont');
+
 document.getElementById('navbar').addEventListener('click',e=>{
     const btn=e.target.closest('.nb-btn');
     if (!btn) return;
+    const wasActive=btn.classList.contains('active');
     document.querySelectorAll('.nb-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
+    if (wasActive) {
+        appCont.classList.remove('open');
+    } else {
+        btn.classList.add('active');
+        appCont.classList.add('open');
+    }
+
+    if (wasActive||btn.dataset.tooltip==='Home') {
+        appCont.classList.remove('open');
+        return;
+    }
 });
 
 document.querySelectorAll('.nb-btn').forEach(btn=>{
@@ -118,6 +131,10 @@ searchEl.addEventListener('mouseup',()=>{
 searchEl.addEventListener('input',()=>{
     updateCaret();
     requestAnimationFrame(animateCaret);
+});
+
+searchEl.addEventListener('keydown',e=>{
+    if (e.key==='Enter') e.preventDefault();
 });
 
 searchEl.classList.add('empty');
