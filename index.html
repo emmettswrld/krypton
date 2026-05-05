@@ -21,16 +21,26 @@
             </div>
         </div>
 
-        <div class="address-bar">
-            <button class="nav-btn" id="backBtn" disabled><i data-lucide="arrow-left"></i></button>
-            <button class="nav-btn" id="fwBtn" disabled><i data-lucide="arrow-right"></i></button>
-            <button class="nav-btn" id="refBtn"><i data-lucide="rotate-cw"></i></button>
-            <div class="url-intainer">
-                <div class="url-icon"><i data-lucide="atom"></i></div>
-                <input type="text" class="url-input" placeholder="Search or enter address" id="urlInput">
+        <div class="main-col">
+            <div class="address-bar">
+                <button class="nav-btn" id="backBtn" disabled><i data-lucide="arrow-left"></i></button>
+                <button class="nav-btn" id="fwBtn" disabled><i data-lucide="arrow-right"></i></button>
+                <button class="nav-btn" id="refBtn"><i data-lucide="rotate-cw"></i></button>
+                <div class="url-intainer">
+                    <div class="url-icon"><i data-lucide="atom"></i></div>
+                    <input type="text" class="url-input" placeholder="Search or enter address...">
+                </div>
+            </div>
+
+            <div class="below">
+                <div class="sidebar" id="sidebar">
+                    <button class="sb-btn active" id="homeBtn" title="Home"><i data-lucide="house"></i></button>
+                    <button class="sb-btn" id="gmBtn" title="Games"><i data-lucide="gamepad-2"></i></button>
+                    <div class="sb-spacer"></div>
+                    <button class="sb-btn" id="stBtn" title="Settings"><i data-lucide="settings"></i></button>
+                </div>
             </div>
         </div>
-
         <script src="./scripts/main/script.js"></script>
     </body>
 </html>
