@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Home - Classroom</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <link rel="stylesheet" href="./styles/styles.css">
+    </head>
+
+    <body>
+        <div class="tbar" id="tabBar">
+            <div class="tab active" data-tab-id="1">
+                <div class="tab-fav"><i data-lucide="globe"></i></div>
+                <span class="tab-tl">New Tab</span>
+                <div class="tab-cl"><i data-lucide="x"></i></div>
+            </div>
+            <div class="nt-btn" id="ntBtn">
+                <i data-lucide="plus" style="width:14px;height:14px;color:#808080;"></i>
+            </div>
+        </div>
+
+        <div class="address-bar">
+            <button class="nav-btn" id="backBtn" disabled><i data-lucide="arrow-left"></i></button>
+            <button class="nav-btn" id="fwBtn" disabled><i data-lucide="arrow-right"></i></button>
+            <button class="nav-btn" id="refBtn"><i data-lucide="rotate-cw"></i></button>
+            <div class="url-intainer">
+                <div class="url-icon"><i data-lucide="atom"></i></div>
+                <input type="text" class="url-input" placeholder="Search or enter address" id="urlInput">
+            </div>
+        </div>
+
+        <script src="./scripts/main/script.js"></script>
+    </body>
+</html>
