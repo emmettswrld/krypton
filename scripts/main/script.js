@@ -49,3 +49,43 @@ setInterval(()=>{
     inner.classList.add('exit');
     inner.addEventListener('transitionend',showTag,{once:true});
 },3000);
+
+//scram
+const connection = new BareMux.BareMuxConnection("/browse/baremux/worker.js");
+connection.setTransport("/browse/libcurl/index.mjs",[{websocket:"wss://wisp.classroom.lat/"}]);
+
+const {ScramjetController} = $scramjetLoadController();
+const scramjet=new ScramjetController({
+    files:{
+        all:"/browse/scram/scramjet.all.js",
+        wasm:"/browse/scram/scramjet.wasm.wasm",
+        sync:"/browse/scram/scramjet.sync.js"
+    },
+    prefix:"/browse/go/"
+});
+scramjet.init();
+
+function nav(input) {
+    let url=input.trim();
+    if (!url) return;
+    const frame=document.getElementById('browserFrame');
+    const home=document.querySelector('.main');
+    if (!url.includes(" ")||url.includes(" ")) {
+        url="https://duckduckgo.com/?q="+encodeURIComponent(url);
+    } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url="https://"+url;
+    }
+    frame.style.display='block';
+    home.style.display='none';
+    frame.src=scramjet.encodeUrl(url);
+    document.querySelector('.url-input').value=url;
+    document.getElementById("browserFrame").src=scramjet.encodeUrl(url);
+}
+
+document.querySelector(".url-input").addEventListener("keydown",e=>{
+    if (e.key==='Enter') nav(e.target.value);
+});
+
+document.querySelector(".main-search-input").addEventListener("keydown",e=>{
+    if (e.key==='Enter') nav(e.target.value);
+});

@@ -396,6 +396,7 @@ svg {
     background-color:#000;
     background-image:radial-gradient(circle,#222 1px, transparent 1px);
     background-size:20px 20px;
+    position:relative;
 }
 
 #bgCanvas {
@@ -427,6 +428,7 @@ svg {
     flex-direction: column;
     gap:12px;
     height:100%;
+    position:relative;
 }
 
 .main-tl {
@@ -539,12 +541,13 @@ svg {
     padding:12px 24px;
     width:500px;
     margin-top:8px;
-    transition:border-color 0.2s ease, background 0.2s ease;
+    transition:border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     height:42px;
 }
 
 .main-search:focus-within {
-    border: 2px solid #60a5fa;
+    border: 1px solid #60a5fa;
+    box-shadow:0 0 0 2px #60a5fa;
     background:#0a0a0a;
 }
 
@@ -567,4 +570,75 @@ svg {
 
 .main-search-input::placeholder {
     color: #505050;
+}
+
+.shortcuts {
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-top:24px;
+    position:absolute;
+    bottom:150px;
+    left:50%;
+    transform:translateX(-50%)
+}
+
+.shortcut {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    padding:0;
+}
+
+.sc-icon {
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    background:#0a0a0a;
+    border:1px solid #1a1a1a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    transition:border-color 0.2s ease, background 0.2s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.sc-icon img {
+    width:60%;
+    height:60%;
+    object-fit:contain;
+    border-radius:0;
+}
+
+.shortcut:hover .sc-icon {
+    background:#141414;
+    border-color:#2a2a2a;
+    transform:scale(1.08);
+}
+
+.sc-title {
+    font-size:11px;
+    font-weight:400;
+    color:#505050;
+    font-family:'Inter';
+    transition:color 0.2s ease;
+    white-space:nowrap;
+}
+
+.shortcut:hover .sc-title {
+    color:#808080;
+}
+
+.bframe {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    border:none;
+    z-index:10;
 }
