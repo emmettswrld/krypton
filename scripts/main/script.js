@@ -9,6 +9,18 @@ document.getElementById('refBtn').addEventListener('click',()=>{
     void icon.offsetWidth;
     icon.classList.add('spinning');
     icon.addEventListener('animationend',()=>icon.classList.remove('spinning'),{once:true});
+    const frame=document.getElementById('browserFrame');
+    if (frame.style.display!=='none') {
+        const loader=document.getElementById('bloader');
+        frame.classList.remove('loaded');
+        loader.classList.add('active');
+        frame.src=frame.src;
+        frame.onload=()=>{
+            loader.classList.remove('active');
+            frame.classList.add('loaded');
+            startURLP(frame);
+        }
+    }
 });
 
 const tl='krypton';
@@ -65,21 +77,77 @@ const scramjet=new ScramjetController({
 });
 scramjet.init();
 
+//browsing
 function nav(input) {
     let url=input.trim();
     if (!url) return;
     const frame=document.getElementById('browserFrame');
     const home=document.querySelector('.main');
-    if (!url.includes(" ")||url.includes(" ")) {
+    const loader=document.getElementById('bloader');
+
+    if (!url.includes(".")) {
         url="https://duckduckgo.com/?q="+encodeURIComponent(url);
     } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
         url="https://"+url;
     }
-    frame.style.display='block';
+
     home.style.display='none';
+    frame.classList.remove('loaded');
+    frame.style.display='block';
+    loader.classList.add('active');
+
     frame.src=scramjet.encodeUrl(url);
-    document.querySelector('.url-input').value=url;
-    document.getElementById("browserFrame").src=scramjet.encodeUrl(url);
+    const activeTab=document.querySelector('.tab.active');
+    const tabId=activeTab.dataset.tabId;
+    tabs[tabId]={url,frame};
+    activeTab.querySelector('.tab-tl').textContent=new URL(url).hostname;
+    setUrl(url);
+    frame.onload=()=>{
+        loader.classList.remove('active');
+        frame.classList.add('loaded');
+        startURLP(frame);
+    };
+}
+
+function setUrl(url) {
+    urlInput.value=url;
+    urlDisplay.innerHTML=formatUrl(url);
+    urlDisplay.style.display='block';
+    urlInput.style.display='none';
+}
+
+let urlPollInt=null;
+let lastHref='';
+
+function startURLP(frame) { //url polling
+    if (urlPollInt) clearInterval(urlPollInt);
+    lastHref='';
+    urlPollInt=setInterval(()=>{
+        try {
+            const href=frame.contentWindow.location.href;
+            if (href && href!==lastHref&&href!=='about:blank') {
+                lastHref=href;
+                const loader=document.getElementById('bloader');
+                frame.classList.remove('loaded');
+                loader.classList.add('active');
+                setTimeout(()=>{
+                    loader.classList.remove('active');
+                    frame.classList.add('loaded');
+                },1500);
+            }
+            const decoded=scramjet.decodeUrl(href);
+            if (decoded&&decoded!==urlInput.value) {
+                setUrl(decoded);
+                const activeTab=document.querySelector('.tab.active');
+                if (activeTab) {
+                    try {
+                        activeTab.querySelector('.tab-tl').textContent=new URL(decoded).hostname;
+                        tabs[activeTab.dataset.tabId].url=decoded;
+                    } catch (e) {}
+                }
+            }
+        } catch (e) {}
+    },300);
 }
 
 document.querySelector(".url-input").addEventListener("keydown",e=>{
@@ -89,3 +157,134 @@ document.querySelector(".url-input").addEventListener("keydown",e=>{
 document.querySelector(".main-search-input").addEventListener("keydown",e=>{
     if (e.key==='Enter') nav(e.target.value);
 });
+
+//url formatting
+const urlInput=document.querySelector('.url-input');
+const urlContainer=document.querySelector('.url-intainer');
+const urlDisplay=document.createElement('div');
+urlDisplay.className='url-display';
+urlDisplay.style.display='none';
+urlContainer.appendChild(urlDisplay);
+
+urlDisplay.addEventListener('click',()=>{
+    urlDisplay.style.display='none';
+    urlInput.style.display='block';
+    urlInput.focus();
+    urlInput.select();
+});
+
+urlInput.addEventListener('blur',()=>{
+    if (urlInput.value) {
+        urlDisplay.innerHTML=formatUrl(urlInput.value);
+        urlDisplay.style.display='block';
+        urlInput.style.display='none';
+    }
+});
+
+function formatUrl(url) {
+    try {
+        const urlObj=new URL(url);
+        return `<span class="url-proto">${urlObj.protocol}//</span><span class="url-domain">${urlObj.hostname}</span><span class="url-path">${urlObj.pathname}${urlObj.search}${urlObj.hash}</span>`;
+    } catch (e) {
+        return `<span class="url-domain">${url}</span>`;
+    }
+}
+
+//btn handling
+document.getElementById('backBtn').addEventListener('click',()=>{
+    try {
+        document.getElementById('browserFrame').contentWindow.history.back();
+    } catch (e) {}
+});
+
+document.getElementById('fwBtn').addEventListener('click',()=>{
+    try {
+        document.getElementById('browserFrame').contentWindow.history.forward();
+    } catch (e) {}
+});
+
+//tab handling
+let tabs={};
+let tabCount=1;
+
+tabs[1] = {
+    url:'',
+    frame:null
+};
+
+function createTab(url=null) {
+    tabCount++;
+    const tabBar=document.getElementById('tabBar');
+    const ntBtn=document.getElementById('ntBtn');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const tab=document.createElement('div');
+    tab.className='tab active';
+    tab.dataset.tabId=tabCount;
+    tab.innerHTML=`
+    <div class="tab-fav"><i data-lucide="globe"></i></div>
+    <span class="tab-tl">New Tab</span>
+    <div class="tab-cl"><i data-lucide="x"></i></div>`;
+    tabBar.insertBefore(tab,ntBtn);
+    lucide.createIcons();
+    tabs[tabCount]={url:'',frame:null};
+    addTabListeners(tab);
+    swTab(tabCount);
+    if (url) nav(url);
+}
+
+function swTab(tabId) {
+    document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
+    if (urlPollInt) clearInterval(urlPollInt);
+    const tab=tabs[tabId];
+    const home=document.querySelector('.main');
+    if (tab.frame) {
+        tab.frame.style.display='block';
+        home.style.display='none';
+        setUrl(tab.url);
+        startURLP(tab.frame);
+    } else {
+        home.style.display='';
+        urlInput.value='';
+        urlDisplay.style.display='none';
+        urlInput.style.display='block';
+    }
+}
+
+function closeTab(tabId) {
+    if (document.querySelectorAll('.tab').length<=1) return;
+    const tab=document.querySelector(`.tab[data-tab-id="${tabId}"]`);
+    const wasActive=tab.classList.contains('active');
+    tab.style.transition='min-width 0.2s ease, max-width 0.2s ease, opacity 0.2s ease, padding 0.2s ease';
+    tab.style.minWidth='0';
+    tab.style.maxWidth='0';
+    tab.style.opacity='0';
+    tab.style.padding='0';
+    tab.style.overflow='hidden';
+    setTimeout(()=>{
+        if (tabs[tabId]?.frame) tabs[tabId].frame.remove();
+        delete tabs[tabId];
+        tab.remove();
+        if (wasActive) {
+            const rem=document.querySelector('.tab');
+            if (rem) {
+                rem.classList.add('active');
+                swTab(rem.dataset.tabId);
+            }
+        }
+    },200);
+}
+
+function addTabListeners(tab) {
+    tab.addEventListener('click',(e)=>{
+        if (e.target.closest('.tab-cl')) {
+            closeTab(tab.dataset.tabId);
+        } else {
+            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            tab.classList.add('active');
+            swTab(tab.dataset.tabId);
+        }
+    });
+}
+
+document.getElementById('ntBtn').addEventListener('click',()=>createTab());
+addTabListeners(document.querySelector('.tab[data-tab-id="1"]'));
