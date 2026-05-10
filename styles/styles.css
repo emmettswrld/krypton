@@ -326,13 +326,14 @@ svg {
 .below {
     display:flex;
     flex:1;
-    overflow:hidden;
+    overflow:visible;
 }
 
 .sidebar {
     display:flex;
     flex-direction: column;
     align-items:center;
+    overflow:visible;
     gap:3px;
     padding:8px 6px;
     background:#000;
@@ -360,14 +361,11 @@ svg {
     transition:background 0.2s ease, color 0.2s ease, transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
 }
 
-.sb-btn::after {
-    content:attr(title);
-    position:absolute;
-    left:calc(100% + 10px);
-    top:50%;
-    transform:translateY(-50%) scale(0.95);
-    background:#1a1a1a;
-    border:1px solid #2a2a2a;
+.sb-tooltip {
+    position:fixed;
+    transform:translateY(-50%);
+    background:#0a0a0a;
+    border:1px solid #1a1a1a;
     color:#c0c0c0;
     font-size:11px;
     font-family:'Inter';
@@ -376,10 +374,12 @@ svg {
     border-radius:5px;
     pointer-events:none;
     opacity:0;
-    transition:opacity 0.15s ease, transform 0.15s ease;
+    z-index:99999;
+    transform:translateY(-50%) scale(0.75);
+    transition:opacity 0.35s ease, transform 0.35s ease;
 }
 
-.sb-btn:hover::after {
+.sb-tooltip.visible {
     opacity:1;
     transform:translateY(-50%) scale(1);
 }

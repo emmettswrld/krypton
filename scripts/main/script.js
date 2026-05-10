@@ -14,7 +14,12 @@ document.getElementById('refBtn').addEventListener('click',()=>{
         const loader=document.getElementById('bloader');
         frame.classList.remove('loaded');
         loader.classList.add('active');
-        frame.src=frame.src;
+        const currentUrl=frame.dataset.currentUrl;
+        if (currentUrl) {
+            frame.src=scramjet.encodeUrl(currentUrl);
+        } else {
+            frame.src=frame.src;
+        }
         frame.onload=()=>{
             loader.classList.remove('active');
             frame.classList.add('loaded');
@@ -61,6 +66,34 @@ setInterval(()=>{
     inner.classList.add('exit');
     inner.addEventListener('transitionend',showTag,{once:true});
 },3000);
+
+const tooltip=document.createElement('div');
+tooltip.className='sb-tooltip';
+document.body.appendChild(tooltip);
+let tooltipT=null;
+document.querySelectorAll('.sb-btn').forEach(btn=>{
+    btn.addEventListener('mouseenter',()=>{
+        const title=btn.getAttribute('title');
+        if (!title) return;
+        btn.setAttribute('data-title',title);
+        btn.removeAttribute('title');
+        const rect=btn.getBoundingClientRect();
+        tooltip.classList.remove('visible');
+        tooltip.textContent=title;
+        tooltip.style.top=(rect.top+rect.height/2)+'px';
+        tooltip.style.left=(rect.right+15)+'px';
+        clearTimeout(tooltipT);
+        tooltipT=setTimeout(()=>{
+            tooltip.classList.add('visible');
+        },10);
+    });
+    btn.addEventListener('mouseleave',()=>{
+        clearTimeout(tooltipT);
+        tooltip.classList.remove('visible');
+        const title=btn.getAttribute('data-title');
+        if (title) btn.setAttribute('title',title);
+    });
+});
 
 //scram
 const connection = new BareMux.BareMuxConnection("/browse/baremux/worker.js");
@@ -119,34 +152,47 @@ function setUrl(url) {
 let urlPollInt=null;
 let lastHref='';
 
-function startURLP(frame) { //url polling
+function startURLP(frame) {
     if (urlPollInt) clearInterval(urlPollInt);
     lastHref='';
+    let firstPoll=true;
     urlPollInt=setInterval(()=>{
         try {
             const href=frame.contentWindow.location.href;
-            if (href && href!==lastHref&&href!=='about:blank') {
+            if (href && href!==lastHref && href!=='about:blank') {
+                const oldDecoded=(()=>{try{return scramjet.decodeUrl(lastHref);}catch(e){return lastHref;}})();
+                const newDecoded=(()=>{try{return scramjet.decodeUrl(href);}catch(e){return href;}})();
+                const oldPath=(()=>{try{return new URL(oldDecoded).pathname;}catch(e){return oldDecoded;}})();
+                const newPath=(()=>{try{return new URL(newDecoded).pathname;}catch(e){return newDecoded;}})();
+                const oldHost=(()=>{try{return new URL(oldDecoded).hostname;}catch(e){return '';}})();
+                const newHost=(()=>{try{return new URL(newDecoded).hostname;}catch(e){return '';}})();
+                const isNewPage=!firstPoll&&(newHost!==oldHost||newPath!==oldPath);
                 lastHref=href;
-                const loader=document.getElementById('bloader');
-                frame.classList.remove('loaded');
-                loader.classList.add('active');
-                setTimeout(()=>{
-                    loader.classList.remove('active');
-                    frame.classList.add('loaded');
-                },1500);
+                firstPoll=false;
+                if (isNewPage) {
+                    const loader=document.getElementById('bloader');
+                    if (urlPollInt) clearInterval(urlPollInt);
+                    frame.classList.remove('loaded');
+                    loader.classList.add('active');
+                    setTimeout(()=>{
+                        loader.classList.remove('active');
+                        frame.classList.add('loaded');
+                    },1500);
+                }
             }
             const decoded=scramjet.decodeUrl(href);
             if (decoded&&decoded!==urlInput.value) {
                 setUrl(decoded);
+                frame.dataset.currentUrl=decoded;
                 const activeTab=document.querySelector('.tab.active');
                 if (activeTab) {
                     try {
                         activeTab.querySelector('.tab-tl').textContent=new URL(decoded).hostname;
                         tabs[activeTab.dataset.tabId].url=decoded;
-                    } catch (e) {}
+                    } catch(e){}
                 }
             }
-        } catch (e) {}
+        } catch(e){}
     },300);
 }
 
