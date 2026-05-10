@@ -452,6 +452,13 @@ svg {
     gap:12px;
     height:100%;
     position:relative;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+}
+
+.main.hidden {
+    opacity:0;
+    transition:scale(0.97);
+    pointer-events:none;
 }
 
 .main-tl {

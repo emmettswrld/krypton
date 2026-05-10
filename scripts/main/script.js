@@ -512,3 +512,77 @@ document.querySelectorAll('.shortcut').forEach(sc=>{
         if (urls[title]) nav(urls[title]);
     });
 });
+
+//sidebar handling
+function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
+    const pageCont=document.getElementById('pageCont');
+    const home=document.querySelector('.main');
+    const activeTab=document.querySelector('.tab.active');
+    const tabId=activeTab.dataset.tabId;
+    let frame=tabs[tabId]?.frame;
+    if (!frame) {
+        frame=document.createElement('iframe');
+        frame.className='bframe';
+        frame.style.display='none';
+        pageCont.appendChild(frame);
+    }
+    document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
+    home.style.display='none';
+    frame.classList.remove('loaded');
+    frame.style.display='block';
+    frame.src=path;
+    tabs[tabId]={url:kryptonUrl,frame};
+    const label=kryptonUrl.replace('krypton://','');
+    activeTab.querySelector('.tab-tl').textContent=label.charAt(0).toUpperCase()+label.slice(1);
+    activeTab.querySelector('.tab-fav').innerHTML='<i data-lucide="atom"></i>';
+    lucide.createIcons();
+    frame.onload=()=>{
+        frame.classList.add('loaded');
+    };
+    urlInput.value=kryptonUrl;
+    urlDisplay.innerHTML=formatUrl(kryptonUrl);
+    urlDisplay.style.display='block';
+    urlInput.style.display='none';
+    if (urlPollInt) clearInterval(urlPollInt);
+    updNavBtns(null);
+    setSidebarActive(sidebarId);
+}
+
+document.getElementById('homeBtn').addEventListener('click',()=>{
+    const activeTab=document.querySelector('.tab.active');
+    const tabId=activeTab?.dataset.tabId;
+    const frame=tabs[tabId]?.frame;
+    const home=document.querySelector('.main');
+    if (frame&&frame.style.display!=='none') {
+        frame.classList.remove('loaded');
+        setTimeout(()=>{
+            frame.style.display='none';
+            frame.src='about:blank';
+        },250);
+    }
+    if (urlPollInt) clearInterval(urlPollInt);
+    home.style.display='';
+    home.classList.add('hidden');
+    requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>home.classList.remove('hidden'));
+    });
+    urlInput.value='';
+    urlDisplay.style.display='none';
+    urlInput.style.display='block';
+    if (tabs[tabId]) tabs[tabId]={url:'',frame:null};
+    activeTab.querySelector('.tab-tl').textContent='New Tab';
+    activeTab.querySelector('.tab-fav').innerHTML='<i data-lucide="globe"></i>';
+    lucide.createIcons();
+    updNavBtns(null);
+    showTag();
+    setSidebarActive('homeBtn');
+});
+
+function setSidebarActive(id) {
+    document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+    if (id) document.getElementById(id)?.classList.add('active');
+}
+
+document.getElementById('gmBtn').addEventListener('click',()=>{
+    loadInternal('../../pages/g.html','krypton://games','gmBtn');
+});
