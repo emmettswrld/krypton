@@ -375,8 +375,8 @@ svg {
     pointer-events:none;
     opacity:0;
     z-index:99999;
-    transform:translateY(-50%) scale(0.75);
-    transition:opacity 0.35s ease, transform 0.35s ease;
+    transform:translateY(-50%) scale(0.95);
+    transition:opacity 0.15s ease, transform 0.15s ease;
 }
 
 .sb-tooltip.visible {
