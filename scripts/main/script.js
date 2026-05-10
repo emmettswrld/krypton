@@ -9,7 +9,8 @@ document.getElementById('refBtn').addEventListener('click',()=>{
     void icon.offsetWidth;
     icon.classList.add('spinning');
     icon.addEventListener('animationend',()=>icon.classList.remove('spinning'),{once:true});
-    const frame=document.getElementById('browserFrame');
+    const frame=getActiveFrame();
+    if (!frame) return;
     if (frame.style.display!=='none') {
         const loader=document.getElementById('bloader');
         frame.classList.remove('loaded');
@@ -114,32 +115,46 @@ scramjet.init();
 function nav(input) {
     let url=input.trim();
     if (!url) return;
-    const frame=document.getElementById('browserFrame');
     const home=document.querySelector('.main');
     const loader=document.getElementById('bloader');
-
-    if (!url.includes(".")) {
-        url="https://duckduckgo.com/?q="+encodeURIComponent(url);
-    } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        url="https://"+url;
+    const pageCont=document.getElementById('pageCont');
+    if (!url.includes('.')&&!url.startsWith('http')) {
+        url='https://duckduckgo.com/?q='+encodeURIComponent(url);
+    } else if (!url.startsWith('http://')&&!url.startsWith('https://')) {
+        url='https://'+url;
     }
-
+    const activeTab=document.querySelector('.tab.active');
+    const tabId=activeTab.dataset.tabId;
+    let frame=tabs[tabId]?.frame;
+    if (!frame) {
+        frame=document.createElement('iframe');
+        frame.className='bframe';
+        frame.style.display='none';
+        pageCont.appendChild(frame);
+    }
+    document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
     home.style.display='none';
     frame.classList.remove('loaded');
     frame.style.display='block';
     loader.classList.add('active');
-
     frame.src=scramjet.encodeUrl(url);
-    const activeTab=document.querySelector('.tab.active');
-    const tabId=activeTab.dataset.tabId;
     tabs[tabId]={url,frame};
     activeTab.querySelector('.tab-tl').textContent=new URL(url).hostname;
     setUrl(url);
     frame.onload=()=>{
         loader.classList.remove('active');
         frame.classList.add('loaded');
+        frame.dataset.navCount=(parseInt(frame.dataset.navCount||'0')+1).toString();
+        frame.dataset.fwCount='0';
+        updNavBtns(frame);
         startURLP(frame);
     };
+}
+
+function getActiveFrame() {
+    const activeTab=document.querySelector('.tab.active');
+    if (!activeTab) return null;
+    return tabs[activeTab.dataset.tabId]?.frame||null;
 }
 
 function setUrl(url) {
@@ -171,7 +186,6 @@ function startURLP(frame) {
                 firstPoll=false;
                 if (isNewPage) {
                     const loader=document.getElementById('bloader');
-                    if (urlPollInt) clearInterval(urlPollInt);
                     frame.classList.remove('loaded');
                     loader.classList.add('active');
                     setTimeout(()=>{
@@ -236,17 +250,90 @@ function formatUrl(url) {
     }
 }
 
-//btn handling
+//hist nav handling
+function updNavBtns(frame) {
+    if (!frame) {
+        document.getElementById('backBtn').disabled=true;
+        document.getElementById('fwBtn').disabled=true;
+        return;
+    }
+    document.getElementById('backBtn').disabled=parseInt(frame.dataset.navCount||'0')<=0;
+    document.getElementById('fwBtn').disabled=parseInt(frame.dataset.fwCount||'0')<=0;
+}
+
 document.getElementById('backBtn').addEventListener('click',()=>{
+    const frame=getActiveFrame();
+    if (!frame) return;
+    const navCount=parseInt(frame.dataset.navCount||'0');
+    if (navCount<=0) return;
+    if (navCount===1) {
+        //go home
+        if (urlPollInt) clearInterval(urlPollInt);
+        frame.style.display='none';
+        frame.classList.remove('loaded');
+        document.querySelector('.main').style.display='';
+        urlInput.value='';
+        urlDisplay.style.display='none';
+        urlInput.style.display='block';
+        frame.dataset.navCount='0';
+        frame.dataset.fwCount=(parseInt(frame.dataset.fwCount||'0')+1).toString();
+        updNavBtns(frame);
+        return;
+    }
+    if (urlPollInt) clearInterval(urlPollInt);
+    const loader=document.getElementById('bloader');
+    frame.classList.remove('loaded');
+    loader.classList.add('active');
+    frame.dataset.navCount=(navCount-1).toString();
+    frame.dataset.fwCount=(parseInt(frame.dataset.fwCount||'0')+1).toString();
     try {
-        document.getElementById('browserFrame').contentWindow.history.back();
+        frame.contentWindow.history.back();
     } catch (e) {}
+    setTimeout(()=>{
+        loader.classList.remove('active');
+        frame.classList.add('loaded');
+        startURLP(frame);
+        updNavBtns(frame);
+    },600);
 });
 
 document.getElementById('fwBtn').addEventListener('click',()=>{
-    try {
-        document.getElementById('browserFrame').contentWindow.history.forward();
-    } catch (e) {}
+    const frame=getActiveFrame();
+    if (!frame) return;
+    const fwCount=parseInt(frame.dataset.fwCount||'0');
+    if (fwCount<=0) return;
+    if (urlPollInt) clearInterval(urlPollInt);
+    const loader=document.getElementById('bloader');
+    if (frame.style.display==='none') {
+        const activeTab=document.querySelector('.tab.active');
+        const tabId=activeTab?.dataset.tabId;
+        if (tabs[tabId]?.url) {
+            frame.style.display='block';
+            document.querySelector('.main').style.display='none';
+            frame.classList.add('active');
+            frame.dataset.navCount=(parseInt(frame.dataset.navCount||'0')+1).toString();
+            frame.dataset.fwCount=(fwCount-1).toString();
+            try {frame.contentWindow.history.forward();} catch (e) {}
+            setTimeout(()=>{
+                loader.classList.remove('active');
+                frame.classList.add('loaded');
+                startURLP(frame);
+                updNavBtns(frame);
+            },600);
+        }
+        return;
+    }
+    frame.classList.remove('loaded');
+    loader.classList.add('active');
+    frame.dataset.navCount=(parseInt(frame.dataset.navCount||'0')+1).toString();
+    frame.dataset.fwCount=(fwCount-1).toString();
+    try {frame.contentWindow.history.forward();} catch (e) {}
+    setTimeout(()=>{
+        loader.classList.remove('active');
+        frame.classList.add('loaded');
+        startURLP(frame);
+        updNavBtns(frame);
+    },600);
 });
 
 //tab handling
