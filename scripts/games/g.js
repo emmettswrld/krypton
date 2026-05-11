@@ -60,6 +60,10 @@ async function loadMore() {
         cardObserver.observe(card);
         gameGrid.insertBefore(card,st);
     });
+    const loader=document.getElementById('gridLd');
+    if (loader&&gameGrid.querySelectorAll('.game-card').length>0) {
+        loader.remove();
+    }
     page++;
     loading=false;
     syncGR();
