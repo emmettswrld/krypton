@@ -144,7 +144,7 @@ function nav(input) {
         pageCont.appendChild(frame);
     }
     document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
-    home.style.display='none';
+    hideHome();
     frame.classList.remove('loaded');
     frame.style.display='block';
     loader.classList.add('active');
@@ -527,7 +527,7 @@ function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
         pageCont.appendChild(frame);
     }
     document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
-    home.style.display='none';
+    hideHome();
     frame.classList.remove('loaded');
     frame.style.display='block';
     frame.src=path;
@@ -546,6 +546,17 @@ function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
     if (urlPollInt) clearInterval(urlPollInt);
     updNavBtns(null);
     setSidebarActive(sidebarId);
+}
+
+function hideHome(cb) {
+    const home=document.querySelector('.main');
+    if (home.style.display==='none') {if (cb) cb(); return;}
+    home.classList.add('hidden');
+    setTimeout(()=>{
+        home.style.display='none';
+        home.classList.remove('hidden');
+        if (cb) cb();
+    },250);
 }
 
 document.getElementById('homeBtn').addEventListener('click',()=>{

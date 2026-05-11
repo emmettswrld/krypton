@@ -6,6 +6,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <script src="https://unpkg.com/lucide@latest"></script>
         <link rel="stylesheet" href="../styles/g.css">
+        <script src="https://cdn.jsdelivr.net/gh/luminsdk/script@latest/lumin.min.js"></script>
     </head>
     <body>
         <div class="top-bar">
@@ -26,6 +27,9 @@
                 <i data-lucide="search" class="search-icon"></i>
                 <input type="text" class="search-input" id="searchInput" placeholder="Search through the games...">
             </div>
+        </div>
+        <div class="game-grid" id="gameGrid">
+            <div class="scroll-st" id="st"></div>
         </div>
         <script src="../scripts/games/g.js"></script>
     </body>
