@@ -244,7 +244,7 @@
         (t.keys = () => []), (t.resolve = t), (t.id = 409), (e.exports = t);
       },
       336: function (e, t, r) {
-        r.r(t), r.d(t, { ScramjetClient: () => g });
+        r.r(t), r.d(t, { browserjetClient: () => g });
         var n = r(2794),
           i = r(94),
           s = r(3696),
@@ -273,7 +273,7 @@
             if (((this.global = e), n.pX in e))
               throw (
                 (console.error(
-                  "attempted to initialize a scramjet client, but one is already loaded - this is very bad"
+                  "attempted to initialize a browserjet client, but one is already loaded - this is very bad"
                 ),
                 Error())
               );
@@ -294,8 +294,8 @@
                     new Promise((e) => {
                       addEventListener("message", ({ data: t }) => {
                         "object" == typeof t &&
-                          "$scramjet$type" in t &&
-                          "baremuxinit" === t.$scramjet$type &&
+                          "$browserjet$type" in t &&
+                          "baremuxinit" === t.$browserjet$type &&
                           e(t.port);
                       });
                     })
@@ -392,7 +392,7 @@
                 if (!r.name)
                   return (
                     console.error(
-                      "YOU NEED TO USE `new ScramjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
+                      "YOU NEED TO USE `new browserjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
                     ),
                     null
                   );
@@ -409,7 +409,7 @@
                   if (!t.name)
                     return (
                       console.error(
-                        "YOU NEED TO USE `new ScramjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
+                        "YOU NEED TO USE `new browserjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
                       ),
                       null
                     );
@@ -420,7 +420,7 @@
                   if (!e.name)
                     return (
                       console.error(
-                        "YOU NEED TO USE `new ScramjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
+                        "YOU NEED TO USE `new browserjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
                       ),
                       null
                     );
@@ -557,7 +557,7 @@
                     if (e instanceof Error)
                       if (e.stack instanceof Object)
                         (e.stack = e.stack.stack),
-                          console.error("ERROR FROM SCRAMJET INTERNALS", e);
+                          console.error("ERROR FROM browserjet INTERNALS", e);
                       else throw e;
                     else throw e;
                   }
@@ -662,8 +662,8 @@
                     "symbol" == typeof r
                       ? Reflect.has(e, r)
                       : !(
-                          r.startsWith("scramjet-attr-") ||
-                          t[r]?.name?.startsWith("scramjet-attr-")
+                          r.startsWith("browserjet-attr-") ||
+                          t[r]?.name?.startsWith("browserjet-attr-")
                         ) && Reflect.has(e, r),
                 });
               return r;
@@ -696,11 +696,11 @@
       9116: function (e, t, r) {
         function n(e, t) {
           e.serviceWorker.addEventListener("message", ({ data: t }) => {
-            if ("scramjet$type" in t && "cookie" === t.scramjet$type) {
+            if ("browserjet$type" in t && "cookie" === t.browserjet$type) {
               e.cookieStore.setCookies([t.cookie], new URL(t.url));
               let r = {
-                scramjet$token: t.scramjet$token,
-                scramjet$type: "cookie",
+                browserjet$token: t.browserjet$token,
+                browserjet$type: "cookie",
               };
               e.serviceWorker.controller.postMessage(r);
             }
@@ -715,7 +715,7 @@
                 );
                 n &&
                   e.natives.call("ServiceWorker.prototype.postMessage", n, {
-                    scramjet$type: "cookie",
+                    browserjet$type: "cookie",
                     cookie: r,
                     url: e.url.href,
                   });
@@ -949,34 +949,34 @@
             e.Proxy("Element.prototype.getAttribute", {
               apply(t) {
                 let [r] = t.args;
-                if (r.startsWith("scramjet-attr")) return t.return(null);
+                if (r.startsWith("browserjet-attr")) return t.return(null);
                 if (
                   e.natives.call(
                     "Element.prototype.hasAttribute",
                     t.this,
-                    `scramjet-attr-${r}`
+                    `browserjet-attr-${r}`
                   )
                 ) {
-                  let e = t.fn.call(t.this, `scramjet-attr-${r}`);
+                  let e = t.fn.call(t.this, `browserjet-attr-${r}`);
                   return null === e ? t.return("") : t.return(e);
                 }
               },
             }),
             e.Proxy("Element.prototype.getAttributeNames", {
               apply(e) {
-                let t = e.call().filter((e) => !e.startsWith("scramjet-attr"));
+                let t = e.call().filter((e) => !e.startsWith("browserjet-attr"));
                 e.return(t);
               },
             }),
             e.Proxy("Element.prototype.getAttributeNode", {
               apply(e) {
-                if (e.args[0].startsWith("scramjet-attr"))
+                if (e.args[0].startsWith("browserjet-attr"))
                   return e.return(null);
               },
             }),
             e.Proxy("Element.prototype.hasAttribute", {
               apply(e) {
-                if (e.args[0].startsWith("scramjet-attr")) return e.return(!1);
+                if (e.args[0].startsWith("browserjet-attr")) return e.return(!1);
               },
             }),
             e.Proxy("Element.prototype.setAttribute", {
@@ -1003,7 +1003,7 @@
                     return;
                   }
                   (t.args[1] = n),
-                    t.fn.call(t.this, `scramjet-attr-${t.args[0]}`, i);
+                    t.fn.call(t.this, `browserjet-attr-${t.args[0]}`, i);
                 }
               },
             }),
@@ -1025,7 +1025,7 @@
                   e.natives.call(
                     "Element.prototype.setAttribute",
                     t.this,
-                    `scramjet-attr-${t.args[1]}`,
+                    `browserjet-attr-${t.args[1]}`,
                     s
                   ));
               },
@@ -1047,23 +1047,23 @@
             }),
             e.Proxy("Element.prototype.removeAttribute", {
               apply(t) {
-                if (t.args[0].startsWith("scramjet-attr"))
+                if (t.args[0].startsWith("browserjet-attr"))
                   return t.return(void 0);
                 e.natives.call(
                   "Element.prototype.hasAttribute",
                   t.this,
                   t.args[0]
-                ) && t.fn.call(t.this, `scramjet-attr-${t.args[0]}`);
+                ) && t.fn.call(t.this, `browserjet-attr-${t.args[0]}`);
               },
             }),
             e.Proxy("Element.prototype.toggleAttribute", {
               apply(t) {
-                if (t.args[0].startsWith("scramjet-attr")) return t.return(!1);
+                if (t.args[0].startsWith("browserjet-attr")) return t.return(!1);
                 e.natives.call(
                   "Element.prototype.hasAttribute",
                   t.this,
                   t.args[0]
-                ) && t.fn.call(t.this, `scramjet-attr-${t.args[0]}`);
+                ) && t.fn.call(t.this, `browserjet-attr-${t.args[0]}`);
               },
             }),
             e.Trap("Element.prototype.innerHTML", {
@@ -1074,7 +1074,7 @@
                     e.natives.call(
                       "Element.prototype.setAttribute",
                       r.this,
-                      "scramjet-attr-script-source-src",
+                      "browserjet-attr-script-source-src",
                       btoa(
                         Array.from(u.encode(a), (e) =>
                           String.fromCodePoint(e)
@@ -1096,7 +1096,7 @@
                   let t = e.natives.call(
                     "Element.prototype.getAttribute",
                     r.this,
-                    "scramjet-attr-script-source-src"
+                    "browserjet-attr-script-source-src"
                   );
                   return t ? atob(t) : r.get();
                 }
@@ -1174,7 +1174,7 @@
               {
                 get(e) {
                   let t = e.get();
-                  return t && (l.pX in t || new c.ScramjetClient(t).hook()), t;
+                  return t && (l.pX in t || new c.browserjetClient(t).hook()), t;
                 },
               }
             ),
@@ -1192,7 +1192,7 @@
                     t.this
                   );
                   return r
-                    ? (l.pX in r || new c.ScramjetClient(r).hook(), r.document)
+                    ? (l.pX in r || new c.browserjetClient(r).hook(), r.document)
                     : r;
                 },
               }
@@ -1284,7 +1284,7 @@
               if (!r) return t.return(r);
               if (i.pX in r) return t.return(r[i.pX].global);
               {
-                let e = new n.ScramjetClient(r);
+                let e = new n.browserjetClient(r);
                 return e.hook(), t.return(e.global);
               }
             },
@@ -1405,7 +1405,7 @@
                   "ServiceWorker.prototype.postMessage",
                   l,
                   {
-                    scramjet$type: "registerServiceWorker",
+                    browserjet$type: "registerServiceWorker",
                     port: o,
                     origin: e.url.origin,
                   },
@@ -1505,11 +1505,11 @@
         function g(e) {
           if (
             ((0, n.Nk)(e),
-            l.log("initializing scramjet client"),
+            l.log("initializing browserjet client"),
             !(i.pX in globalThis))
           ) {
             (0, n.Ec)();
-            let e = new s.ScramjetClient(globalThis),
+            let e = new s.browserjetClient(globalThis),
               t = globalThis.frameElement;
             t &&
               !t.name &&
@@ -1519,8 +1519,8 @@
                 .join("")}`),
               globalThis.COOKIE && e.loadcookies(globalThis.COOKIE),
               e.hook(),
-              f && new a.ScramjetServiceWorkerRuntime(e).hook();
-            let r = new o.ScramjetContextEvent(e.global.window, e);
+              f && new a.browserjetServiceWorkerRuntime(e).hook();
+            let r = new o.browserjetContextEvent(e.global.window, e);
             e.frame?.dispatchEvent(r);
             let i = new o.UrlChangeEvent(e.url.href);
             e.isSubframe || e.frame?.dispatchEvent(i);
@@ -1533,8 +1533,8 @@
         r.r(t),
           r.d(t, {
             NavigateEvent: () => i,
-            ScramjetContextEvent: () => o,
-            ScramjetGlobalDownloadEvent: () => n,
+            browserjetContextEvent: () => o,
+            browserjetGlobalDownloadEvent: () => n,
             UrlChangeEvent: () => s,
           });
         class n extends Event {
@@ -1577,10 +1577,10 @@
         r.r(t),
           r.d(t, {
             NavigateEvent: () => s.NavigateEvent,
-            ScramjetClient: () => n.ScramjetClient,
-            ScramjetContextEvent: () => s.ScramjetContextEvent,
-            ScramjetGlobalDownloadEvent: () => s.ScramjetGlobalDownloadEvent,
-            ScramjetServiceWorkerRuntime: () => l.ScramjetServiceWorkerRuntime,
+            browserjetClient: () => n.browserjetClient,
+            browserjetContextEvent: () => s.browserjetContextEvent,
+            browserjetGlobalDownloadEvent: () => s.browserjetGlobalDownloadEvent,
+            browserjetServiceWorkerRuntime: () => l.browserjetServiceWorkerRuntime,
             UrlChangeEvent: () => s.UrlChangeEvent,
             createLocationProxy: () => a.createLocationProxy,
             getOwnPropertyDescriptorHandler: () =>
@@ -1953,14 +1953,14 @@
         var n = r(1323),
           i = r(1472),
           s = r(94);
-        let o = Symbol.for("scramjet original onevent function");
+        let o = Symbol.for("browserjet original onevent function");
         function a(e, t) {
           let r = {
             message: {
               _init() {
                 return (
                   "object" != typeof this.data ||
-                  !("$scramjet$type" in this.data)
+                  !("$browserjet$type" in this.data)
                 );
               },
               ports() {
@@ -1971,14 +1971,14 @@
               },
               origin() {
                 return "object" == typeof this.data &&
-                  "$scramjet$origin" in this.data
-                  ? this.data.$scramjet$origin
+                  "$browserjet$origin" in this.data
+                  ? this.data.$browserjet$origin
                   : e.url.origin;
               },
               data() {
                 return "object" == typeof this.data &&
-                  "$scramjet$data" in this.data
-                  ? this.data.$scramjet$data
+                  "$browserjet$data" in this.data
+                  ? this.data.$browserjet$data
                   : this.data;
               },
             },
@@ -2237,9 +2237,9 @@
                   r = t("return globalThis")()[i.pX],
                   n = t("...args", "this(...args)");
                 (e.args[0] = {
-                  $scramjet$messagetype: "window",
-                  $scramjet$origin: r.url.origin,
-                  $scramjet$data: e.args[0],
+                  $browserjet$messagetype: "window",
+                  $browserjet$origin: r.url.origin,
+                  $browserjet$data: e.args[0],
                 }),
                   "string" == typeof e.args[1] && (e.args[1] = "*"),
                   "object" == typeof e.args[1] &&
@@ -2253,8 +2253,8 @@
             e.Proxy(t, {
               apply(e) {
                 e.args[0] = {
-                  $scramjet$messagetype: "worker",
-                  $scramjet$data: e.args[0],
+                  $browserjet$messagetype: "worker",
+                  $browserjet$data: e.args[0],
                 };
               },
             });
@@ -2263,7 +2263,7 @@
       1914: function (e, t, r) {
         r.r(t), r.d(t, { POLLUTANT: () => i, default: () => s });
         var n = r(37);
-        let i = Symbol.for("scramjet realm pollutant");
+        let i = Symbol.for("browserjet realm pollutant");
         function s(e, t) {
           Object.defineProperty(t.Object.prototype, n.$W.globals.setrealmfn, {
             value(e) {
@@ -2739,7 +2739,7 @@
                 e.natives.call(
                   "Worker.prototype.postMessage",
                   r,
-                  { $scramjet$type: "baremuxinit", port: t },
+                  { $browserjet$type: "baremuxinit", port: t },
                   [t]
                 );
               })();
@@ -2765,7 +2765,7 @@
                   e.natives.call(
                     "MessagePort.prototype.postMessage",
                     r.port,
-                    { $scramjet$type: "baremuxinit", port: t },
+                    { $browserjet$type: "baremuxinit", port: t },
                     [t]
                   );
                 })();
@@ -2900,7 +2900,7 @@
               return (
                 location,
                 n.iswindow && t.top,
-                "string" == typeof e && e.includes("scramjet"),
+                "string" == typeof e && e.includes("browserjet"),
                 "string" == typeof e && e.includes(location.origin),
                 e
               );
@@ -2937,7 +2937,7 @@
         }
       },
       8409: function (e, t, r) {
-        r.r(t), r.d(t, { ScramjetServiceWorkerRuntime: () => s });
+        r.r(t), r.d(t, { browserjetServiceWorkerRuntime: () => s });
         var n = r(1472),
           i = r(8665).A;
         class s {
@@ -2950,11 +2950,11 @@
                 i.log("sw", "connected"),
                   r.addEventListener("message", (t) => {
                     console.log("sw", t.data),
-                      "scramjet$type" in t.data &&
-                        ("init" === t.data.scramjet$type
-                          ? ((this.recvport = t.data.scramjet$port),
+                      "browserjet$type" in t.data &&
+                        ("init" === t.data.browserjet$type
+                          ? ((this.recvport = t.data.browserjet$port),
                             this.recvport.postMessage({
-                              scramjet$type: "init",
+                              browserjet$type: "init",
                             }))
                           : o.call(this, e, t.data));
                   }),
@@ -2986,15 +2986,15 @@
         }
         function o(e, t) {
           let r = this.recvport,
-            s = t.scramjet$type,
-            o = t.scramjet$token,
+            s = t.browserjet$type,
+            o = t.browserjet$token,
             a = e.eventcallbacks.get(self);
           if ("fetch" === s) {
             i.log("ee", t);
             let s = a.filter((e) => "fetch" === e.event);
             if (!s) return;
             for (let a of s) {
-              let s = t.scramjet$request,
+              let s = t.browserjet$request,
                 l = new e.natives.Request((0, n.v2)(s.url), {
                   body: s.body,
                   headers: new Headers(s.headers),
@@ -3011,9 +3011,9 @@
                 (u = !0),
                   (async () => {
                     let t = {
-                      scramjet$type: "fetch",
-                      scramjet$token: o,
-                      scramjet$response: {
+                      browserjet$type: "fetch",
+                      browserjet$token: o,
+                      browserjet$response: {
                         body: (e = await e).body,
                         headers: Array.from(e.headers.entries()),
                         status: e.status,
@@ -3032,9 +3032,9 @@
                 u ||
                   (console.log("sw", "no response"),
                   r.postMessage({
-                    scramjet$type: "fetch",
-                    scramjet$token: o,
-                    scramjet$response: !1,
+                    browserjet$type: "fetch",
+                    browserjet$token: o,
+                    browserjet$response: !1,
                   }));
             }
           }
@@ -3070,20 +3070,20 @@
               },
               r = t(
                 {
-                  prefix: "/scramjet/",
+                  prefix: "/browserjet/",
                   globals: {
-                    wrapfn: "$scramjet$wrap",
-                    wrappropertybase: "$scramjet__",
-                    wrappropertyfn: "$scramjet$prop",
-                    cleanrestfn: "$scramjet$clean",
-                    importfn: "$scramjet$import",
-                    rewritefn: "$scramjet$rewrite",
-                    metafn: "$scramjet$meta",
-                    setrealmfn: "$scramjet$setrealm",
-                    pushsourcemapfn: "$scramjet$pushsourcemap",
-                    trysetfn: "$scramjet$tryset",
-                    templocid: "$scramjet$temploc",
-                    tempunusedid: "$scramjet$tempunused",
+                    wrapfn: "$browserjet$wrap",
+                    wrappropertybase: "$browserjet__",
+                    wrappropertyfn: "$browserjet$prop",
+                    cleanrestfn: "$browserjet$clean",
+                    importfn: "$browserjet$import",
+                    rewritefn: "$browserjet$rewrite",
+                    metafn: "$browserjet$meta",
+                    setrealmfn: "$browserjet$setrealm",
+                    pushsourcemapfn: "$browserjet$pushsourcemap",
+                    trysetfn: "$browserjet$tryset",
+                    templocid: "$browserjet$temploc",
+                    tempunusedid: "$browserjet$tempunused",
                   },
                   files: {
                     wasm: "/history.wasm.wasm",
@@ -3119,16 +3119,16 @@
             (0, n.Ec)(),
               await this.openIDB(),
               navigator.serviceWorker.controller?.postMessage({
-                scramjet$type: "loadConfig",
+                browserjet$type: "loadConfig",
                 config: n.$W,
               }),
               o.log("config loaded"),
               navigator.serviceWorker.addEventListener("message", (e) => {
-                if (!("scramjet$type" in e.data)) return;
+                if (!("browserjet$type" in e.data)) return;
                 let t = e.data;
-                "download" === t.scramjet$type &&
+                "download" === t.browserjet$type &&
                   this.dispatchEvent(
-                    new s.ScramjetGlobalDownloadEvent(t.download)
+                    new s.browserjetGlobalDownloadEvent(t.download)
                   );
               });
           }
@@ -3155,7 +3155,7 @@
             return (0, n.P_)(e.slice(t.length));
           }
           async openIDB() {
-            let e = indexedDB.open("$scramjet", 1);
+            let e = indexedDB.open("$browserjet", 1);
             return new Promise((t, r) => {
               (e.onsuccess = async () => {
                 (this.db = e.result), await this.#e(), t(e.result);
@@ -3191,7 +3191,7 @@
               (0, n.Ec)(),
               await this.#e(),
               navigator.serviceWorker.controller?.postMessage({
-                scramjet$type: "loadConfig",
+                browserjet$type: "loadConfig",
                 config: n.$W,
               });
           }
@@ -3244,7 +3244,7 @@
       },
       9052: function (e, t, r) {
         r.r(t),
-          r.d(t, { ScramjetController: () => i.q, ScramjetFrame: () => n.X });
+          r.d(t, { browserjetController: () => i.q, browserjetFrame: () => n.X });
         var n = r(4869),
           i = r(3402);
       },
@@ -3604,7 +3604,7 @@
           let r = JSON.stringify(e.dump()),
             n = `
 		self.COOKIE = ${r};
-		$scramjetLoadClient().loadAndHook(${JSON.stringify(c.$W)});
+		$browserjetLoadClient().loadAndHook(${JSON.stringify(c.$W)});
 		if ("document" in self && document?.currentScript) {
 			document.currentScript.remove();
 		}
@@ -3643,12 +3643,12 @@
                           let s = t.attribs[i],
                             o = e.fn(s, n, r);
                           null === o ? delete t.attribs[i] : (t.attribs[i] = o),
-                            (t.attribs[`scramjet-attr-${i}`] = s);
+                            (t.attribs[`browserjet-attr-${i}`] = s);
                         }
                       }
                     for (let [e, r] of Object.entries(t.attribs))
                       b.includes(e) &&
-                        ((t.attribs[`scramjet-attr-${e}`] = r),
+                        ((t.attribs[`browserjet-attr-${e}`] = r),
                         (t.attribs[e] = (0, l.o)(
                           r,
                           `(inline ${e} on element)`,
@@ -3690,7 +3690,7 @@
                   ) {
                     let e = t.children[0].data,
                       r = "module" === t.attribs.type;
-                    (t.attribs["scramjet-attr-script-source-src"] = y(
+                    (t.attribs["browserjet-attr-script-source-src"] = y(
                       p.encode(e)
                     )),
                       (e = e.replace(/<!--[\s\S]*?-->/g, "")),
@@ -3754,13 +3754,13 @@
             !(function e(t) {
               if ("attribs" in t)
                 for (let e in t.attribs) {
-                  if ("scramjet-attr-script-source-src" == e) {
+                  if ("browserjet-attr-script-source-src" == e) {
                     t.children[0] &&
                       "data" in t.children[0] &&
                       (t.children[0].data = atob(t.attribs[e]));
                     continue;
                   }
-                  e.startsWith("scramjet-attr-") &&
+                  e.startsWith("browserjet-attr-") &&
                     ((t.attribs[e.slice(14)] = t.attribs[e]),
                     delete t.attribs[e]);
                 }
@@ -4115,7 +4115,7 @@ ${l}`;
             };
           l("wasm"),
             l("all"),
-            (o += `$scramjetLoadClient().loadAndHook(${JSON.stringify(
+            (o += `$browserjetLoadClient().loadAndHook(${JSON.stringify(
               n.$W
             )});`);
           let c = (0, i.o)(e, r, s, a);
@@ -4136,7 +4136,7 @@ ${l}`;
         });
         let n = { none: 0, "same-origin": 1, "same-site": 2, "cross-site": 3 };
         async function i() {
-          let e = indexedDB.open("$scramjet", 1);
+          let e = indexedDB.open("$browserjet", 1);
           return new Promise((t, r) => {
             (e.onerror = () => r(e.error)), (e.onsuccess = () => t(e.result));
           });
@@ -4218,7 +4218,7 @@ ${l}`;
         r.d(t, { ps: () => a });
         let n = "publicSuffixList";
         async function i() {
-          let e = indexedDB.open("$scramjet", 1);
+          let e = indexedDB.open("$browserjet", 1);
           return new Promise((t, r) => {
             (e.onerror = () => r(e.error)), (e.onsuccess = () => t(e.result));
           });
@@ -4307,8 +4307,8 @@ ${l}`;
       },
       2794: function (e, t, r) {
         r.d(t, { pX: () => n, zr: () => i });
-        let n = Symbol.for("scramjet client global"),
-          i = Symbol.for("scramjet frame handle");
+        let n = Symbol.for("browserjet client global"),
+          i = Symbol.for("browserjet frame handle");
       },
       5956: function (e, t, r) {
         function n(e, t) {
@@ -4320,9 +4320,9 @@ ${l}`;
                 )};
                 reload.addEventListener("click", () => location.reload());
                 version.textContent = ${JSON.stringify(
-                  $scramjetVersion.version
+                  $browserjetVersion.version
                 )};
-                build.textContent = ${JSON.stringify($scramjetVersion.build)};
+                build.textContent = ${JSON.stringify($browserjetVersion.build)};
 
                 document.getElementById('copy-button').addEventListener('click', async () => {
                     const text = document.getElementById('errorTrace').value;
@@ -4336,7 +4336,7 @@ ${l}`;
             <html>
                 <head>
                     <meta charset="utf-8" />
-                    <title>Scramjet</title>
+                    <title>browserjet</title>
                     <link rel="stylesheet" href="/assets/css/font.css">
                 </head>
                 <body>
@@ -4484,8 +4484,8 @@ a {
             <p>If you're the owner of <b id="hostname"></b>, try:</p>
             <ul>
                 <li>Restarting your server</li>
-                <li>Updating Scramjet</li>
-                <li>Troubleshooting the error on the <a href="https://github.com/MercuryWorkshop/scramjet"
+                <li>Updating browserjet</li>
+                <li>Troubleshooting the error on the <a href="https://github.com/MercuryWorkshop/browserjet"
                         target="_blank">GitHub repository</a></li>
             </ul>
         </div>
@@ -4493,7 +4493,7 @@ a {
     <br>
     <button id="reload" class="primary">Reload</button>
 </div>
-<p id="version-wrapper"><i>Scramjet v<span id="version"></span> (build <span id="build"></span>)</i></p>
+<p id="version-wrapper"><i>browserjet v<span id="version"></span> (build <span id="build"></span>)</i></p>
                     <script src="${
                       "data:application/javascript," + encodeURIComponent(r)
                     }"></script>
@@ -4524,30 +4524,30 @@ a {
             (this.handle = e),
               (this.origin = t),
               this.messageChannel.port1.addEventListener("message", (e) => {
-                "scramjet$type" in e.data &&
-                  ("init" === e.data.scramjet$type
+                "browserjet$type" in e.data &&
+                  ("init" === e.data.browserjet$type
                     ? (this.connected = !0)
                     : this.handleMessage(e.data));
               }),
               this.messageChannel.port1.start(),
               this.handle.postMessage(
                 {
-                  scramjet$type: "init",
-                  scramjet$port: this.messageChannel.port2,
+                  browserjet$type: "init",
+                  browserjet$port: this.messageChannel.port2,
                 },
                 [this.messageChannel.port2]
               );
           }
           handleMessage(e) {
-            let t = this.promises[e.scramjet$token];
-            t && (t(e), delete this.promises[e.scramjet$token]);
+            let t = this.promises[e.browserjet$token];
+            t && (t(e), delete this.promises[e.browserjet$token]);
           }
           async fetch(e) {
             let t = this.syncToken++,
               r = {
-                scramjet$type: "fetch",
-                scramjet$token: t,
-                scramjet$request: {
+                browserjet$type: "fetch",
+                browserjet$token: t,
+                browserjet$request: {
                   url: e.url,
                   body: e.body,
                   headers: Array.from(e.headers.entries()),
@@ -4558,7 +4558,7 @@ a {
               },
               n = e.body ? [e.body] : [];
             this.handle.postMessage(r, n);
-            let { scramjet$response: i } = await new Promise((e) => {
+            let { browserjet$response: i } = await new Promise((e) => {
               this.promises[t] = e;
             });
             return (
@@ -4800,7 +4800,7 @@ self.WASM = '${r}';`),
           for (let t in v)
             if (h) {
               let r = f.dispatch(h, {
-                scramjet$type: "cookie",
+                browserjet$type: "cookie",
                 cookie: t,
                 url: e.href,
               });
@@ -4865,7 +4865,7 @@ self.WASM = '${r}';`),
                 body: l.body,
                 length: Number(n),
               };
-              i[0].postMessage({ scramjet$type: "download", download: s }, [
+              i[0].postMessage({ browserjet$type: "download", download: s }, [
                 l.body,
               ]),
                 await new Promise(() => {});
@@ -4977,9 +4977,9 @@ self.WASM = '${r}';`),
         r.r(t),
           r.d(t, {
             FakeServiceWorker: () => n.H,
-            ScramjetHandleResponseEvent: () => i.dT,
-            ScramjetRequestEvent: () => i.V3,
-            ScramjetServiceWorker: () => u,
+            browserjetHandleResponseEvent: () => i.dT,
+            browserjetRequestEvent: () => i.V3,
+            browserjetServiceWorker: () => u,
             errorTemplate: () => c.B,
             handleFetch: () => i.Pf,
             renderError: () => c.v,
@@ -5000,7 +5000,7 @@ self.WASM = '${r}';`),
           serviceWorkers = [];
           constructor() {
             super(), (this.client = new s.Ay());
-            let e = indexedDB.open("$scramjet", 1);
+            let e = indexedDB.open("$browserjet", 1);
             (e.onsuccess = () => {
               let t = e.result
                 .transaction("cookies", "readonly")
@@ -5011,23 +5011,23 @@ self.WASM = '${r}';`),
               };
             }),
               addEventListener("message", async ({ data: t }) => {
-                if ("scramjet$type" in t) {
-                  if ("scramjet$token" in t) {
-                    let e = this.syncPool[t.scramjet$token];
-                    delete this.syncPool[t.scramjet$token], e(t);
+                if ("browserjet$type" in t) {
+                  if ("browserjet$token" in t) {
+                    let e = this.syncPool[t.browserjet$token];
+                    delete this.syncPool[t.browserjet$token], e(t);
                     return;
                   }
-                  if ("registerServiceWorker" === t.scramjet$type)
+                  if ("registerServiceWorker" === t.browserjet$type)
                     return void this.serviceWorkers.push(
                       new n.H(t.port, t.origin)
                     );
-                  "cookie" === t.scramjet$type &&
+                  "cookie" === t.browserjet$type &&
                     (this.cookieStore.setCookies([t.cookie], new URL(t.url)),
                     e.result
                       .transaction("cookies", "readwrite")
                       .objectStore("cookies")
                       .put(JSON.parse(this.cookieStore.dump()), "cookies")),
-                    "loadConfig" === t.scramjet$type &&
+                    "loadConfig" === t.browserjet$type &&
                       (this.config = t.config);
                 }
               });
@@ -5038,14 +5038,14 @@ self.WASM = '${r}';`),
               i = new Promise((e) => (r = e));
             return (
               (this.syncPool[n] = r),
-              (t.scramjet$token = n),
+              (t.browserjet$token = n),
               e.postMessage(t),
               await i
             );
           }
           async loadConfig() {
             if (this.config) return;
-            let e = indexedDB.open("$scramjet", 1);
+            let e = indexedDB.open("$browserjet", 1);
             return new Promise((t, r) => {
               (e.onsuccess = async () => {
                 let n = e.result
@@ -7887,19 +7887,19 @@ self.WASM = '${r}';`),
         Object.defineProperty(e, Symbol.toStringTag, { value: "Module" }),
         Object.defineProperty(e, "__esModule", { value: !0 });
     }),
-    (globalThis.$scramjetRequire = function (e) {
+    (globalThis.$browserjetRequire = function (e) {
       return r(409)(e);
     }),
-    (globalThis.$scramjetLoadController = function () {
+    (globalThis.$browserjetLoadController = function () {
       return r(9052);
     }),
-    (globalThis.$scramjetLoadClient = function () {
+    (globalThis.$browserjetLoadClient = function () {
       return r(1323);
     }),
-    (globalThis.$scramjetLoadWorker = function () {
+    (globalThis.$browserjetLoadWorker = function () {
       return r(7510);
     }),
-    (globalThis.$scramjetVersion = {
+    (globalThis.$browserjetVersion = {
       build: "947bc65",
       version: "2.0.0-alpha",
     }),

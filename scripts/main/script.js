@@ -17,7 +17,7 @@ document.getElementById('refBtn').addEventListener('click',()=>{
         loader.classList.add('active');
         const currentUrl=frame.dataset.currentUrl;
         if (currentUrl) {
-            frame.src=scramjet.encodeUrl(currentUrl);
+            frame.src=browserjet.encodeUrl(currentUrl);
         } else {
             frame.src=frame.src;
         }
@@ -104,16 +104,16 @@ document.querySelectorAll('.sb-btn').forEach(btn=>{
 const connection = new BareMux.BareMuxConnection("/browse/baremux/worker.js");
 connection.setTransport("/browse/libcurl/index.mjs",[{websocket:"wss://wisp.classroom.lat/"}]);
 
-const {ScramjetController} = $scramjetLoadController();
-const scramjet=new ScramjetController({
+const {browserjetController} = $browserjetLoadController();
+const browserjet=new browserjetController({
     files:{
-        all:"/browse/scram/scramjet.all.js",
-        wasm:"/browse/scram/scramjet.wasm.wasm",
-        sync:"/browse/scram/scramjet.sync.js"
+        all:"/browse/scram/browserjet.all.js",
+        wasm:"/browse/scram/browserjet.wasm.wasm",
+        sync:"/browse/scram/browserjet.sync.js"
     },
     prefix:"/browse/go/"
 });
-scramjet.init();
+browserjet.init();
 
 //browsing
 function nav(input) {
@@ -148,7 +148,7 @@ function nav(input) {
     frame.classList.remove('loaded');
     frame.style.display='block';
     loader.classList.add('active');
-    frame.src=scramjet.encodeUrl(url);
+    frame.src=browserjet.encodeUrl(url);
     tabs[tabId]={url,frame};
     activeTab.querySelector('.tab-tl').textContent=new URL(url).hostname;
     setUrl(url);
@@ -188,8 +188,8 @@ function startURLP(frame) {
         try {
             const href=frame.contentWindow.location.href;
             if (href && href!==lastHref && href!=='about:blank') {
-                const oldDecoded=(()=>{try{return scramjet.decodeUrl(lastHref);}catch(e){return lastHref;}})();
-                const newDecoded=(()=>{try{return scramjet.decodeUrl(href);}catch(e){return href;}})();
+                const oldDecoded=(()=>{try{return browserjet.decodeUrl(lastHref);}catch(e){return lastHref;}})();
+                const newDecoded=(()=>{try{return browserjet.decodeUrl(href);}catch(e){return href;}})();
                 const oldPath=(()=>{try{return new URL(oldDecoded).pathname;}catch(e){return oldDecoded;}})();
                 const newPath=(()=>{try{return new URL(newDecoded).pathname;}catch(e){return newDecoded;}})();
                 const oldHost=(()=>{try{return new URL(oldDecoded).hostname;}catch(e){return '';}})();
@@ -219,7 +219,7 @@ function startURLP(frame) {
                     },5000);
                 }
             }
-            const decoded=scramjet.decodeUrl(href);
+            const decoded=browserjet.decodeUrl(href);
             if (decoded&&decoded!==urlInput.value&&!urlFocused) {
                 setUrl(decoded);
                 frame.dataset.currentUrl=decoded;

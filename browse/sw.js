@@ -7,10 +7,10 @@ if (navigator.userAgent.includes("Firefox")) {
 
 // blocklist by s16 and swium - blocklist by s16 and swium - blocklist by s16 and swium - blocklist by s16 and swium - blocklist by s16 and swium
 
-importScripts("/browse/scram/scramjet.all.js");
+importScripts("/browse/scram/browserjet.all.js");
 
-const { ScramjetServiceWorker } = $scramjetLoadWorker();
-const scramjet = new ScramjetServiceWorker();
+const { browserjetServiceWorker } = $browserjetLoadWorker();
+const browserjet = new browserjetServiceWorker();
 
 const CONFIG = {
   blocked: [
@@ -125,10 +125,10 @@ function isBlocked(hostname, pathname) {
  * @returns {Promise<Response>}
  */
 async function handleRequest(event) {
-  await scramjet.loadConfig();
+  await browserjet.loadConfig();
 
-  if (scramjet.route(event)) {
-    const response = await scramjet.fetch(event);
+  if (browserjet.route(event)) {
+    const response = await browserjet.fetch(event);
     const contentType = response.headers.get("content-type") || "";
 
     if (contentType.includes("text/html")) {
@@ -167,7 +167,7 @@ self.addEventListener("message", ({ data }) => {
   }
 });
 
-scramjet.addEventListener("request", (e) => {
+browserjet.addEventListener("request", (e) => {
   if (isBlocked(e.url.hostname, e.url.pathname)) {
     e.response = new Response("Site Blocked", { status: 403 });
     return;

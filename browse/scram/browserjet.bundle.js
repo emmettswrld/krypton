@@ -249,7 +249,7 @@ var A,
       (I.keys = () => []), (I.resolve = I), (I.id = 409), (A.exports = I);
     },
     336: function (A, I, g) {
-      g.r(I), g.d(I, { ScramjetClient: () => r });
+      g.r(I), g.d(I, { browserjetClient: () => r });
       var B = g(2794),
         Q = g(94),
         C = g(3696),
@@ -278,7 +278,7 @@ var A,
           if (((this.global = A), B.pX in A))
             throw (
               (console.error(
-                "attempted to initialize a scramjet client, but one is already loaded - this is very bad"
+                "attempted to initialize a browserjet client, but one is already loaded - this is very bad"
               ),
               Error())
             );
@@ -299,8 +299,8 @@ var A,
                   new Promise((A) => {
                     addEventListener("message", ({ data: I }) => {
                       "object" == typeof I &&
-                        "$scramjet$type" in I &&
-                        "baremuxinit" === I.$scramjet$type &&
+                        "$browserjet$type" in I &&
+                        "baremuxinit" === I.$browserjet$type &&
                         A(I.port);
                     });
                   })
@@ -397,7 +397,7 @@ var A,
               if (!g.name)
                 return (
                   console.error(
-                    "YOU NEED TO USE `new ScramjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
+                    "YOU NEED TO USE `new browserjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
                   ),
                   null
                 );
@@ -414,7 +414,7 @@ var A,
                 if (!I.name)
                   return (
                     console.error(
-                      "YOU NEED TO USE `new ScramjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
+                      "YOU NEED TO USE `new browserjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
                     ),
                     null
                   );
@@ -425,7 +425,7 @@ var A,
                 if (!A.name)
                   return (
                     console.error(
-                      "YOU NEED TO USE `new ScramjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
+                      "YOU NEED TO USE `new browserjetFrame()`! DIRECT IFRAMES WILL NOT WORK"
                     ),
                     null
                   );
@@ -560,7 +560,7 @@ var A,
                   if (A instanceof Error)
                     if (A.stack instanceof Object)
                       (A.stack = A.stack.stack),
-                        console.error("ERROR FROM SCRAMJET INTERNALS", A);
+                        console.error("ERROR FROM browserjet INTERNALS", A);
                     else throw A;
                   else throw A;
                 }
@@ -665,8 +665,8 @@ var A,
                   "symbol" == typeof g
                     ? Reflect.has(A, g)
                     : !(
-                        g.startsWith("scramjet-attr-") ||
-                        I[g]?.name?.startsWith("scramjet-attr-")
+                        g.startsWith("browserjet-attr-") ||
+                        I[g]?.name?.startsWith("browserjet-attr-")
                       ) && Reflect.has(A, g),
               });
             return g;
@@ -699,11 +699,11 @@ var A,
     9116: function (A, I, g) {
       function B(A, I) {
         A.serviceWorker.addEventListener("message", ({ data: I }) => {
-          if ("scramjet$type" in I && "cookie" === I.scramjet$type) {
+          if ("browserjet$type" in I && "cookie" === I.browserjet$type) {
             A.cookieStore.setCookies([I.cookie], new URL(I.url));
             let g = {
-              scramjet$token: I.scramjet$token,
-              scramjet$type: "cookie",
+              browserjet$token: I.browserjet$token,
+              browserjet$type: "cookie",
             };
             A.serviceWorker.controller.postMessage(g);
           }
@@ -718,7 +718,7 @@ var A,
               );
               B &&
                 A.natives.call("ServiceWorker.prototype.postMessage", B, {
-                  scramjet$type: "cookie",
+                  browserjet$type: "cookie",
                   cookie: g,
                   url: A.url.href,
                 });
@@ -948,33 +948,33 @@ var A,
           A.Proxy("Element.prototype.getAttribute", {
             apply(I) {
               let [g] = I.args;
-              if (g.startsWith("scramjet-attr")) return I.return(null);
+              if (g.startsWith("browserjet-attr")) return I.return(null);
               if (
                 A.natives.call(
                   "Element.prototype.hasAttribute",
                   I.this,
-                  `scramjet-attr-${g}`
+                  `browserjet-attr-${g}`
                 )
               ) {
-                let A = I.fn.call(I.this, `scramjet-attr-${g}`);
+                let A = I.fn.call(I.this, `browserjet-attr-${g}`);
                 return null === A ? I.return("") : I.return(A);
               }
             },
           }),
           A.Proxy("Element.prototype.getAttributeNames", {
             apply(A) {
-              let I = A.call().filter((A) => !A.startsWith("scramjet-attr"));
+              let I = A.call().filter((A) => !A.startsWith("browserjet-attr"));
               A.return(I);
             },
           }),
           A.Proxy("Element.prototype.getAttributeNode", {
             apply(A) {
-              if (A.args[0].startsWith("scramjet-attr")) return A.return(null);
+              if (A.args[0].startsWith("browserjet-attr")) return A.return(null);
             },
           }),
           A.Proxy("Element.prototype.hasAttribute", {
             apply(A) {
-              if (A.args[0].startsWith("scramjet-attr")) return A.return(!1);
+              if (A.args[0].startsWith("browserjet-attr")) return A.return(!1);
             },
           }),
           A.Proxy("Element.prototype.setAttribute", {
@@ -1001,7 +1001,7 @@ var A,
                   return;
                 }
                 (I.args[1] = B),
-                  I.fn.call(I.this, `scramjet-attr-${I.args[0]}`, Q);
+                  I.fn.call(I.this, `browserjet-attr-${I.args[0]}`, Q);
               }
             },
           }),
@@ -1023,7 +1023,7 @@ var A,
                 A.natives.call(
                   "Element.prototype.setAttribute",
                   I.this,
-                  `scramjet-attr-${I.args[1]}`,
+                  `browserjet-attr-${I.args[1]}`,
                   C
                 ));
             },
@@ -1045,23 +1045,23 @@ var A,
           }),
           A.Proxy("Element.prototype.removeAttribute", {
             apply(I) {
-              if (I.args[0].startsWith("scramjet-attr"))
+              if (I.args[0].startsWith("browserjet-attr"))
                 return I.return(void 0);
               A.natives.call(
                 "Element.prototype.hasAttribute",
                 I.this,
                 I.args[0]
-              ) && I.fn.call(I.this, `scramjet-attr-${I.args[0]}`);
+              ) && I.fn.call(I.this, `browserjet-attr-${I.args[0]}`);
             },
           }),
           A.Proxy("Element.prototype.toggleAttribute", {
             apply(I) {
-              if (I.args[0].startsWith("scramjet-attr")) return I.return(!1);
+              if (I.args[0].startsWith("browserjet-attr")) return I.return(!1);
               A.natives.call(
                 "Element.prototype.hasAttribute",
                 I.this,
                 I.args[0]
-              ) && I.fn.call(I.this, `scramjet-attr-${I.args[0]}`);
+              ) && I.fn.call(I.this, `browserjet-attr-${I.args[0]}`);
             },
           }),
           A.Trap("Element.prototype.innerHTML", {
@@ -1072,7 +1072,7 @@ var A,
                   A.natives.call(
                     "Element.prototype.setAttribute",
                     g.this,
-                    "scramjet-attr-script-source-src",
+                    "browserjet-attr-script-source-src",
                     btoa(
                       Array.from(D.encode(i), (A) =>
                         String.fromCodePoint(A)
@@ -1094,7 +1094,7 @@ var A,
                 let I = A.natives.call(
                   "Element.prototype.getAttribute",
                   g.this,
-                  "scramjet-attr-script-source-src"
+                  "browserjet-attr-script-source-src"
                 );
                 return I ? atob(I) : g.get();
               }
@@ -1172,7 +1172,7 @@ var A,
             {
               get(A) {
                 let I = A.get();
-                return I && (o.pX in I || new t.ScramjetClient(I).hook()), I;
+                return I && (o.pX in I || new t.browserjetClient(I).hook()), I;
               },
             }
           ),
@@ -1190,7 +1190,7 @@ var A,
                   I.this
                 );
                 return g
-                  ? (o.pX in g || new t.ScramjetClient(g).hook(), g.document)
+                  ? (o.pX in g || new t.browserjetClient(g).hook(), g.document)
                   : g;
               },
             }
@@ -1282,7 +1282,7 @@ var A,
             if (!g) return I.return(g);
             if (Q.pX in g) return I.return(g[Q.pX].global);
             {
-              let A = new B.ScramjetClient(g);
+              let A = new B.browserjetClient(g);
               return A.hook(), I.return(A.global);
             }
           },
@@ -1401,7 +1401,7 @@ var A,
                 "ServiceWorker.prototype.postMessage",
                 o,
                 {
-                  scramjet$type: "registerServiceWorker",
+                  browserjet$type: "registerServiceWorker",
                   port: E,
                   origin: A.url.origin,
                 },
@@ -1501,11 +1501,11 @@ var A,
       function r(A) {
         if (
           ((0, B.Nk)(A),
-          o.log("initializing scramjet client"),
+          o.log("initializing browserjet client"),
           !(Q.pX in globalThis))
         ) {
           (0, B.Ec)();
-          let A = new C.ScramjetClient(globalThis),
+          let A = new C.browserjetClient(globalThis),
             I = globalThis.frameElement;
           I &&
             !I.name &&
@@ -1515,8 +1515,8 @@ var A,
               .join("")}`),
             globalThis.COOKIE && A.loadcookies(globalThis.COOKIE),
             A.hook(),
-            w && new i.ScramjetServiceWorkerRuntime(A).hook();
-          let g = new E.ScramjetContextEvent(A.global.window, A);
+            w && new i.browserjetServiceWorkerRuntime(A).hook();
+          let g = new E.browserjetContextEvent(A.global.window, A);
           A.frame?.dispatchEvent(g);
           let Q = new E.UrlChangeEvent(A.url.href);
           A.isSubframe || A.frame?.dispatchEvent(Q);
@@ -1529,8 +1529,8 @@ var A,
       g.r(I),
         g.d(I, {
           NavigateEvent: () => Q,
-          ScramjetContextEvent: () => E,
-          ScramjetGlobalDownloadEvent: () => B,
+          browserjetContextEvent: () => E,
+          browserjetGlobalDownloadEvent: () => B,
           UrlChangeEvent: () => C,
         });
       class B extends Event {
@@ -1573,10 +1573,10 @@ var A,
       g.r(I),
         g.d(I, {
           NavigateEvent: () => C.NavigateEvent,
-          ScramjetClient: () => B.ScramjetClient,
-          ScramjetContextEvent: () => C.ScramjetContextEvent,
-          ScramjetGlobalDownloadEvent: () => C.ScramjetGlobalDownloadEvent,
-          ScramjetServiceWorkerRuntime: () => o.ScramjetServiceWorkerRuntime,
+          browserjetClient: () => B.browserjetClient,
+          browserjetContextEvent: () => C.browserjetContextEvent,
+          browserjetGlobalDownloadEvent: () => C.browserjetGlobalDownloadEvent,
+          browserjetServiceWorkerRuntime: () => o.browserjetServiceWorkerRuntime,
           UrlChangeEvent: () => C.UrlChangeEvent,
           createLocationProxy: () => i.createLocationProxy,
           getOwnPropertyDescriptorHandler: () =>
@@ -1944,13 +1944,13 @@ var A,
       var B = g(1323),
         Q = g(1472),
         C = g(94);
-      let E = Symbol.for("scramjet original onevent function");
+      let E = Symbol.for("browserjet original onevent function");
       function i(A, I) {
         let g = {
           message: {
             _init() {
               return (
-                "object" != typeof this.data || !("$scramjet$type" in this.data)
+                "object" != typeof this.data || !("$browserjet$type" in this.data)
               );
             },
             ports() {
@@ -1961,14 +1961,14 @@ var A,
             },
             origin() {
               return "object" == typeof this.data &&
-                "$scramjet$origin" in this.data
-                ? this.data.$scramjet$origin
+                "$browserjet$origin" in this.data
+                ? this.data.$browserjet$origin
                 : A.url.origin;
             },
             data() {
               return "object" == typeof this.data &&
-                "$scramjet$data" in this.data
-                ? this.data.$scramjet$data
+                "$browserjet$data" in this.data
+                ? this.data.$browserjet$data
                 : this.data;
             },
           },
@@ -2221,9 +2221,9 @@ var A,
                 g = I("return globalThis")()[Q.pX],
                 B = I("...args", "this(...args)");
               (A.args[0] = {
-                $scramjet$messagetype: "window",
-                $scramjet$origin: g.url.origin,
-                $scramjet$data: A.args[0],
+                $browserjet$messagetype: "window",
+                $browserjet$origin: g.url.origin,
+                $browserjet$data: A.args[0],
               }),
                 "string" == typeof A.args[1] && (A.args[1] = "*"),
                 "object" == typeof A.args[1] && (A.args[1].targetOrigin = "*"),
@@ -2236,8 +2236,8 @@ var A,
           A.Proxy(I, {
             apply(A) {
               A.args[0] = {
-                $scramjet$messagetype: "worker",
-                $scramjet$data: A.args[0],
+                $browserjet$messagetype: "worker",
+                $browserjet$data: A.args[0],
               };
             },
           });
@@ -2246,7 +2246,7 @@ var A,
     1914: function (A, I, g) {
       g.r(I), g.d(I, { POLLUTANT: () => Q, default: () => C });
       var B = g(37);
-      let Q = Symbol.for("scramjet realm pollutant");
+      let Q = Symbol.for("browserjet realm pollutant");
       function C(A, I) {
         Object.defineProperty(I.Object.prototype, B.$W.globals.setrealmfn, {
           value(A) {
@@ -2714,7 +2714,7 @@ var A,
               A.natives.call(
                 "Worker.prototype.postMessage",
                 g,
-                { $scramjet$type: "baremuxinit", port: I },
+                { $browserjet$type: "baremuxinit", port: I },
                 [I]
               );
             })();
@@ -2738,7 +2738,7 @@ var A,
                 A.natives.call(
                   "MessagePort.prototype.postMessage",
                   g.port,
-                  { $scramjet$type: "baremuxinit", port: I },
+                  { $browserjet$type: "baremuxinit", port: I },
                   [I]
                 );
               })();
@@ -2873,7 +2873,7 @@ var A,
             return (
               location,
               B.iswindow && I.top,
-              "string" == typeof A && A.includes("scramjet"),
+              "string" == typeof A && A.includes("browserjet"),
               "string" == typeof A && A.includes(location.origin),
               A
             );
@@ -2910,7 +2910,7 @@ var A,
       }
     },
     8409: function (A, I, g) {
-      g.r(I), g.d(I, { ScramjetServiceWorkerRuntime: () => C });
+      g.r(I), g.d(I, { browserjetServiceWorkerRuntime: () => C });
       var B = g(1472),
         Q = g(8665).A;
       class C {
@@ -2923,10 +2923,10 @@ var A,
               Q.log("sw", "connected"),
                 g.addEventListener("message", (I) => {
                   console.log("sw", I.data),
-                    "scramjet$type" in I.data &&
-                      ("init" === I.data.scramjet$type
-                        ? ((this.recvport = I.data.scramjet$port),
-                          this.recvport.postMessage({ scramjet$type: "init" }))
+                    "browserjet$type" in I.data &&
+                      ("init" === I.data.browserjet$type
+                        ? ((this.recvport = I.data.browserjet$port),
+                          this.recvport.postMessage({ browserjet$type: "init" }))
                         : E.call(this, A, I.data));
                 }),
                 g.start();
@@ -2956,15 +2956,15 @@ var A,
       }
       function E(A, I) {
         let g = this.recvport,
-          C = I.scramjet$type,
-          E = I.scramjet$token,
+          C = I.browserjet$type,
+          E = I.browserjet$token,
           i = A.eventcallbacks.get(self);
         if ("fetch" === C) {
           Q.log("ee", I);
           let C = i.filter((A) => "fetch" === A.event);
           if (!C) return;
           for (let i of C) {
-            let C = I.scramjet$request,
+            let C = I.browserjet$request,
               o = new A.natives.Request((0, B.v2)(C.url), {
                 body: C.body,
                 headers: new Headers(C.headers),
@@ -2979,9 +2979,9 @@ var A,
               (D = !0),
                 (async () => {
                   let I = {
-                    scramjet$type: "fetch",
-                    scramjet$token: E,
-                    scramjet$response: {
+                    browserjet$type: "fetch",
+                    browserjet$token: E,
+                    browserjet$response: {
                       body: (A = await A).body,
                       headers: Array.from(A.headers.entries()),
                       status: A.status,
@@ -3000,9 +3000,9 @@ var A,
               D ||
                 (console.log("sw", "no response"),
                 g.postMessage({
-                  scramjet$type: "fetch",
-                  scramjet$token: E,
-                  scramjet$response: !1,
+                  browserjet$type: "fetch",
+                  browserjet$token: E,
+                  browserjet$response: !1,
                 }));
           }
         }
@@ -3038,20 +3038,20 @@ var A,
             },
             g = I(
               {
-                prefix: "/scramjet/",
+                prefix: "/browserjet/",
                 globals: {
-                  wrapfn: "$scramjet$wrap",
-                  wrappropertybase: "$scramjet__",
-                  wrappropertyfn: "$scramjet$prop",
-                  cleanrestfn: "$scramjet$clean",
-                  importfn: "$scramjet$import",
-                  rewritefn: "$scramjet$rewrite",
-                  metafn: "$scramjet$meta",
-                  setrealmfn: "$scramjet$setrealm",
-                  pushsourcemapfn: "$scramjet$pushsourcemap",
-                  trysetfn: "$scramjet$tryset",
-                  templocid: "$scramjet$temploc",
-                  tempunusedid: "$scramjet$tempunused",
+                  wrapfn: "$browserjet$wrap",
+                  wrappropertybase: "$browserjet__",
+                  wrappropertyfn: "$browserjet$prop",
+                  cleanrestfn: "$browserjet$clean",
+                  importfn: "$browserjet$import",
+                  rewritefn: "$browserjet$rewrite",
+                  metafn: "$browserjet$meta",
+                  setrealmfn: "$browserjet$setrealm",
+                  pushsourcemapfn: "$browserjet$pushsourcemap",
+                  trysetfn: "$browserjet$tryset",
+                  templocid: "$browserjet$temploc",
+                  tempunusedid: "$browserjet$tempunused",
                 },
                 files: {
                   wasm: "/history.wasm.wasm",
@@ -3087,16 +3087,16 @@ var A,
           (0, B.Ec)(),
             await this.openIDB(),
             navigator.serviceWorker.controller?.postMessage({
-              scramjet$type: "loadConfig",
+              browserjet$type: "loadConfig",
               config: B.$W,
             }),
             E.log("config loaded"),
             navigator.serviceWorker.addEventListener("message", (A) => {
-              if (!("scramjet$type" in A.data)) return;
+              if (!("browserjet$type" in A.data)) return;
               let I = A.data;
-              "download" === I.scramjet$type &&
+              "download" === I.browserjet$type &&
                 this.dispatchEvent(
-                  new C.ScramjetGlobalDownloadEvent(I.download)
+                  new C.browserjetGlobalDownloadEvent(I.download)
                 );
             });
         }
@@ -3120,7 +3120,7 @@ var A,
           return (0, B.P_)(A.slice(I.length));
         }
         async openIDB() {
-          let A = indexedDB.open("$scramjet", 1);
+          let A = indexedDB.open("$browserjet", 1);
           return new Promise((I, g) => {
             (A.onsuccess = async () => {
               (this.db = A.result), await this.#A(), I(A.result);
@@ -3156,7 +3156,7 @@ var A,
             (0, B.Ec)(),
             await this.#A(),
             navigator.serviceWorker.controller?.postMessage({
-              scramjet$type: "loadConfig",
+              browserjet$type: "loadConfig",
               config: B.$W,
             });
         }
@@ -3209,7 +3209,7 @@ var A,
     },
     9052: function (A, I, g) {
       g.r(I),
-        g.d(I, { ScramjetController: () => Q.q, ScramjetFrame: () => B.X });
+        g.d(I, { browserjetController: () => Q.q, browserjetFrame: () => B.X });
       var B = g(4869),
         Q = g(3402);
     },
@@ -3224,14 +3224,14 @@ var A,
         return g(7510);
       }
       g.d(I, { AL: () => C, HT: () => Q, aR: () => B, q9: () => E }),
-        (globalThis.$scramjetRequire = function (A) {
+        (globalThis.$browserjetRequire = function (A) {
           return g(409)(A);
         });
       let E = { build: "947bc65", version: "2.0.0-alpha" };
-      (globalThis.$scramjetLoadController = B),
-        (globalThis.$scramjetLoadClient = Q),
-        (globalThis.$scramjetLoadWorker = C),
-        (globalThis.$scramjetVersion = E),
+      (globalThis.$browserjetLoadController = B),
+        (globalThis.$browserjetLoadClient = Q),
+        (globalThis.$browserjetLoadWorker = C),
+        (globalThis.$browserjetVersion = E),
         "document" in globalThis &&
           document?.currentScript &&
           document.currentScript.remove();
@@ -3617,7 +3617,7 @@ var A,
         let g = JSON.stringify(A.dump()),
           B = `
 		self.COOKIE = ${g};
-		$scramjetLoadClient().loadAndHook(${JSON.stringify(t.$W)});
+		$browserjetLoadClient().loadAndHook(${JSON.stringify(t.$W)});
 		if ("document" in self && document?.currentScript) {
 			document.currentScript.remove();
 		}
@@ -3656,12 +3656,12 @@ var A,
                         let C = I.attribs[Q],
                           E = A.fn(C, B, g);
                         null === E ? delete I.attribs[Q] : (I.attribs[Q] = E),
-                          (I.attribs[`scramjet-attr-${Q}`] = C);
+                          (I.attribs[`browserjet-attr-${Q}`] = C);
                       }
                     }
                   for (let [A, g] of Object.entries(I.attribs))
                     S.includes(A) &&
-                      ((I.attribs[`scramjet-attr-${A}`] = g),
+                      ((I.attribs[`browserjet-attr-${A}`] = g),
                       (I.attribs[A] = (0, o.o)(
                         g,
                         `(inline ${A} on element)`,
@@ -3703,7 +3703,7 @@ var A,
                 ) {
                   let A = I.children[0].data,
                     g = "module" === I.attribs.type;
-                  (I.attribs["scramjet-attr-script-source-src"] = c(
+                  (I.attribs["browserjet-attr-script-source-src"] = c(
                     a.encode(A)
                   )),
                     (A = A.replace(/<!--[\s\S]*?-->/g, "")),
@@ -3766,13 +3766,13 @@ var A,
           !(function A(I) {
             if ("attribs" in I)
               for (let A in I.attribs) {
-                if ("scramjet-attr-script-source-src" == A) {
+                if ("browserjet-attr-script-source-src" == A) {
                   I.children[0] &&
                     "data" in I.children[0] &&
                     (I.children[0].data = atob(I.attribs[A]));
                   continue;
                 }
-                A.startsWith("scramjet-attr-") &&
+                A.startsWith("browserjet-attr-") &&
                   ((I.attribs[A.slice(14)] = I.attribs[A]),
                   delete I.attribs[A]);
               }
@@ -4148,7 +4148,7 @@ ${i}`;
           };
         o("wasm"),
           o("all"),
-          (E += `$scramjetLoadClient().loadAndHook(${JSON.stringify(B.$W)});`);
+          (E += `$browserjetLoadClient().loadAndHook(${JSON.stringify(B.$W)});`);
         let t = (0, Q.o)(A, g, C, i);
         return (
           t instanceof Uint8Array && (t = new TextDecoder().decode(t)), (E += t)
@@ -4167,7 +4167,7 @@ ${i}`;
       });
       let B = { none: 0, "same-origin": 1, "same-site": 2, "cross-site": 3 };
       async function Q() {
-        let A = indexedDB.open("$scramjet", 1);
+        let A = indexedDB.open("$browserjet", 1);
         return new Promise((I, g) => {
           (A.onerror = () => g(A.error)), (A.onsuccess = () => I(A.result));
         });
@@ -4275,7 +4275,7 @@ ${i}`;
       g.d(I, { Pg: () => D, eI: () => o, ps: () => i });
       let B = "publicSuffixList";
       async function Q() {
-        let A = indexedDB.open("$scramjet", 1);
+        let A = indexedDB.open("$browserjet", 1);
         return new Promise((I, g) => {
           (A.onerror = () => g(A.error)), (A.onsuccess = () => I(A.result));
         });
@@ -4364,9 +4364,9 @@ ${i}`;
     },
     2794: function (A, I, g) {
       g.d(I, { _0: () => B, pX: () => Q, zr: () => C });
-      let B = "scramjet client global",
+      let B = "browserjet client global",
         Q = Symbol.for(B),
-        C = Symbol.for("scramjet frame handle");
+        C = Symbol.for("browserjet frame handle");
     },
     5956: function (A, I, g) {
       function B(A, I) {
@@ -4378,9 +4378,9 @@ ${i}`;
                 )};
                 reload.addEventListener("click", () => location.reload());
                 version.textContent = ${JSON.stringify(
-                  $scramjetVersion.version
+                  $browserjetVersion.version
                 )};
-                build.textContent = ${JSON.stringify($scramjetVersion.build)};
+                build.textContent = ${JSON.stringify($browserjetVersion.build)};
 
                 document.getElementById('copy-button').addEventListener('click', async () => {
                     const text = document.getElementById('errorTrace').value;
@@ -4394,7 +4394,7 @@ ${i}`;
             <html>
                 <head>
                     <meta charset="utf-8" />
-                    <title>Scramjet</title>
+                    <title>browserjet</title>
                     <link rel="stylesheet" href="/assets/css/font.css">
                     <style>
                     
@@ -4545,8 +4545,8 @@ a {
             <p>If you're the owner of <b id="hostname"></b>, try:</p>
             <ul>
                 <li>Restarting your server</li>
-                <li>Updating Scramjet</li>
-                <li>Troubleshooting the error on the <a href="https://github.com/MercuryWorkshop/scramjet"
+                <li>Updating browserjet</li>
+                <li>Troubleshooting the error on the <a href="https://github.com/MercuryWorkshop/browserjet"
                         target="_blank">GitHub repository</a></li>
             </ul>
         </div>
@@ -4554,7 +4554,7 @@ a {
     <br>
     <button id="reload" class="primary">Reload</button>
 </div>
-<p id="version-wrapper"><i>Scramjet v<span id="version"></span> (build <span id="build"></span>)</i></p>
+<p id="version-wrapper"><i>browserjet v<span id="version"></span> (build <span id="build"></span>)</i></p>
                     <script src="${
                       "data:application/javascript," + encodeURIComponent(g)
                     }"></script>
@@ -4585,30 +4585,30 @@ a {
           (this.handle = A),
             (this.origin = I),
             this.messageChannel.port1.addEventListener("message", (A) => {
-              "scramjet$type" in A.data &&
-                ("init" === A.data.scramjet$type
+              "browserjet$type" in A.data &&
+                ("init" === A.data.browserjet$type
                   ? (this.connected = !0)
                   : this.handleMessage(A.data));
             }),
             this.messageChannel.port1.start(),
             this.handle.postMessage(
               {
-                scramjet$type: "init",
-                scramjet$port: this.messageChannel.port2,
+                browserjet$type: "init",
+                browserjet$port: this.messageChannel.port2,
               },
               [this.messageChannel.port2]
             );
         }
         handleMessage(A) {
-          let I = this.promises[A.scramjet$token];
-          I && (I(A), delete this.promises[A.scramjet$token]);
+          let I = this.promises[A.browserjet$token];
+          I && (I(A), delete this.promises[A.browserjet$token]);
         }
         async fetch(A) {
           let I = this.syncToken++,
             g = {
-              scramjet$type: "fetch",
-              scramjet$token: I,
-              scramjet$request: {
+              browserjet$type: "fetch",
+              browserjet$token: I,
+              browserjet$request: {
                 url: A.url,
                 body: A.body,
                 headers: Array.from(A.headers.entries()),
@@ -4619,7 +4619,7 @@ a {
             },
             B = A.body ? [A.body] : [];
           this.handle.postMessage(g, B);
-          let { scramjet$response: Q } = await new Promise((A) => {
+          let { browserjet$response: Q } = await new Promise((A) => {
             this.promises[I] = A;
           });
           return (
@@ -4858,7 +4858,7 @@ self.WASM = '${g}';`),
         for (let I in n)
           if (s) {
             let g = w.dispatch(s, {
-              scramjet$type: "cookie",
+              browserjet$type: "cookie",
               cookie: I,
               url: A.href,
             });
@@ -4920,7 +4920,7 @@ self.WASM = '${g}';`),
               body: o.body,
               length: Number(B),
             };
-            Q[0].postMessage({ scramjet$type: "download", download: C }, [
+            Q[0].postMessage({ browserjet$type: "download", download: C }, [
               o.body,
             ]),
               await new Promise(() => {});
@@ -5030,9 +5030,9 @@ self.WASM = '${g}';`),
       g.r(I),
         g.d(I, {
           FakeServiceWorker: () => B.H,
-          ScramjetHandleResponseEvent: () => Q.dT,
-          ScramjetRequestEvent: () => Q.V3,
-          ScramjetServiceWorker: () => D,
+          browserjetHandleResponseEvent: () => Q.dT,
+          browserjetRequestEvent: () => Q.V3,
+          browserjetServiceWorker: () => D,
           errorTemplate: () => t.B,
           handleFetch: () => Q.Pf,
           renderError: () => t.v,
@@ -5053,7 +5053,7 @@ self.WASM = '${g}';`),
         serviceWorkers = [];
         constructor() {
           super(), (this.client = new C.Ay());
-          let A = indexedDB.open("$scramjet", 1);
+          let A = indexedDB.open("$browserjet", 1);
           (A.onsuccess = () => {
             let I = A.result
               .transaction("cookies", "readonly")
@@ -5064,23 +5064,23 @@ self.WASM = '${g}';`),
             };
           }),
             addEventListener("message", async ({ data: I }) => {
-              if ("scramjet$type" in I) {
-                if ("scramjet$token" in I) {
-                  let A = this.syncPool[I.scramjet$token];
-                  delete this.syncPool[I.scramjet$token], A(I);
+              if ("browserjet$type" in I) {
+                if ("browserjet$token" in I) {
+                  let A = this.syncPool[I.browserjet$token];
+                  delete this.syncPool[I.browserjet$token], A(I);
                   return;
                 }
-                if ("registerServiceWorker" === I.scramjet$type)
+                if ("registerServiceWorker" === I.browserjet$type)
                   return void this.serviceWorkers.push(
                     new B.H(I.port, I.origin)
                   );
-                "cookie" === I.scramjet$type &&
+                "cookie" === I.browserjet$type &&
                   (this.cookieStore.setCookies([I.cookie], new URL(I.url)),
                   A.result
                     .transaction("cookies", "readwrite")
                     .objectStore("cookies")
                     .put(JSON.parse(this.cookieStore.dump()), "cookies")),
-                  "loadConfig" === I.scramjet$type && (this.config = I.config);
+                  "loadConfig" === I.browserjet$type && (this.config = I.config);
               }
             });
         }
@@ -5090,14 +5090,14 @@ self.WASM = '${g}';`),
             Q = new Promise((A) => (g = A));
           return (
             (this.syncPool[B] = g),
-            (I.scramjet$token = B),
+            (I.browserjet$token = B),
             A.postMessage(I),
             await Q
           );
         }
         async loadConfig() {
           if (this.config) return;
-          let A = indexedDB.open("$scramjet", 1);
+          let A = indexedDB.open("$browserjet", 1);
           return new Promise((I, g) => {
             (A.onsuccess = async () => {
               let B = A.result
@@ -7935,32 +7935,32 @@ o.d(t, {
   Pg: () => g.Pg,
   Qs: () => g.Qs,
   Sn: () => g.Sn,
-  Tu: () => A.ScramjetServiceWorkerRuntime,
+  Tu: () => A.browserjetServiceWorkerRuntime,
   U5: () => g.U5,
   Uk: () => g.Uk,
   V0: () => A.iswindow,
-  V3: () => B.ScramjetRequestEvent,
+  V3: () => B.browserjetRequestEvent,
   VP: () => g.VP,
-  Vc: () => A.ScramjetGlobalDownloadEvent,
+  Vc: () => A.browserjetGlobalDownloadEvent,
   Vj: () => A.isworker,
-  XD: () => I.ScramjetFrame,
+  XD: () => I.browserjetFrame,
   YH: () => g.YH,
   Yq: () => g.Yq,
   Z5: () => A.getOwnPropertyDescriptorHandler,
   Zp: () => A.issw,
   _0: () => C._0,
   aR: () => Q.aR,
-  bw: () => A.ScramjetClient,
+  bw: () => A.browserjetClient,
   cN: () => A.isemulatedsw,
   ch: () => A.isshared,
-  dT: () => B.ScramjetHandleResponseEvent,
+  dT: () => B.browserjetHandleResponseEvent,
   eI: () => g.eI,
   f9: () => g.f9,
   gP: () => g.gP,
   hD: () => g.hD,
   hU: () => g.hU,
   iP: () => g.iP,
-  jV: () => B.ScramjetServiceWorker,
+  jV: () => B.browserjetServiceWorker,
   kg: () => A.createLocationProxy,
   kv: () => g.kv,
   lB: () => g.lB,
@@ -7973,10 +7973,10 @@ o.d(t, {
   pX: () => C.pX,
   ps: () => g.ps,
   q9: () => Q.q9,
-  qi: () => I.ScramjetController,
+  qi: () => I.browserjetController,
   qp: () => g.qp,
   rj: () => g.rj,
-  rx: () => A.ScramjetContextEvent,
+  rx: () => A.browserjetContextEvent,
   sM: () => g.sM,
   su: () => g.su,
   uh: () => g.uh,
@@ -8058,26 +8058,26 @@ var D = t.HT,
   AN = t.v2,
   An = t.YH;
 export {
-  D as $scramjetLoadClient,
-  e as $scramjetLoadController,
-  s as $scramjetLoadWorker,
-  a as $scramjetVersion,
+  D as $browserjetLoadClient,
+  e as $browserjetLoadController,
+  s as $browserjetLoadWorker,
+  a as $browserjetVersion,
   w as CookieStore,
   r as FakeServiceWorker,
   h as NavigateEvent,
-  c as SCRAMJETCLIENT,
-  S as SCRAMJETCLIENTNAME,
-  G as SCRAMJETFRAME,
-  y as ScramjetClient,
-  N as ScramjetContextEvent,
-  n as ScramjetController,
-  R as ScramjetFrame,
-  k as ScramjetGlobalDownloadEvent,
-  F as ScramjetHandleResponseEvent,
-  U as ScramjetHeaders,
-  Y as ScramjetRequestEvent,
-  M as ScramjetServiceWorker,
-  J as ScramjetServiceWorkerRuntime,
+  c as browserjetCLIENT,
+  S as browserjetCLIENTNAME,
+  G as browserjetFRAME,
+  y as browserjetClient,
+  N as browserjetContextEvent,
+  n as browserjetController,
+  R as browserjetFrame,
+  k as browserjetGlobalDownloadEvent,
+  F as browserjetHandleResponseEvent,
+  U as browserjetHeaders,
+  Y as browserjetRequestEvent,
+  M as browserjetServiceWorker,
+  J as browserjetServiceWorkerRuntime,
   L as UrlChangeEvent,
   K as asyncSetWasm,
   l as cleanExpiredTrackers,
