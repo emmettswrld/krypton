@@ -14,12 +14,15 @@ const PAGE_SIZE=24;
         onReady:()=>console.log('lumin ready'),
         onError:()=>console.error('lumin error',err)
     });
-    await loadMore();
-    if (!exhausted) await loadMore();
+    const saved=localStorage.getItem('gameProvider')||'lumin';
+    document.querySelectorAll('.provider-opt').forEach(o=>{
+        const isActive=o.dataset.value===saved;
+        o.classList.toggle('active',isActive);
+        if (isActive) document.getElementById('providerLabel').textContent=o.querySelector('span').textContent;
+    });
+    await loadProvider(saved);
     const observer=new IntersectionObserver(async (entries)=>{
-        if (entries[0].isIntersecting && !loading && !exhausted) {
-            await loadMore();
-        }
+        if (entries[0].isIntersecting&&!loading&&!exhausted) await loadMore();
     },{threshold:0.1});
     observer.observe(st);
 })();
@@ -120,11 +123,12 @@ function syncGR() {
     if (colWidth) grid.style.gridAutoRows=colWidth+'px';
 }
 
-let currProvider='lumin';
+let currProvider=localStorage.getItem('gameProvider')||'lumin';
 let staticData=[];
 
 async function loadProvider(provider) {
     currProvider=provider;
+    localStorage.setItem('gameProvider',provider);
     currQuery='';
     document.getElementById('searchInput').value='';
     gameGrid.querySelectorAll('.game-card').forEach(c=>c.remove());
