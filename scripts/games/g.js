@@ -45,7 +45,7 @@ const cardObserver=new IntersectionObserver((entries)=>{
 
 async function loadMore() {
     loading=true;
-    const res=await Lumin.getGames({page,limit:PAGE_SIZE,q:currentQuery});
+    const res=await Lumin.getGames({page,limit:PAGE_SIZE,q:currQuery});
     if (!res.games.length||page>=res.pages) exhausted=true;
     const imgUrls=await Promise.all(
         res.games.map(g=>Lumin.getImageUrl(g.image_token))
@@ -120,15 +120,94 @@ function syncGR() {
     if (colWidth) grid.style.gridAutoRows=colWidth+'px';
 }
 
+let currProvider='lumin';
+let staticData=[];
+
+async function loadProvider(provider) {
+    currProvider=provider;
+    currQuery='';
+    document.getElementById('searchInput').value='';
+    gameGrid.querySelectorAll('.game-card').forEach(c=>c.remove());
+    if (!document.getElementById('gridLd')) {
+        const ld=document.createElement('div');
+        ld.className='grid-ld';
+        ld.id='gridLd';
+        ld.innerHTML='<div class="grid-spinner"></div>';
+        gameGrid.insertBefore(ld,st);
+    }
+    if (provider==='lumin') {
+        page=1;
+        exhausted=false;
+        await loadMore();
+        return;
+    }
+    const res=await fetch(`../../assets/json/${provider}.json`);
+    const json=await res.json();
+    staticData=json;
+    renderStatic();
+}
+
+function renderStatic() {
+    gameGrid.querySelectorAll('.game-card').forEach(c=>c.remove());
+    const loader=document.getElementById('gridLd');
+    if (loader) loader.remove();
+    const filtered=currQuery?staticData.filter(g=>g.name.toLowerCase().includes(currQuery.toLowerCase())):staticData;
+    filtered.forEach(game=>{
+        const card=document.createElement('div');
+        card.className='game-card';
+        card.innerHTML=`
+        <img src="${game.img}" alt=${game.name} loading="lazy">
+        <div class="game-card-nm">${game.name}</div>`;
+        card.addEventListener('click',()=>{
+            if (window.parent) {
+                const iframe=window.parent.document.getElementById('browserFrame')||window.parent.getActiveFrame?.();
+                const gameFrame=window.parent.document.querySelector('.bframe:not([style*="display:none"])');
+                if (gameFrame) {
+                    gameFrame.src=game.url;
+                }
+            }
+        });
+        cardObserver.observe(card);
+        gameGrid.insertBefore(card,st);
+    });
+    syncGR();
+}
+
+document.getElementById('providerBtn').addEventListener('click',e=>{
+    e.stopPropagation();
+    const dr=document.getElementById('providerDr');
+    const chv=document.getElementById('providerChv');
+    dr.classList.toggle('open');
+    chv.classList.toggle('open',dr.classList.contains('open'));
+});
+
+document.addEventListener('click',()=>{
+    document.getElementById('providerDr').classList.remove('open');
+    document.getElementById('providerChv').classList.remove('open');
+});
+
+document.querySelectorAll('.provider-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+        document.querySelectorAll('.provider-opt').forEach(o=>o.classList.remove('active'));
+        opt.classList.add('active');
+        document.getElementById('providerLabel').textContent=opt.querySelector('span').textContent;
+        loadProvider(opt.dataset.value);
+    });
+});
+
 let debounce;
-let currentQuery='';
+let currQuery='';
 document.getElementById('searchInput').addEventListener('input',(e)=>{
     clearTimeout(debounce);
     debounce=setTimeout(()=>{
-        currentQuery=e.target.value.trim();
-        page=1;
-        exhausted=false;
-        gameGrid.querySelectorAll('.game-card').forEach(c=>c.remove());
-        loadMore();
+        currQuery=e.target.value.trim();
+        if (currProvider==='lumin') {
+            page=1;
+            exhausted=false;
+            gameGrid.querySelectorAll('.game-card').forEach(c=>c.remove());
+            loadMore();
+        } else {
+            renderStatic();
+        }
     },300);
 });
