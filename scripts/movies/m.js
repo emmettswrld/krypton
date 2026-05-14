@@ -54,7 +54,6 @@ function buildCard(item,tv) {
         card.innerHTML=`
         <div class="movie-card-inner">
             <img src="${poster}" alt="${title}" loading="lazy">
-            ${tv?'<div class="movie-card-badge">TV</div>':''}
             <div class="movie-card-play">
                 <i data-lucide="play"></i>
             </div>
@@ -69,10 +68,8 @@ function buildCard(item,tv) {
     } else {
         card.innerHTML=`
         <div class="movie-card-inner">
-            ${tv?'<div class="movie-card-badge">TV</div>':''}
             <div class="movie-card-fallback">
                 <i data-lucide="film"></i>
-                <span>${title}</span>
             </div>
             <div class="movie-card-play">
                 <i data-lucide="play"></i>
