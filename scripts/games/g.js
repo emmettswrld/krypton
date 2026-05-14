@@ -1,7 +1,10 @@
 lucide.createIcons();
 
 const gameGrid=document.getElementById('gameGrid');
+const overlay=document.createElement('div');
 const st=document.getElementById('st');
+overlay.className='provider-overlay';
+document.body.appendChild(overlay);
 
 let page=1;
 let loading=false;
@@ -16,7 +19,7 @@ const PAGE_SIZE=50;
     });
     const saved=localStorage.getItem('gameProvider')||'lumin';
     document.querySelectorAll('.provider-opt').forEach(o=>{
-        const isActive=o.dataset.value===saved;
+        isActive=o.dataset.value===saved;
         o.classList.toggle('active',isActive);
         if (isActive) document.getElementById('providerLabel').textContent=o.querySelector('span').textContent;
     });
@@ -181,13 +184,15 @@ document.getElementById('providerBtn').addEventListener('click',e=>{
     e.stopPropagation();
     const dr=document.getElementById('providerDr');
     const chv=document.getElementById('providerChv');
-    dr.classList.toggle('open');
-    chv.classList.toggle('open',dr.classList.contains('open'));
+    const isOpen=dr.classList.toggle('open');
+    chv.classList.toggle('open',isOpen);
+    overlay.classList.toggle('active',isOpen);
 });
 
 document.addEventListener('click',()=>{
     document.getElementById('providerDr').classList.remove('open');
     document.getElementById('providerChv').classList.remove('open');
+    overlay.classList.remove('active');
 });
 
 document.querySelectorAll('.provider-opt').forEach(opt=>{
