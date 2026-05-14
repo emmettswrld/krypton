@@ -6,7 +6,7 @@ const st=document.getElementById('st');
 let page=1;
 let loading=false;
 let exhausted=false;
-const PAGE_SIZE=24;
+const PAGE_SIZE=50;
 
 (async ()=>{
     await Lumin.init({

@@ -442,6 +442,7 @@ function createTab(url=null) {
 function swTab(tabId) {
     document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
     if (urlPollInt) clearInterval(urlPollInt);
+    document.getElementById('bloader').classList.remove('active');
     const tab=tabs[tabId];
     const home=document.querySelector('.main');
     if (tab.frame) {
@@ -596,4 +597,8 @@ function setSidebarActive(id) {
 
 document.getElementById('gmBtn').addEventListener('click',()=>{
     loadInternal('../../pages/g.html','krypton://games','gmBtn');
+});
+
+document.getElementById('mvBtn').addEventListener('click',()=>{
+    loadInternal('../../pages/m.html','krypton://movies','mvBtn');
 });
