@@ -10,22 +10,35 @@ document.getElementById('refBtn').addEventListener('click',()=>{
     icon.classList.add('spinning');
     icon.addEventListener('animationend',()=>icon.classList.remove('spinning'),{once:true});
     const frame=getActiveFrame();
-    if (!frame) return;
-    if (frame.style.display!=='none') {
-        const loader=document.getElementById('bloader');
-        frame.classList.remove('loaded');
-        loader.classList.add('active');
-        const currentUrl=frame.dataset.currentUrl;
-        if (currentUrl) {
-            frame.src=browserjet.encodeUrl(currentUrl);
-        } else {
-            frame.src=frame.src;
+    if (!frame||frame.style.display==='none') return;
+    const loader=document.getElementById('bloader');
+    const activeTab=document.querySelector('.tab.active');
+    const tabId=activeTab?.dataset.tabId;
+    const tabData=tabs[tabId];
+    frame.classList.remove('loaded');
+    loader.classList.add('active');
+    const isInternal=tabData?.url?.startsWith('krypton://');
+    if (isInternal) {
+        const currentSrc=frame.dataset.internalSrc||frame.src;
+        frame.src='';
+        frame.onload=()=>{
+            loader.classList.remove('active');
+            frame.classList.add('loaded');
+        };
+        setTimeout(()=>{frame.src=currentSrc;},50);
+    } else {
+        const currentUrl=frame.dataset.currentUrl||tabData?.url;
+        if (!currentUrl) {
+            loader.classList.remove('active');
+            frame.classList.add('loaded');
+            return;
         }
         frame.onload=()=>{
             loader.classList.remove('active');
             frame.classList.add('loaded');
             startURLP(frame);
-        }
+        };
+        frame.src=browserjet.encodeUrl(currentUrl);
     }
 });
 
@@ -161,12 +174,15 @@ function nav(input) {
         startURLP(frame);
     };
 }
+window.nav=nav;
 
 function getActiveFrame() {
     const activeTab=document.querySelector('.tab.active');
     if (!activeTab) return null;
     return tabs[activeTab.dataset.tabId]?.frame||null;
 }
+
+window.getActiveFrame=getActiveFrame;
 
 function setUrl(url) {
     urlInput.value=url;
@@ -450,7 +466,9 @@ function swTab(tabId) {
         home.style.display='none';
         showTag();
         setUrl(tab.url);
-        startURLP(tab.frame);
+        if (!tab.url.startsWith('krypton://')) {
+            startURLP();
+        }
     } else {
         home.style.display='';
         urlInput.value='';
@@ -601,4 +619,68 @@ document.getElementById('gmBtn').addEventListener('click',()=>{
 
 document.getElementById('mvBtn').addEventListener('click',()=>{
     loadInternal('../../pages/m.html','krypton://movies','mvBtn');
+});
+
+document.getElementById('cdBtn').addEventListener('click',()=>{
+    loadInternal('../pages/c.html','krypton://cloud','cdBtn');
+});
+
+//raccoon handling
+window.addEventListener('message',async (event)=>{
+    if (event.data.type==='LAUNCH_GAME') {
+        const item=event.data.item;
+        console.log('received',item.name);
+        const stored=localStorage.getItem('raccoon_credentials');
+        const userToken=localStorage.getItem('www.raccoongame.com@user_token');
+        if (stored||userToken) {
+            nav(item.url);
+            return;
+        } else {
+            console.log('no creds');
+        }
+        const frameGetter=()=>{
+            const pageCont=document.getElementById('pageCont');
+            if (!pageCont) return null;
+            const frames=Array.from(pageCont.querySelectorAll('.bframe'));
+            return frames.find(f=>f.style.display!=='none'&&!f.src.includes('pages'))||null;
+        }
+        const SIGNUP_URL='https://www.raccoongame.com/login?redirect_uri='+'https%3A%2F%2Fwww.raccoongame.com%2Fweb2%2Fdist%2F%23%2Fplatform%2Fcloudgame';
+        nav(SIGNUP_URL);
+        let attempts=0;
+        let maxAttempts=60;
+        while (attempts<maxAttempts) {
+            await new Promise(r=>setTimeout(r,500));
+            attempts++;
+            const frame=frameGetter();
+            if (!frame) continue;
+            if (frame.classList.contains('loaded')) {
+                try {
+                    const frameWin=frame.contentWindow;
+                    const frameDoc=frame.contentDocument||frameWin.document;
+                    if (frameWin.$&&typeof frameWin.to_register==='function'&&typeof frameWin.post==='function') {
+                        console.log('starting racooon');
+                        break;
+                    }
+                } catch (e) {
+                    console.log('na');
+                }
+            }
+        }
+        if (attempts>=maxAttempts) {
+            console.warn('timeout');
+        }
+        const {Raccoon}=await import('../cloud/raccoon.js');
+        const signup=new Raccoon();
+        try {
+            const credentials=await signup.run(nav,item.url,frameGetter);
+            console.log('completed');
+            console.log(item.url);
+            await new Promise(r=>setTimeout(r,2000));
+            nav(item.url);
+        } catch (err) {
+            console.error('failed',err);
+            console.error(err.stack);
+            nav(item.url);
+        }
+    }
 });
