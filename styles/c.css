@@ -164,16 +164,3 @@ i[data-lucide] svg {
     justify-content:center;
     pointer-events: none;
 }
-
-.grid-spinner {
-    width:60px;
-    height:60px;
-    border:5px solid #1a1a1a;
-    border-top-color:#60a5fa;
-    border-radius:50%;
-    animation:spin 0.75s linear infinite;
-}
-
-@keyframes spin {
-    to {transform:rotate(360deg);}
-}

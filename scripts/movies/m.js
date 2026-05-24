@@ -43,6 +43,7 @@ function getCatEndpoint(cat,pageNum,query) {
 }
 
 function buildCard(item,tv) {
+    if (!item||!item.id) return null;
     const title=tv?(item.name||item.original_name):(item.title||item.original_title);
     const date=tv?item.first_air_date:item.release_date;
     const year=date?date.slice(0,4):'';
@@ -54,9 +55,6 @@ function buildCard(item,tv) {
         card.innerHTML=`
         <div class="movie-card-inner">
             <img src="${poster}" alt="${title}" loading="lazy">
-            <div class="movie-card-play">
-                <i data-lucide="play"></i>
-            </div>
             <div class="movie-card-info">
                 <div class="movie-card-title">${title}</div>
                 <div class="movie-card-meta">
@@ -70,9 +68,6 @@ function buildCard(item,tv) {
         <div class="movie-card-inner">
             <div class="movie-card-fallback">
                 <i data-lucide="film"></i>
-            </div>
-            <div class="movie-card-play">
-                <i data-lucide="play"></i>
             </div>
             <div class="movie-card-info">
                 <div class="movie-card-title">${title}</div>
@@ -88,18 +83,73 @@ function buildCard(item,tv) {
     return card;
 }
 
-function launchMedia(id,tv) {
-    let embedUrl;
-    if (tv) {
-        embedUrl=`${VIDKING_BASE}/tv/${id}/1/1?color=60a5fa&autoPlay=true&nextEpisode=true&episodeSelector=true`;
-    } else {
-        embedUrl=`${VIDKING_BASE}/movie/${id}?color=60a5fa&autoPlay=true`;
-    }
+function closeOvr(ovr) {
+    if (!ovr||!ovr.parentNode) return;
+    const box=ovr.querySelector('.ep-ovr-box');
+    ovr.style.animation='ovrOut 0.2s cubic-bezier(0.4,0,0.2,1) forwards';
+    if (box) box.style.animation='boxOut 0.15s cubic-bezier(0.4,0,0.2,1) forwards';
+    setTimeout(()=>{
+        if (ovr.parentNode) ovr.parentNode.removeChild(ovr);
+    },200);
+}
+
+function navigate(url) {
     try {
-        window.parent.nav(embedUrl);
+        window.parent.nav(url);
     } catch (e) {
-        window.top.location.href=embedUrl;
+        window.top.location.href=url;
     }
+}
+
+function launchMedia(id,tv) {
+    if (!id) return;
+    if (tv) {
+        showEpSel(id);
+    } else {
+        navigate(`${VIDKING_BASE}/movie/${id}?color=60a5fa&autoPlay=true`);
+    }
+}
+
+async function showEpSel(tvId) {
+    const data=await fetchTMDB(`/tv/${tvId}`);
+    const seasons=(data.seasons||[]).filter(s=>s.season_number>0);
+    const ovr=document.createElement('div');
+    ovr.className='ep-ovr';
+    ovr.innerHTML=`
+    <div class="ep-ovr-box">
+        <div class="ep-ovr-header">
+            <span class="ep-ovr-title">${data.name}</span>
+            <button class="ep-ovr-close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ep-sels">
+            <select class="ep-sel" id="seasonSel">
+                ${seasons.map(s=>`<option value="${s.season_number}">Season ${s.season_number}</option>`).join('')}
+            </select>
+            <select class="ep-sel" id="episodeSel"></select>
+        </div>
+        <button class="ep-watch-btn">
+            <i data-lucide="play"></i> Watch
+        </button>
+    </div>`;
+    document.body.appendChild(ovr);
+    lucide.createIcons({nodes:[ovr]});
+    const seasonSel=ovr.querySelector('#seasonSel');
+    const episodeSel=ovr.querySelector('#episodeSel');
+    async function loadEpisodes(seasonNum) {
+        const sData=await fetchTMDB(`/tv/${tvId}/season/${seasonNum}`);
+        const episodes=sData.episodes||[];
+        episodeSel.innerHTML=episodes.map(e=>`<option value="${e.episode_number}">Ep ${e.episode_number}: ${e.name}</option>`).join('');
+    }
+    await loadEpisodes(seasonSel.value);
+    seasonSel.addEventListener('change',()=>loadEpisodes(seasonSel.value));
+    ovr.querySelector('.ep-watch-btn').addEventListener('click',()=>{
+        const s=seasonSel.value;
+        const e=episodeSel.value;
+        closeOvr(ovr);
+        navigate(`${VIDKING_BASE}/tv/${tvId}/${s}/${e}?color=60a5fa&autoPlay=true`);
+    });
+    ovr.querySelector('.ep-ovr-close').addEventListener('click',()=>closeOvr(ovr));
+    ovr.addEventListener('click',e=>{if (e.target===ovr)closeOvr(ovr);});
 }
 
 async function loadMore() {
@@ -122,7 +172,7 @@ async function loadMore() {
         } else {
             results.forEach(item=>{
                 const card=buildCard(item,tv);
-                movieGrid.insertBefore(card,st);
+                if (card) movieGrid.insertBefore(card,st);
             });
             if (loader&&movieGrid.querySelectorAll('.movie-card').length>0) {
                 loader.remove();
