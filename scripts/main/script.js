@@ -625,6 +625,10 @@ document.getElementById('cdBtn').addEventListener('click',()=>{
     loadInternal('../pages/c.html','krypton://cloud','cdBtn');
 });
 
+document.getElementById('aiBtn').addEventListener('click',()=>{
+    loadInternal('../pages/a.html','krypton://ai','aiBtn');
+});
+
 //raccoon handling
 window.addEventListener('message',async (event)=>{
     if (event.data.type==='LAUNCH_GAME') {
