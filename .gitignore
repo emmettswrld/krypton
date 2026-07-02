@@ -2,3 +2,4 @@ assets*
 games*
 stores*
 scripts/cloud/raccoon.js
+script/ai/config.js

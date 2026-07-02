@@ -8,14 +8,66 @@
         <link rel="stylesheet" href="../styles/a.css">
     </head>
     <body>
-        <div class="content-area" id="contentArea"></div>
+        <div class="top-bar">
+            <div class="kname">
+                <i data-lucide="sparkle" class="kicon"></i> 
+                <span class="ktext">krypton AI</span>
+            </div>
+            <div class="chat-sel" id="chatSel">
+                <button class="chat-btn" id="chatBtn">
+                    <i data-lucide="message-square" class="chat-icon"></i>
+                    <span id="chatLabel">Chats</span>
+                    <i data-lucide="chevron-down" class="chat-chv" id="chatChv"></i>
+                </button>
+                <div class="chat-dr" id="chatDr">
+                    <div class="chat-new" id="ncBtn">
+                        <i data-lucide="plus"></i>
+                        <span>New Chat</span>
+                    </div>
+                    <div class="chat-divider"></div>
+                    <div class="chat-opt active" data-value="1">
+                        <i data-lucide="message-circle"></i>
+                        <span>Chat 1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="overlay" id="overlay"></div>
+        <div class="content-area" id="contentArea">
+            <div class="example-grid">
+                <div class="example-card" data-prompt="Explain quantum physics in simple terms">
+                    <i data-lucide="atom" class="example-icon"></i>
+                    <div class="example-title">Explain quantum physics</div>
+                    <div class="example-sub">in simple terms</div>
+                </div>
+                <div class="example-card" data-prompt="Write a short story">
+                    <i data-lucide="feather" class="example-icon"></i>
+                    <div class="example-title">Write a short story</div>
+                    <div class="example-sub">about a lost robot</div>
+                </div>
+                <div class="example-card" data-prompt="Debug my code">
+                    <i data-lucide="bug" class="example-icon"></i>
+                    <div class="example-title">Debug my code</div>
+                    <div class="example-sub">and explain the fix</div>
+                </div>
+                <div class="example-card" data-prompt="Plan a trip">
+                    <i data-lucide="map" class="example-icon"></i>
+                    <div class="example-title">Plan a trip</div>
+                    <div class="example-sub">to Japan for 7 days</div>
+                </div>
+            </div>
+        </div>
         <div class="prompt-bar">
             <div class="text-wpr">
                 <i data-lucide="sparkle" class="text-icon"></i>
                 <input type="text" class="text-input" id="textInput" placeholder="Ask the assistant anything...">
             </div>
+            <button class="send-btn" id="sendBtn">
+                <i data-lucide="send" class="send-icon"></i>
+            </button>
         </div>
 
+        <script src="../scripts/ai/config.js"></script>
         <script src="../scripts/ai/a.js"></script>
     </body>
 </html>
