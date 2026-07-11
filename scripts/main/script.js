@@ -552,7 +552,8 @@ function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
     frame.src=path;
     tabs[tabId]={url:kryptonUrl,frame};
     const label=kryptonUrl.replace('krypton://','');
-    activeTab.querySelector('.tab-tl').textContent=label.charAt(0).toUpperCase()+label.slice(1);
+    const specialLabels={ai:'AI'};
+    activeTab.querySelector('.tab-tl').textContent=specialLabels[label]??(label.charAt(0).toUpperCase()+label.slice(1));
     activeTab.querySelector('.tab-fav').innerHTML='<i data-lucide="atom"></i>';
     lucide.createIcons();
     frame.onload=()=>{
