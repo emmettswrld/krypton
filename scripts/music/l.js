@@ -22,7 +22,7 @@ function renderCard(track) {
     card.dataset.id=track.id;
     card.innerHTML=`
     <div class="card-art">
-        <img src=${track.thumb}" alt="${escapeHtml(track.title)}" loading="lazy">
+        <img src="${track.thumb}" alt="${escapeHtml(track.title)}" loading="lazy">
         <div class="card-play">
             <i data-lucide="play"></i>
         </div>
@@ -95,7 +95,7 @@ function playTrack(track) {
     npProgressFill.style.width='0%';
     npBar.classList.add('visible');
     document.querySelectorAll('.music-card.playing').forEach((el)=>el.classList.remove('playing'));
-    const el=document.querySelector(`music-card[data-id="${track.id}"]`);
+    const el=document.querySelector(`.music-card[data-id="${track.id}"]`);
     if (el) el.classList.add('playing');
 }
 
