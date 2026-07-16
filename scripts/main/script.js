@@ -630,6 +630,10 @@ document.getElementById('aiBtn').addEventListener('click',()=>{
     loadInternal('../pages/a.html','krypton://ai','aiBtn');
 });
 
+document.getElementById('msBtn').addEventListener('click',()=>{
+    loadInternal('../pages/l.html','krypton://music','msBtn');
+});
+
 //raccoon handling
 window.addEventListener('message',async (event)=>{
     if (event.data.type==='LAUNCH_GAME') {
