@@ -43,6 +43,7 @@ function searchVinyl(query) {
         currentEventSource.close();
         currentEventSource=null;
     }
+    cardGrid.className='card-grid';
     cardGrid.innerHTML='';
     if (!query.trim()) return;
     const url=`${API_BASE}/api/music/ytm/search?q=${encodeURIComponent(query)}&limit=20`;
@@ -124,4 +125,45 @@ npPlayBtn.addEventListener('click',()=>{
     else audioEl.pause();
 });
 
-lucide.createIcons();
+function renderSection(title,tracks) {
+    const section=document.createElement('div');
+    section.className='home-section';
+    section.innerHTML=`<h2 class="section-title">${escapeHtml(title)}</h2>`;
+    const grid=document.createElement('div');
+    grid.className='card-grid';
+    tracks.forEach(track=>grid.appendChild(renderCard(track)));
+    section.appendChild(grid);
+    return section;
+}
+
+function fetchHome() {
+    if (currentEventSource) {
+        currentEventSource.close();
+        currentEventSource=null;
+    }
+    cardGrid.innerHTML='';
+    cardGrid.className='home-sections';
+    const url=`${API_BASE}/api/music/ytm/home?limit=10`;
+    const es=new EventSource(url);
+    currentEventSource=es;
+    es.onmessage=(event)=>{
+        if (event.data==='[DONE]') {
+            es.close();
+            currentEventSource=null;
+            return;
+        }
+        try {
+            const {section,tracks}=JSON.parse(event.data);
+            cardGrid.appendChild(renderSection(section,tracks));
+            lucide.createIcons();
+        } catch (err) {
+            console.error('failed to parse home section',err,event.data);
+        }
+    };
+    es.onerror=()=>{
+        es.close();
+        currentEventSource=null;
+    };
+}
+
+fetchHome();
