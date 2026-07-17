@@ -43,12 +43,12 @@ function searchVinyl(query) {
         currentEventSource.close();
         currentEventSource=null;
     }
-    if (query==="") {
+    if (!query.trim()) {
         fetchHome();
-    } 
+        return;
+    }
     cardGrid.className='card-grid';
     cardGrid.innerHTML='';
-    if (!query.trim()) return;
     const url=`${API_BASE}/api/music/ytm/search?q=${encodeURIComponent(query)}&limit=20`;
     const es=new EventSource(url);
     currentEventSource=es;
