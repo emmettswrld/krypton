@@ -43,6 +43,9 @@ function searchVinyl(query) {
         currentEventSource.close();
         currentEventSource=null;
     }
+    if (query==="") {
+        fetchHome();
+    } 
     cardGrid.className='card-grid';
     cardGrid.innerHTML='';
     if (!query.trim()) return;
