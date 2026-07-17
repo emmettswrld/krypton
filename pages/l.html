@@ -26,6 +26,18 @@
 
         <div class="main-panel">
             <div class="top-bar">
+                <div class="np-inline">
+                    <i data-lucide="music" class="np-icon"></i>
+                    <div class="np-inline-meta">
+                        <div class="np-title" id="npTitle">Nothing playing</div>
+                        <div class="np-progress">
+                            <div class="np-progress-fill" id="npProgressFill"></div>
+                        </div>
+                    </div>
+                    <button class="np-play-btn" id="npPlayBtn">
+                        <i data-lucide="play"></i>
+                    </button>
+                </div>
                 <div class="search-wpr">
                     <i data-lucide="search" class="search-icon"></i>
                     <input type="text" class="search-input" id="searchInput" placeholder="Search for a song, artist or album...">
@@ -33,23 +45,6 @@
             </div>
             <div class="content-area" id="contentArea">
                 <div class="card-grid" id="cardGrid"></div>
-            </div>
-        </div>
-        <div class="np-bar" id="npBar">
-            <div class="np-track">
-                <img id="npThumb" src="" alt="">
-                <div class="np-meta">
-                    <div class="np-title" id="npTitle">-</div>
-                    <div class="np-artist" id="npArtist">-</div>
-                </div>
-            </div>
-            <div class="np-controls">
-                <button class="np-play-btn" id="npPlayBtn">
-                    <i data-lucide="play"></i>
-                </button>
-            </div>
-            <div class="np-progress">
-                <div class="np-progress-fill" id="npProgressFill"></div>
             </div>
         </div>
         <script src="../scripts/music/l.js"></script>

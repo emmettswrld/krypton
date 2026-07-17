@@ -89,9 +89,7 @@ function playTrack(track) {
     audioEl.play().catch((err)=>console.error('playback failed',err));
     currentTrack=track;
     currentPlayingId=track.id;
-    npThumb.src=track.thumb;
     npTitle.textContent=track.title;
-    npArtist.textContent=track.artist;
     npProgressFill.style.width='0%';
     npBar.classList.add('visible');
     document.querySelectorAll('.music-card.playing').forEach((el)=>el.classList.remove('playing'));
@@ -111,9 +109,7 @@ function setPlayButtonState(isPlaying) {
 }
 
 const npBar=document.getElementById('npBar');
-const npThumb=document.getElementById('npThumb');
 const npTitle=document.getElementById('npTitle');
-const npArtist=document.getElementById('npArtist');
 const npPlayBtn=document.getElementById('npPlayBtn');
 const npProgressFill=document.getElementById('npProgressFill');
 
