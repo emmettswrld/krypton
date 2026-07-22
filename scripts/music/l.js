@@ -197,7 +197,7 @@ function setPlayButtonState(isPlaying) {
 
 npPlayBtn.addEventListener('click',()=>{
     if (!audioEl||!currentTrack) return;
-    if (!audioEl.paused) audioEl.play();
+    if (audioEl.paused) audioEl.play();
     else audioEl.pause();
 });
 
@@ -211,6 +211,13 @@ npmBackTenBtn.addEventListener('click',()=>{
     if (!audioEl) return;
     audioEl.currentTime=Math.max(0,audioEl.currentTime-10);
 });
+
+function formatTime(seconds) {
+    if (!isFinite(seconds)||seconds<0) return '0:00';
+    const m=Math.floor(seconds/60);
+    const s=Math.floor(seconds%60);
+    return `${m}:${s.toString().padStart(2,'0')}`;
+}
 
 function seekToPE(e) {
     if (!currentTrack?.duration) return;
@@ -234,8 +241,8 @@ npmProgressTrack.addEventListener('mousedown',(e)=>{
         document.removeEventListener('mousemove',onMove);
         document.removeEventListener('mouseup',onUp);
     };
-    document.getElementById('mousemove',onMove);
-    document.getElementById('mouseup',onUp);
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
 });
 
 function showNPView() {
@@ -283,13 +290,13 @@ async function loadLyrics(track) {
         }
         if (data.syncedLyrics) {
             lyricsBody.innerHTML=syncedLyricsLines.map((line,i)=>`<div class="lyrics-line" data-index="${i}">${escapeHtml(line.text)}</div>`).join('');
-            lyricsBody.querySelectorAll('.lyrics-line').forEach((el,i=>{
+            lyricsBody.querySelectorAll('.lyrics-line').forEach((el,i)=>{
                 el.addEventListener('click',()=>{
                     if (!audioEl) return;
                     audioEl.currentTime=syncedLyricsLines[i].time;
                 });
                 el.style.cursor='pointer';
-            }));
+            });
         } else {
             lyricsBody.innerHTML=`<p class="lyrics-empty" style="font-style:normal;font-size:16px;line-height:1.9;color:#b0b0b0;white-space:pre-line;">${escapeHtml(data.plainLyrics)}</p>`;
         }
