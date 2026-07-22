@@ -289,6 +289,7 @@ async function loadLyrics(track) {
             return;
         }
         if (data.syncedLyrics) {
+            syncedLyricsLines=parseLRC(data.syncedLyrics);
             lyricsBody.innerHTML=syncedLyricsLines.map((line,i)=>`<div class="lyrics-line" data-index="${i}">${escapeHtml(line.text)}</div>`).join('');
             lyricsBody.querySelectorAll('.lyrics-line').forEach((el,i)=>{
                 el.addEventListener('click',()=>{
