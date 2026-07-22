@@ -4,6 +4,30 @@ const API_BASE='';
 const cardGrid=document.getElementById('cardGrid');
 const searchInput=document.getElementById('searchInput');
 
+const npBar=document.getElementById('npBar');
+const npTitle=document.getElementById('npTitle');
+const npPlayBtn=document.getElementById('npPlayBtn');
+const npProgressFill=document.getElementById('npProgressFill');
+const npThumb=document.getElementById('npThumb');
+const npDefaultIcon=document.getElementById('npDefaultIcon');
+const npmView=document.getElementById('npmView');
+const npmCover=document.getElementById('npmCover');
+const npmTrackTitle=document.getElementById('npmTrackTitle');
+const npmTrackArtist=document.getElementById('npmTrackArtist');
+const npmProgressFill=document.getElementById('npmProgressFill');
+const npmProgressHandle=document.getElementById('npmProgressHandle');
+const npmProgressTrack=document.getElementById('npmProgressTrack');
+const npmDuration=document.getElementById('npmDuration');
+const npmCurrentTime=document.getElementById('npmCurrentTime');
+const npmPlayBtn=document.getElementById('npmPlayBtn');
+const npmBackBtn=document.getElementById('npmBackBtn');
+const npmBackTenBtn=document.getElementById('npmBackTenBtn');
+const npmFwdTenBtn=document.getElementById('npmFwdTenBtn');
+const lyricsBody=document.getElementById('lyricsBody');
+const contentArea=document.getElementById('contentArea');
+let syncedLyricsLines=null;
+let isSeeking=false;
+
 let currentEventSource=null;
 let debounceTimer=null;
 let audioEl=null;
@@ -78,76 +102,6 @@ searchInput.addEventListener('input',(e)=>{
     debounceTimer=setTimeout(()=>searchVinyl(q),350);
 });
 
-function playTrack(track) {
-    const url=`${API_BASE}/api/sp/audio/${track.id}`;
-    if (!audioEl) {
-        audioEl=new Audio();
-        document.body.appendChild(audioEl);
-        audioEl.addEventListener('timeupdate',updProgress);
-        audioEl.addEventListener('play',()=>setPlayButtonState(true));
-        audioEl.addEventListener('pause',()=>setPlayButtonState(false));
-        audioEl.addEventListener('ended',()=>setPlayButtonState(false));
-    }
-    audioEl.pause();
-    audioEl.src=url;
-    audioEl.play().catch((err)=>console.error('playback failed',err));
-    currentTrack=track;
-    currentPlayingId=track.id;
-    npTitle.textContent=track.title;
-    npThumb.src=track.thumb;
-    npThumb.style.display='block';
-    npDefaultIcon.style.display='none';
-    npProgressFill.style.width='0%';
-    npBar.classList.add('visible');
-    npmCover.src=track.thumb;
-    npmTrackTitle.textContent=track.title;
-    npmTrackArtist.textContent=track.artist;
-    npmProgressFill.style.width='0%';
-    showNPView();
-    loadLyrics(track);
-    document.querySelectorAll('.music-card.playing').forEach((el)=>el.classList.remove('playing'));
-    const el=document.querySelector(`.music-card[data-id="${track.id}"]`);
-    if (el) el.classList.add('playing');
-}
-
-function updProgress() {
-    if (!currentTrack||!currentTrack.duration) return;
-    const pct=Math.min(100,(audioEl.currentTime/currentTrack.duration)*100);
-    npmProgressFill.style.width=`${pct}%`;
-    npProgressFill.style.width=`${pct}%`;
-    updSyncedLyricsHighlight();
-}
-
-function setPlayButtonState(isPlaying) {
-    const iconName=isPlaying?'pause':'play';
-    npPlayBtn.innerHTML=`<i data-lucide="${iconName}"></i>`;
-    npmPlayBtn.innerHTML=`<i data-lucide="${iconName}"></i>`;
-    lucide.createIcons();
-}
-
-const npBar=document.getElementById('npBar');
-const npTitle=document.getElementById('npTitle');
-const npPlayBtn=document.getElementById('npPlayBtn');
-const npProgressFill=document.getElementById('npProgressFill');
-const npThumb=document.getElementById('npThumb');
-const npDefaultIcon=document.getElementById('npDefaultIcon');
-const npmView=document.getElementById('npmView');
-const npmCover=document.getElementById('npmCover');
-const npmTrackTitle=document.getElementById('npmTrackTitle');
-const npmTrackArtist=document.getElementById('npmTrackArtist');
-const npmProgressFill=document.getElementById('npmProgressFill');
-const npmPlayBtn=document.getElementById('npmPlayBtn');
-const npmBackBtn=document.getElementById('npmBackBtn');
-const lyricsBody=document.getElementById('lyricsBody');
-const contentArea=document.getElementById('contentArea');
-let syncedLyricsLines=null;
-
-npPlayBtn.addEventListener('click',()=>{
-    if (!audioEl||!currentTrack) return;
-    if (audioEl.paused) audioEl.play();
-    else audioEl.pause();
-});
-
 function renderSection(title,tracks) {
     const section=document.createElement('div');
     section.className='home-section';
@@ -189,6 +143,101 @@ function fetchHome() {
     };
 }
 
+function playTrack(track) {
+    const url=`${API_BASE}/api/sp/audio/${track.id}`;
+    if (!audioEl) {
+        audioEl=new Audio();
+        document.body.appendChild(audioEl);
+        audioEl.addEventListener('timeupdate',updProgress);
+        audioEl.addEventListener('play',()=>setPlayButtonState(true));
+        audioEl.addEventListener('pause',()=>setPlayButtonState(false));
+        audioEl.addEventListener('ended',()=>setPlayButtonState(false));
+    }
+    audioEl.pause();
+    audioEl.src=url;
+    audioEl.play().catch((err)=>console.error('playback failed',err));
+    currentTrack=track;
+    currentPlayingId=track.id;
+    npTitle.textContent=track.title;
+    npThumb.src=track.thumb;
+    npThumb.style.display='block';
+    npDefaultIcon.style.display='none';
+    npmProgressFill.style.width='0%';
+    npBar.classList.add('visible');
+    npmCover.src=track.thumb;
+    npmTrackTitle.textContent=track.title;
+    npmTrackArtist.textContent=track.artist;
+    npmProgressFill.style.width='0%';
+    npmProgressHandle.style.left='0%';
+    npmCurrentTime.textContent='0:00';
+    npmDuration.textContent=track.duration?formatTime(track.duration):'0:00';
+    showNPView();
+    loadLyrics(track);
+    document.querySelectorAll('.music-card.playing').forEach((el)=>el.classList.remove('playing'));
+    const el=document.querySelector(`.music-card[data-id="${track.id}"]`);
+    if (el) el.classList.add('playing');
+}
+
+function updProgress() {
+    if (!currentTrack||!currentTrack.duration) return;
+    const pct=Math.min(100,(audioEl.currentTime/currentTrack.duration)*100);
+    npmProgressFill.style.width=`${pct}%`;
+    npProgressFill.style.width=`${pct}%`;
+    npmProgressHandle.style.left=`${pct}%`;
+    npmCurrentTime.textContent=formatTime(audioEl.currentTime);
+    updSyncedLyricsHighlight();
+}
+
+function setPlayButtonState(isPlaying) {
+    const iconName=isPlaying?'pause':'play';
+    npPlayBtn.innerHTML=`<i data-lucide="${iconName}"></i>`;
+    npmPlayBtn.innerHTML=`<i data-lucide="${iconName}"></i>`;
+    lucide.createIcons();
+}
+
+npPlayBtn.addEventListener('click',()=>{
+    if (!audioEl||!currentTrack) return;
+    if (!audioEl.paused) audioEl.play();
+    else audioEl.pause();
+});
+
+npmPlayBtn.addEventListener('click',()=>{
+    if (!audioEl||!currentTrack) return;
+    if (audioEl.paused) audioEl.play();
+    else audioEl.pause();
+});
+
+npmBackTenBtn.addEventListener('click',()=>{
+    if (!audioEl) return;
+    audioEl.currentTime=Math.max(0,audioEl.currentTime-10);
+});
+
+function seekToPE(e) {
+    if (!currentTrack?.duration) return;
+    const rect=npmProgressTrack.getBoundingClientRect();
+    const x=Math.min(Math.max(e.clientX-rect.left,0),rect.width);
+    const pct=x/rect.width;
+    const time=pct*currentTrack.duration;
+    npmProgressFill.style.width=`${pct*100}%`;
+    npProgressFill.style.width=`${pct*100}%`;
+    npmProgressHandle.style.left=`${pct*100}%`;
+    npmCurrentTime.textContent=formatTime(time);
+    if (audioEl) audioEl.currentTime=time;
+}
+
+npmProgressTrack.addEventListener('mousedown',(e)=>{
+    isSeeking=true;
+    seekToPE(e);
+    const onMove=(ev)=>seekToPE(ev);
+    const onUp=()=>{
+        isSeeking=false;
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+    };
+    document.getElementById('mousemove',onMove);
+    document.getElementById('mouseup',onUp);
+});
+
 function showNPView() {
     contentArea.style.display='none';
     npmView.classList.add('visible');
@@ -229,17 +278,23 @@ async function loadLyrics(track) {
         const res=await fetch(`${API_BASE}/api/music/lyrics?${params.toString()}`);
         const data=await res.json();
         if (!data.found||(!data.plainLyrics&&!data.syncedLyrics)) {
-            lyricsBody.innerHTML='<p class="lyrics-empty">No lyrics found for this song</p>';
+            lyricsBody.innerHTML='<p class="lyrics-empty">No lyrics found for this song.</p>';
             return;
         }
         if (data.syncedLyrics) {
-            syncedLyricsLines=parseLRC(data.syncedLyrics);
             lyricsBody.innerHTML=syncedLyricsLines.map((line,i)=>`<div class="lyrics-line" data-index="${i}">${escapeHtml(line.text)}</div>`).join('');
+            lyricsBody.querySelectorAll('.lyrics-line').forEach((el,i=>{
+                el.addEventListener('click',()=>{
+                    if (!audioEl) return;
+                    audioEl.currentTime=syncedLyricsLines[i].time;
+                });
+                el.style.cursor='pointer';
+            }));
         } else {
-            lyricsBody.textContent=data.plainLyrics;
+            lyricsBody.innerHTML=`<p class="lyrics-empty" style="font-style:normal;font-size:16px;line-height:1.9;color:#b0b0b0;white-space:pre-line;">${escapeHtml(data.plainLyrics)}</p>`;
         }
     } catch (err) {
-        console.error('failed to load lyrics ',err);
+        console.error('failed to load lyrics',err);
         lyricsBody.innerHTML='<p class="lyrics-empty">Couldn\'t load lyrics.</p>';
     }
 }
@@ -252,19 +307,16 @@ function updSyncedLyricsHighlight() {
         if (syncedLyricsLines[i].time<=t) activeIndex=i;
         else break;
     }
-    document.querySelectorAll('.lyrics-line').forEach((el,i)=>{
-        el.classList.toggle('active',i===activeIndex);
+    const lines=document.querySelectorAll('.lyrics-line');
+    lines.forEach((el,i)=>{
+        el.classList.remove('active','near-active');
+        if (i===activeIndex) el.classList.add('active');
+        else if (Math.abs(i-activeIndex)===1) el.classList.add('near-active');
     });
     if (activeIndex>=0) {
         const activeEl=document.querySelector(`.lyrics-line[data-index="${activeIndex}"]`);
         activeEl?.scrollIntoView({behavior:'smooth',block:'center'});
     }
 }
-
-npmPlayBtn.addEventListener('click',()=>{
-    if (!audioEl||!currentTrack) return;
-    if (audioEl.paused) audioEl.play();
-    else audioEl.pause();
-});
 
 fetchHome();
