@@ -378,6 +378,7 @@ img.np-icon {
     padding:8px 14px;
     border-radius:999px;
     font-size:12px;
+    font-family:'Inter';
     cursor:pointer;
     transition:border-color 0.2s ease,color 0.2s ease;
 }
