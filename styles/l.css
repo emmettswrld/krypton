@@ -26,7 +26,6 @@ html {
     flex-shrink:0;
     padding:16px 10px;
     background:#000;
-    border-right:1px solid #1a1a1a;
 }
 
 .sb-item {
