@@ -24,6 +24,8 @@ const npmBackTenBtn=document.getElementById('npmBackTenBtn');
 const npmFwdTenBtn=document.getElementById('npmFwdTenBtn');
 const contentArea=document.getElementById('contentArea');
 const amLyricsEl=document.getElementById('amLyricsEl');
+const sbFavourites=document.getElementById('sbFavourites');
+const npmFavBtn=document.getElementById('npmFavBtn');
 let isSeeking=false;
 
 let currentEventSource=null;
@@ -45,6 +47,9 @@ function renderCard(track) {
     card.innerHTML=`
     <div class="card-art">
         <img src="${track.thumb}" alt="${escapeHtml(track.title)}" loading="lazy">
+        <button class="card-fav-btn${isFavourite(track.id)?' faved':''}" data-id="${track.id}">
+            <i data-lucide="heart"></i>
+        </button>
         <div class="card-play">
             <i data-lucide="play"></i>
         </div>
@@ -168,6 +173,7 @@ function playTrack(track) {
     npmProgressFill.style.width='0%';
     npmProgressHandle.style.left='0%';
     npmCurrentTime.textContent='0:00';
+    npmFavBtn.classList.toggle('faved',isFavourite(track.id));
     amLyricsEl.songTitle=track.title;
     amLyricsEl.songArtist=track.artist;
     amLyricsEl.query=`${track.title} ${track.artist}`;
@@ -222,6 +228,10 @@ npmFwdTenBtn.addEventListener('click',()=>{
     amLyricsEl.currentTime=audioEl.currentTime*1000;
 });
 
+npmFavBtn.addEventListener('click',()=>{
+    if (!currentTrack) return;
+    toggleFavourite(currentTrack);
+});
 
 function formatTime(seconds) {
     if (!isFinite(seconds)||seconds<0) return '0:00';
@@ -273,8 +283,80 @@ function hideNPView() {
     contentArea.style.display='';
 }
 
-document.querySelector('.sb-item[data-view="home"]').addEventListener('click',()=>{
-    hideNPView();
+document.querySelectorAll('.sb-item[data-view="home"]').forEach(item=>{
+    item.addEventListener('click',()=>{
+        document.querySelectorAll('.sb-item[data-view]').forEach(el=>el.classList.remove('active'));;
+        item.classList.add('active');
+        hideNPView();
+        const view=item.dataset.view;
+        if (view==='home') fetchHome();
+        else if (view==='library') fetchLibrary();
+    });
 });
 
+const FAV_KEY='favourites';
+
+function getFavourites() {
+    try {
+        return JSON.parse(localStorage.getItem(FAV_KEY))||[];
+    } catch (err) {
+        return [];
+    }
+}
+
+function saveFavourites(favs) {
+    localStorage.setItem(FAV_KEY,JSON.stringify(favs));
+}
+
+function isFavourite(id) {
+    return getFavourites().some(t=>t.id===id);
+}
+
+function toggleFavourite(track) {
+    let favs=getFavourites();
+    const idx=favs.findIndex(t=>t.id===track.id);
+    if (idx>1) {
+        favs.splice(idx,1);
+    } else {
+        favs.push(track);
+    }
+    saveFavourites(favs);
+    renderSBFavourites();
+    document.querySelectorAll(`.card-fav-btn[data-id="${track.id}"]`).forEach(el=>{
+        el.classList.toggle('faved',isFavourite(track.id));
+    });
+    if (currentTrack&&currentTrack.id===track.id) {
+        npmFavBtn.classList.toggle('faved',isFavourite(track.id));
+    }
+    if (document.querySelector('.sb-item.active')?.dataset.view==='library') {
+        fetchLibrary();
+    }
+}
+
+function renderSBFavourites() {
+    const favs=getFavourites();
+    sbFavourites.innerHTML='';
+    favs.forEach(track=>{
+        const item=document.createElement('div');
+        item.className='sb-fav-item';
+        item.innerHTML=`
+        <img src="${track.thumb}" alt="">
+        <span>${escapeHtml(track.title)}</span>`;
+        item.addEventListener('click',()=>playTrack(track));
+        sbFavourites.appendChild(item);
+    });
+}
+
+function fetchLibrary() {
+    if (currentEventSource) {
+        currentEventSource.close();
+        currentEventSource=null;
+    }
+    cardGrid.className='card-grid';
+    cardGrid.innerHTML='';
+    getFavourites().forEach(track=>cardGrid.appendChild(renderCard(track)));
+    lucide.createIcons();
+}
+
 fetchHome();
+renderSBFavourites();

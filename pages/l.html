@@ -19,10 +19,7 @@
                 <span>Your Library</span>
             </div>
             <div class="sb-divider"></div>
-            <div class="sb-item" data-view="playlists">
-                <i data-lucide="list-music"></i>
-                <span>Playlists</span>
-            </div>
+            <div class="sb-favourites" id="sbFavourites"></div>
         </div>
 
         <div class="main-panel">
@@ -55,6 +52,9 @@
                         <div class="np-track-title" id="npmTrackTitle">-</div>
                         <div class="np-track-artist" id="npmTrackArtist">-</div>
                     </div>
+                    <button class="np-fav-btn" id="npmFavBtn">
+                        <i data-lucide="heart"></i>
+                    </button>
                     <div class="np-seek-row">
                         <span class="np-time" id="npmCurrentTime">0:00</span>
                         <div class="np-mprogress" id="npmProgressTrack">
