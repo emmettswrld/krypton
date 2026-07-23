@@ -20,12 +20,10 @@ const npmProgressTrack=document.getElementById('npmProgressTrack');
 const npmDuration=document.getElementById('npmDuration');
 const npmCurrentTime=document.getElementById('npmCurrentTime');
 const npmPlayBtn=document.getElementById('npmPlayBtn');
-const npmBackBtn=document.getElementById('npmBackBtn');
 const npmBackTenBtn=document.getElementById('npmBackTenBtn');
 const npmFwdTenBtn=document.getElementById('npmFwdTenBtn');
-const lyricsBody=document.getElementById('lyricsBody');
 const contentArea=document.getElementById('contentArea');
-let syncedLyricsLines=null;
+const amLyricsEl=document.getElementById('amLyricsEl');
 let isSeeking=false;
 
 let currentEventSource=null;
@@ -170,6 +168,11 @@ function playTrack(track) {
     npmProgressFill.style.width='0%';
     npmProgressHandle.style.left='0%';
     npmCurrentTime.textContent='0:00';
+    amLyricsEl.songTitle=track.title;
+    amLyricsEl.songArtist=track.artist;
+    amLyricsEl.query=`${track.title} ${track.artist}`;
+    if (track.duration) amLyricsEl.songDurationMs=track.duration*1000;
+    amLyricsEl.currentTime=0;
     npmDuration.textContent=track.duration?formatTime(track.duration):'0:00';
     showNPView();
     loadLyrics(track);
@@ -185,7 +188,7 @@ function updProgress() {
     npProgressFill.style.width=`${pct}%`;
     npmProgressHandle.style.left=`${pct}%`;
     npmCurrentTime.textContent=formatTime(audioEl.currentTime);
-    updSyncedLyricsHighlight();
+    amLyricsEl.currentTime=audioEl.currentTime*1000;
 }
 
 function setPlayButtonState(isPlaying) {
@@ -210,7 +213,15 @@ npmPlayBtn.addEventListener('click',()=>{
 npmBackTenBtn.addEventListener('click',()=>{
     if (!audioEl) return;
     audioEl.currentTime=Math.max(0,audioEl.currentTime-10);
+    amLyricsEl.currentTime=audioEl.currentTime*1000;
 });
+
+npmFwdTenBtn.addEventListener('click',()=>{
+    if (!audioEl||!currentTrack?.duration) return;
+    audioEl.currentTime=Math.min(currentTrack.duration,audioEl.currentTime+10);
+    amLyricsEl.currentTime=audioEl.currentTime*1000;
+});
+
 
 function formatTime(seconds) {
     if (!isFinite(seconds)||seconds<0) return '0:00';
@@ -230,6 +241,7 @@ function seekToPE(e) {
     npmProgressHandle.style.left=`${pct*100}%`;
     npmCurrentTime.textContent=formatTime(time);
     if (audioEl) audioEl.currentTime=time;
+    amLyricsEl.currentTime=time*1000;
 }
 
 npmProgressTrack.addEventListener('mousedown',(e)=>{
@@ -245,6 +257,12 @@ npmProgressTrack.addEventListener('mousedown',(e)=>{
     document.addEventListener('mouseup',onUp);
 });
 
+amLyricsEl.addEventListener('line-click',(e)=>{
+    if (!audioEl) return;
+    audioEl.currentTime=e.detail.timestamp/1000;
+    audioEl.play();
+});
+
 function showNPView() {
     contentArea.style.display='none';
     npmView.classList.add('visible');
@@ -255,76 +273,8 @@ function hideNPView() {
     contentArea.style.display='';
 }
 
-npmBackBtn.addEventListener('click',hideNPView);
-
-function parseLRC(lrcText) {
-    const lines=lrcText.split('\n');
-    const parsed=[];
-    const timeTag=/\[(\d{2}):(\d{2}\.\d{2,3})\]/;
-    for (const line of lines) {
-        const match=line.match(timeTag);
-        if (!match) continue;
-        const minutes=parseInt(match[1],10);
-        const seconds=parseFloat(match[2]);
-        const time=minutes*60+seconds;
-        const text=line.replace(timeTag,'').trim();
-        if (text) parsed.push({time,text});
-    }
-    return parsed;
-}
-
-async function loadLyrics(track) {
-    syncedLyricsLines=null;
-    lyricsBody.innerHTML='<p class="lyrics-empty">Loading lyrics...</p>';
-    try {
-        const params=new URLSearchParams({
-            track:track.title,
-            artist:track.artist,
-        });
-        if (track.duration) params.set('duration',track.duration);
-        const res=await fetch(`${API_BASE}/api/music/lyrics?${params.toString()}`);
-        const data=await res.json();
-        if (!data.found||(!data.plainLyrics&&!data.syncedLyrics)) {
-            lyricsBody.innerHTML='<p class="lyrics-empty">No lyrics found for this song.</p>';
-            return;
-        }
-        if (data.syncedLyrics) {
-            syncedLyricsLines=parseLRC(data.syncedLyrics);
-            lyricsBody.innerHTML=syncedLyricsLines.map((line,i)=>`<div class="lyrics-line" data-index="${i}">${escapeHtml(line.text)}</div>`).join('');
-            lyricsBody.querySelectorAll('.lyrics-line').forEach((el,i)=>{
-                el.addEventListener('click',()=>{
-                    if (!audioEl) return;
-                    audioEl.currentTime=syncedLyricsLines[i].time;
-                });
-                el.style.cursor='pointer';
-            });
-        } else {
-            lyricsBody.innerHTML=`<p class="lyrics-empty" style="font-style:normal;font-size:16px;line-height:1.9;color:#b0b0b0;white-space:pre-line;">${escapeHtml(data.plainLyrics)}</p>`;
-        }
-    } catch (err) {
-        console.error('failed to load lyrics',err);
-        lyricsBody.innerHTML='<p class="lyrics-empty">Couldn\'t load lyrics.</p>';
-    }
-}
-
-function updSyncedLyricsHighlight() {
-    if (!syncedLyricsLines||!audioEl) return;
-    const t=audioEl.currentTime;
-    let activeIndex=-1;
-    for (let i=0;i<syncedLyricsLines.length;i++) {
-        if (syncedLyricsLines[i].time<=t) activeIndex=i;
-        else break;
-    }
-    const lines=document.querySelectorAll('.lyrics-line');
-    lines.forEach((el,i)=>{
-        el.classList.remove('active','near-active');
-        if (i===activeIndex) el.classList.add('active');
-        else if (Math.abs(i-activeIndex)===1) el.classList.add('near-active');
-    });
-    if (activeIndex>=0) {
-        const activeEl=document.querySelector(`.lyrics-line[data-index="${activeIndex}"]`);
-        activeEl?.scrollIntoView({behavior:'smooth',block:'center'});
-    }
-}
+document.querySelector('.sb-item[data-view="home"]').addEventListener('click',()=>{
+    hideNPView();
+});
 
 fetchHome();

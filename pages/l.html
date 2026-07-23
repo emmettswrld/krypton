@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <script src="https://unpkg.com/lucide@latest"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@uimaxbai/am-lyrics/dist/src/am-lyrics.min.js"></script>
         <link rel="stylesheet" href="../styles/l.css">
     </head>
     <body>
@@ -49,10 +50,6 @@
             </div>
             <div class="np-view" id="npmView">
                 <div class="np-left">
-                    <button class="np-mback-btn" id="npmBackBtn">
-                        <i data-lucide="arrow-left"></i>
-                        <span>Back</span>
-                    </button>
                     <img class="np-cover" id="npmCover" src="" alt="">
                     <div class="np-details">
                         <div class="np-track-title" id="npmTrackTitle">-</div>
@@ -79,9 +76,16 @@
                     </div>
                 </div>
                 <div class="np-right">
-                    <div class="lyrics-body" id="lyricsBody">
-                        <p class="lyrics-empty">Loading lyrics...</p>
-                    </div>
+                    <am-lyrics
+                        id="amLyricsEl"
+                        song-title=""
+                        song-artist=""
+                        highlight-color="#60a5fa"
+                        font-family="'Inter', sans-serif"
+                        autoscroll
+                        interpolate
+                        hide-source-footer
+                    ></am-lyrics>
                 </div>
             </div>
         </div>

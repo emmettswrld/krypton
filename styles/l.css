@@ -443,22 +443,33 @@ img.np-icon {
 .np-mprogress {
     position:relative;
     flex:1;
+    height:20px;
+    display:flex;
+    align-items:center;
+    cursor:pointer;
+}
+
+.np-mprogress::before {
+    content:'';
+    position:absolute;
+    left:0;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
     height:4px;
     background:#1a1a1a;
     border-radius:999px;
-    cursor:pointer;
-    padding:8px 0;
-    background-clip:content-box;
 }
 
 .np-mprogress-fill {
     position:absolute;
-    top:8px;
+    top:50%;
     left:0;
     height:4px;
     width:0%;
     background:#60a5fa;
     border-radius:999px;
+    transform:translateY(-50%);
     pointer-events:none;
 }
 
