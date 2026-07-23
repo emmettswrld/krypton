@@ -181,7 +181,6 @@ function playTrack(track) {
     amLyricsEl.currentTime=0;
     npmDuration.textContent=track.duration?formatTime(track.duration):'0:00';
     showNPView();
-    loadLyrics(track);
     document.querySelectorAll('.music-card.playing').forEach((el)=>el.classList.remove('playing'));
     const el=document.querySelector(`.music-card[data-id="${track.id}"]`);
     if (el) el.classList.add('playing');

@@ -501,6 +501,9 @@ img.np-icon {
     display:flex;
     align-items:center;
     gap:20px;
+    width:100%;
+    justify-content:center;
+    position:relative;
 }
 
 .np-mplay-btn {
@@ -631,18 +634,18 @@ img.np-icon {
 }
 
 .np-fav-btn {
-    width:38px;
-    height:38px;
+    width:36px;
+    height:36px;
     border-radius:50%;
     background:transparent;
-    border:1px solid #2a2a2a;
+    border:none;
     display:flex;
     align-items:center;
     justify-content:center;
     cursor:pointer;
     color:#808080;
-    transition:color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-    margin-top:-6px;
+    transition:color 0.2s ease,transform 0.2s ease;
+    position:absolute;
 }
 
 .np-fav-btn svg {
