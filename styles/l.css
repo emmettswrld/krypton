@@ -646,6 +646,9 @@ img.np-icon {
     color:#808080;
     transition:color 0.2s ease,transform 0.2s ease;
     position:absolute;
+    top:50%;
+    right:0;
+    transform:translateY(-50%);
 }
 
 .np-fav-btn svg {
@@ -655,13 +658,11 @@ img.np-icon {
 
 .np-fav-btn:hover {
     color:#e0e0e0;
-    border-color:#3a3a3a;
-    transform:scale(1.06);
+    transform:translateY(-50%) scale(1.06);
 }
 
 .np-fav-btn.faved {
     color:#ef4444;
-    border-color:#ef4444;
 }
 
 .np-fav-btn.faved svg {
