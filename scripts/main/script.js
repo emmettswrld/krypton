@@ -644,9 +644,21 @@ document.getElementById('msBtn').addEventListener('click',()=>{
     loadInternal('../pages/l.html','krypton://music','msBtn');
 });
 
+let isLG=false;
+const loader=document.getElementById('bloader');
+
+if (loader) {
+    const originalRemove=loader.classList.remove.bind(loader.classList);
+    loader.classList.remove=function(...args) {
+        if (isLG&&args.includes('active')) return;
+        originalRemove(...args);
+    };
+}
+
 //raccoon handling
 window.addEventListener('message',async (event)=>{
     if (event.data.type==='GAME_LAUNCHED') {
+        isLG=false;
         const loader=document.getElementById('bloader');
         const loaderText=loader.querySelector('.bloader-text');
         loader.classList.remove('active');
@@ -654,6 +666,7 @@ window.addEventListener('message',async (event)=>{
         return;
     }
     if (event.data.type==='LAUNCH_GAME') {
+        isLG=true;
         const item=event.data.item;
         console.log('received',item.name);
         const loader=document.getElementById('bloader');
