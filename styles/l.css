@@ -73,7 +73,6 @@ html {
     min-width:0;
     display:flex;
     flex-direction:column;
-    position:relative;
 }
 
 .top-bar {
@@ -351,21 +350,14 @@ img.np-icon {
 }
 
 .np-view {
+    display:none;
     flex:1;
     min-height:0;
     overflow:hidden;
-    opacity:0;
-    transform:scale(0.97);
-    pointer-events:none;
-    position:absolute;
-    inset:0;
-    transition:opacity 0.25s ease,transform 0.25s ease;
 }
 
 .np-view.visible {
-    opacity:1;
-    transform:scale(1);
-    pointer-events:auto;
+    display:flex;
 }
 
 .np-left {
@@ -754,11 +746,4 @@ img.np-icon {
 
 .sb-favourites.collapsed {
     display:none;
-}
-
-.view-wrapper {
-    flex:1;
-    min-height:0;
-    position:relative;
-    display:flex;
 }
