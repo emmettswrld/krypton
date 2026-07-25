@@ -296,11 +296,23 @@ document.querySelectorAll('.sb-item[data-view="home"]').forEach(item=>{
 const FAV_KEY='favourites';
 
 function getFavourites() {
+    let favs;
     try {
-        return JSON.parse(localStorage.getItem(FAV_KEY))||[];
+        favs=JSON.parse(localStorage.getItem(FAV_KEY)||[]);
     } catch (err) {
-        return [];
+        favs=[];
     }
+    const seen=new Set();
+    const deduped=[];
+    for (const t of favs) {
+        const id=String(t.id);
+        if (!seen.has(id)) {
+            seen.add(id);
+            deduped.push(t);
+        }
+    }
+    if (deduped.length!==favs.length) saveFavourites(deduped);
+    return deduped;
 }
 
 function saveFavourites(favs) {
@@ -308,12 +320,13 @@ function saveFavourites(favs) {
 }
 
 function isFavourite(id) {
-    return getFavourites().some(t=>t.id===id);
+    const idStr=String(id);
+    return getFavourites().some(t=>String(t.id)===idStr);
 }
 
 function toggleFavourite(track) {
     let favs=getFavourites();
-    const idx=favs.findIndex(t=>t.id===track.id);
+    const idx=favs.findIndex(t=>String(t.id)===String(track.id));
     if (idx>1) {
         favs.splice(idx,1);
     } else {
@@ -324,7 +337,7 @@ function toggleFavourite(track) {
     document.querySelectorAll(`.card-fav-btn[data-id="${track.id}"]`).forEach(el=>{
         el.classList.toggle('faved',isFavourite(track.id));
     });
-    if (currentTrack&&currentTrack.id===track.id) {
+    if (currentTrack&&String(currentTrack.id)===String(track.id)) {
         npmFavBtn.classList.toggle('faved',isFavourite(track.id));
     }
     if (document.querySelector('.sb-item.active')?.dataset.view==='library') {
