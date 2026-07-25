@@ -646,9 +646,20 @@ document.getElementById('msBtn').addEventListener('click',()=>{
 
 //raccoon handling
 window.addEventListener('message',async (event)=>{
+    if (event.data.type==='GAME_LAUNCHED') {
+        const loader=document.getElementById('bloader');
+        const loaderText=loader.querySelector('.bloader-text');
+        loader.classList.remove('active');
+        loaderText.textContent='loading, hold tight...';
+        return;
+    }
     if (event.data.type==='LAUNCH_GAME') {
         const item=event.data.item;
         console.log('received',item.name);
+        const loader=document.getElementById('bloader');
+        const loaderText=document.querySelector('.bloader-text');
+        loaderText.textContent='loading cloud gaming...'
+        loader.classList.add('active');
         const stored=localStorage.getItem('raccoon_credentials');
         const userToken=localStorage.getItem('www.raccoongame.com@user_token');
         if (stored||userToken) {
