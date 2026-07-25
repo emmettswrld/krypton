@@ -351,12 +351,11 @@ img.np-icon {
 }
 
 .np-view {
-    display:none;
     flex:1;
     min-height:0;
     overflow:hidden;
     opacity:0;
-    transition:scale(0.97);
+    transform:scale(0.97);
     pointer-events:none;
     position:absolute;
     inset:0;
