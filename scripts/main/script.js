@@ -672,7 +672,7 @@ window.addEventListener('message',async (event)=>{
             left: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
-            z-index: 999999 !important;
+            z-index: 9 !important;
             background: rgba(10, 10, 10, 0.95) !important;
             display: flex !important;
             flex-direction: column !important;
