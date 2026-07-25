@@ -9,7 +9,6 @@ const npTitle=document.getElementById('npTitle');
 const npPlayBtn=document.getElementById('npPlayBtn');
 const npProgressFill=document.getElementById('npProgressFill');
 const npThumb=document.getElementById('npThumb');
-const npDefaultIcon=document.getElementById('npDefaultIcon');
 const npmView=document.getElementById('npmView');
 const npmCover=document.getElementById('npmCover');
 const npmTrackTitle=document.getElementById('npmTrackTitle');
@@ -170,7 +169,6 @@ function playTrack(track) {
     npTitle.textContent=track.title;
     npThumb.src=track.thumb;
     npThumb.style.display='block';
-    npDefaultIcon.style.display='none';
     npmProgressFill.style.width='0%';
     npBar.classList.add('visible');
     npmCover.src=track.thumb;
