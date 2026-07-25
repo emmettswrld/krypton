@@ -159,6 +159,7 @@ function nav(input) {
     document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
     hideHome();
     frame.classList.remove('loaded');
+    void frame.offsetWidth;
     frame.style.display='block';
     loader.classList.add('active');
     frame.src=browserjet.encodeUrl(url);
@@ -167,7 +168,11 @@ function nav(input) {
     setUrl(url);
     frame.onload=()=>{
         loader.classList.remove('active');
-        frame.classList.add('loaded');
+        requestAnimationFrame(()=>{
+            requestAnimationFrame(()=>{
+                frame.classList.add('loaded');
+            });
+        });
         frame.dataset.navCount=(parseInt(frame.dataset.navCount||'0')+1).toString();
         frame.dataset.fwCount='0';
         updNavBtns(frame);
@@ -548,6 +553,7 @@ function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
     document.querySelectorAll('.bframe').forEach(f=>f.style.display='none');
     hideHome();
     frame.classList.remove('loaded');
+    void frame.offsetWidth;
     frame.style.display='block';
     frame.src=path;
     tabs[tabId]={url:kryptonUrl,frame};
@@ -557,7 +563,11 @@ function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
     activeTab.querySelector('.tab-fav').innerHTML='<i data-lucide="atom"></i>';
     lucide.createIcons();
     frame.onload=()=>{
-        frame.classList.add('loaded');
+        requestAnimationFrame(()=>{
+            requestAnimationFrame(()=>{
+                frame.classList.add('loaded');
+            });
+        });
     };
     urlInput.value=kryptonUrl;
     urlDisplay.innerHTML=formatUrl(kryptonUrl);
