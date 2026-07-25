@@ -711,3 +711,39 @@ img.np-icon {
     overflow:hidden;
     text-overflow:ellipsis;
 }
+
+.sb-fav-header {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border-radius:7px;
+    color:#808080;
+    cursor:pointer;
+    transition:background 0.2s ease, color 0.2s ease;
+}
+
+.sb-fav-header:hover {
+    background:#121212;
+    color:#c0c0c0;
+}
+
+.sb-fav-header svg {
+    width:17px;
+    height:17px;
+    flex-shrink:0;
+    transition:transform 0.2s ease;
+}
+
+.sb-fav-header span {
+    font-size:13px;
+    font-weight:400;
+}
+
+.sb-fav-header.collapsed svg {
+    transform:rotate(-90deg);
+}
+
+.sb-favourites.collapsed {
+    display:none;
+}
