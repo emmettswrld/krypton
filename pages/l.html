@@ -45,50 +45,52 @@
                     <input type="text" class="search-input" id="searchInput" placeholder="Search for a song, artist or album...">
                 </div>
             </div>
-            <div class="content-area" id="contentArea">
-                <div class="card-grid" id="cardGrid"></div>
-            </div>
-            <div class="np-view" id="npmView">
-                <div class="np-left">
-                    <img class="np-cover" id="npmCover" src="" alt="">
-                    <div class="np-details">
-                        <div class="np-track-title" id="npmTrackTitle">-</div>
-                        <div class="np-track-artist" id="npmTrackArtist">-</div>
-                    </div>
-                    <div class="np-seek-row">
-                        <span class="np-time" id="npmCurrentTime">0:00</span>
-                        <div class="np-mprogress" id="npmProgressTrack">
-                            <div class="np-mprogress-fill" id="npmProgressFill"></div>
-                            <div class="np-mprogress-handle" id="npmProgressHandle"></div>
-                        </div>
-                        <span class="np-time" id="npmDuration">0:00</span>
-                    </div>
-                    <div class="np-mcontrols">
-                        <button class="np-skip-btn" id="npmBackTenBtn">
-                            <i data-lucide="rotate-ccw"></i>
-                        </button>
-                        <button class="np-mplay-btn" id="npmPlayBtn">
-                            <i data-lucide="play"></i>
-                        </button>
-                        <button class="np-skip-btn" id="npmFwdTenBtn">
-                            <i data-lucide="rotate-cw"></i>
-                        </button>
-                        <button class="np-fav-btn" id="npmFavBtn">
-                            <i data-lucide="heart"></i>
-                        </button>
-                    </div>
+            <div class="view-wrapper">
+                <div class="content-area" id="contentArea">
+                    <div class="card-grid" id="cardGrid"></div>
                 </div>
-                <div class="np-right">
-                    <am-lyrics
-                        id="amLyricsEl"
-                        song-title=""
-                        song-artist=""
-                        highlight-color="#60a5fa"
-                        font-family="'Inter', sans-serif"
-                        autoscroll
-                        interpolate
-                        hide-source-footer
-                    ></am-lyrics>
+                <div class="np-view" id="npmView">
+                    <div class="np-left">
+                        <img class="np-cover" id="npmCover" src="" alt="">
+                        <div class="np-details">
+                            <div class="np-track-title" id="npmTrackTitle">-</div>
+                            <div class="np-track-artist" id="npmTrackArtist">-</div>
+                        </div>
+                        <div class="np-seek-row">
+                            <span class="np-time" id="npmCurrentTime">0:00</span>
+                            <div class="np-mprogress" id="npmProgressTrack">
+                                <div class="np-mprogress-fill" id="npmProgressFill"></div>
+                                <div class="np-mprogress-handle" id="npmProgressHandle"></div>
+                            </div>
+                            <span class="np-time" id="npmDuration">0:00</span>
+                        </div>
+                        <div class="np-mcontrols">
+                            <button class="np-skip-btn" id="npmBackTenBtn">
+                                <i data-lucide="rotate-ccw"></i>
+                            </button>
+                            <button class="np-mplay-btn" id="npmPlayBtn">
+                                <i data-lucide="play"></i>
+                            </button>
+                            <button class="np-skip-btn" id="npmFwdTenBtn">
+                                <i data-lucide="rotate-cw"></i>
+                            </button>
+                            <button class="np-fav-btn" id="npmFavBtn">
+                                <i data-lucide="heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="np-right">
+                        <am-lyrics
+                            id="amLyricsEl"
+                            song-title=""
+                            song-artist=""
+                            highlight-color="#60a5fa"
+                            font-family="'Inter', sans-serif"
+                            autoscroll
+                            interpolate
+                            hide-source-footer
+                        ></am-lyrics>
+                    </div>
                 </div>
             </div>
         </div>

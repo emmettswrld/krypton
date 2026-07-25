@@ -755,3 +755,10 @@ img.np-icon {
 .sb-favourites.collapsed {
     display:none;
 }
+
+.view-wrapper {
+    flex:1;
+    min-height:0;
+    position:relative;
+    display:flex;
+}
