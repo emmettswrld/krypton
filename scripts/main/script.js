@@ -667,6 +667,20 @@ window.addEventListener('message',async (event)=>{
     }
     if (event.data.type==='LAUNCH_GAME') {
         isLG=true;
+        loader.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            background: rgba(10, 10, 10, 0.95) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            pointer-events: all !important;
+        `;
         const item=event.data.item;
         console.log('received',item.name);
         const loader=document.getElementById('bloader');
