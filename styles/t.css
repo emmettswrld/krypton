@@ -11,7 +11,7 @@ html {
 
 body {
     font-family:'Inter';
-    background:#000;
+    background:transparent;
     color:#fff;
     height:100%;
     overflow:hidden;
@@ -216,6 +216,7 @@ i[data-lucide] svg {
     height:48px;
     flex-shrink:0;
     padding:0 20px;
+    background:#000;
     border-bottom:1px solid #1a1a1a;
 }
 
@@ -401,4 +402,62 @@ i[data-lucide] svg {
     height:17px;
     color:#0a0a0a;
     stroke-width:2.4;
+}
+
+.msg-row {
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:8px 4px;
+    border-radius:8px;
+    transition:background 0.15s ease;
+}
+
+.msg-row:hover {
+    background:#0a0a0a;
+}
+
+.msg-avatar {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:36px;
+    height:36px;
+    flex-shrink:0;
+    border-radius:50%;
+    background:#1a1a1a;
+    color:#f0f0f0;
+    font-size:14px;
+    font-weight:600;
+    text-transform:uppercase;
+    user-select:none;
+}
+
+.msg-body {
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+    flex:1;
+}
+
+.msg-author {
+    font-size:14px;
+    font-weight:600;
+    color:#f0f0f0;
+}
+
+.msg-author .msg-time {
+    margin-left:8px;
+    font-size:11px;
+    font-weight:500;
+    color:#606060;
+}
+
+.msg-text {
+    font-size:14px;
+    font-weight:400;
+    color:#c0c0c0;
+    word-wrap:break-word;
+    white-space:pre-wrap;
 }
