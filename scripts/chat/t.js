@@ -18,7 +18,7 @@ function renderMessage(message) {
     row.innerHTML=`
     <div class="msg-avatar"></div>
     <div class="msg-body">
-        <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}
+        <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
         <div class="msg-text">${escapeHtml(message.text)}</div>
     </div>`;
     contentArea.appendChild(row);
@@ -29,6 +29,11 @@ function escapeHtml(str) {
     const div=document.createElement('div');
     div.textContent=str;
     return div.innerHTML;
+}
+
+function formatTime(iso) {
+    const d=new Date(iso);
+    return d.toLocaleDateString([],{hour:'numeric',minute:'2-digit'});
 }
 
 async function loadHistory(channel) {
