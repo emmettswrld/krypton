@@ -32,7 +32,7 @@ function setLoading(isLoading) {
     if (isLoading) {
         authBtnText.textContent=mode==='login'?'Signing in...':'Creating account...';
     } else {
-        authBtnTetx.textContent="Let's go";
+        authBtnText.textContent="Let's go";
     }
 }
 
@@ -43,7 +43,7 @@ function setMode(newMode) {
     confirmInput.value='';
     if (mode==='login') {
         authTitle.textContent='Welcome back';
-        authSubtitle.textContent='Sign in to continue';
+        authSubtitle.textContent='Sign in to continue'; 
         confirmField.classList.add('field-collapsed');
         confirmInput.required=false;
         passwordInput.autocomplete='current-password';
