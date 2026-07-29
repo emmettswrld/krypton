@@ -73,7 +73,7 @@ async function switchChannel(channel) {
 }
 
 function sendMessage() {
-    const text=messageInput.ariaValueMax.trim();
+    const text=messageInput.value.trim();
     if (!text||!ws||ws.readyState!==WebSocket.OPEN) return;
     ws.send(JSON.stringify({type:'message',text}));
     messageInput.value='';
@@ -116,7 +116,7 @@ function buildSidebar(channels) {
             const item=document.createElement('div');
             item.className='channel-item';
             item.dataset.channel=ch.id;
-            item.innerHTML=`<i data-lucide="hash"></i></span>${escapeHtml(ch.name)}</span>`;
+            item.innerHTML=`<i data-lucide="hash"></i><span>${escapeHtml(ch.name)}</span>`;
             item.addEventListener('click',()=>switchChannel(ch.id));
             channelList.appendChild(item);
         });
@@ -136,7 +136,7 @@ messageInput.addEventListener('keydown',(e)=>{
     if (e.key==='Enter') sendMessage();
 });
 
-requireAuth().then((username)=>{
+requireAuth().then(async(username)=>{
     if (!username) return;
     myUser=username;
     const channels=await loadChannels();
