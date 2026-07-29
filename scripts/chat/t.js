@@ -11,8 +11,10 @@ let ws=null;
 let currentChannel='general';
 let myUser=null;
 let lastMsgUsername=null;
+let lastMsgTimestamp=null;
 
 const AVATAR_COLOURS=['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#f97316','#ec4899','#14b8a6','#6366f1','#f43f5e'];
+const GROUP_WINDOW_MS=2*60*1000
 
 function hashString(str) {
     let hash=0;
@@ -36,8 +38,11 @@ function getIconColour(hex) {
 
 function renderMessage(message) {
     const isMine=message.username===myUser;
-    const isGrouped=message.username===lastMsgUsername;
+    const now=new Date(message.createdAt).getTime();
+    const withinWindow=lastMsgTimestamp!==null&&(now-lastMsgTimestamp)<GROUP_WINDOW_MS;
+    const isGrouped=message.username===lastMsgUsername&&withinWindow;
     lastMsgUsername=message.username;
+    lastMsgTimestamp=now;
     const row=document.createElement('div');
     row.className=isGrouped?'msg-row grouped':'msg-row';
     if (isGrouped) {
@@ -77,6 +82,7 @@ function formatTime(iso) {
 async function loadHistory(channel) {
     contentArea.innerHTML='';
     lastMsgUsername=null;
+    lastMsgTimestamp=null;
     const token=getAuthToken();
     const res=await fetch(`/api/chat/messages/${channel}`,{
         headers:{'Authorization':`Bearer ${token}`}
