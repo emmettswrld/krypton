@@ -644,6 +644,10 @@ document.getElementById('msBtn').addEventListener('click',()=>{
     loadInternal('../pages/l.html','krypton://music','msBtn');
 });
 
+document.getElementById('chBtn').addEventListener('click',()=>{
+    loadInternal('../pages/t.html','krypton://chat','chBtn');
+});
+
 let isLG=false;
 const loader=document.getElementById('bloader');
 
