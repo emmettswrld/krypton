@@ -50,7 +50,7 @@ function renderMessage(message) {
         const colour=getAvatarColour(message.username);
         const iconColour=getIconColour(colour);
         row.innerHTML=`
-        <div class="msg-avatar" style="background:${color}">
+        <div class="msg-avatar" style="background:${colour}">
             <i data-lucide="user" style="color:${iconColour}"></i>
         </div>
         <div class="msg-body">
