@@ -47,7 +47,7 @@ function renderMessage(message) {
             <div class="msg-text">${escapeHtml(message.text)}</div>
         </div>`;
     } else {
-        const color=getAvatarColour(message.username);
+        const colour=getAvatarColour(message.username);
         const iconColour=getIconColour(colour);
         row.innerHTML=`
         <div class="msg-avatar" style="background:${color}">
