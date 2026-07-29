@@ -301,7 +301,7 @@ i[data-lucide] svg {
     align-items:center;
     justify-content:center;
     flex-shrink:0;
-    padding:8px 20px 22px;
+    padding:12px 20px 20px;
 }
 
 .prompt-group {
