@@ -5,17 +5,18 @@ const contentArea=document.getElementById('contentArea');
 const messageInput=document.getElementById('messageInput');
 const sendBtn=document.getElementById('sendBtn');
 const activeChannelName=document.getElementById('activeChannelName');
+const sidebarScroll=document.getElementById('sidebarScroll');
 
 let ws=null;
 let currentChannel='general';
 let myUser=null;
 
 function renderMessage(message) {
-    const isMine=message.username=myUser;
+    const isMine=message.username===myUser;
     const row=document.createElement('div');
     row.className='msg-row';
     row.innerHTML=`
-    <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}
+    <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}</div>
     <div class="msg-text">${escapeHtml(message.text)}</div>`;
     contentArea.appendChild(row);
     contentArea.scrollTop=contentArea.scrollHeight;
@@ -47,7 +48,7 @@ function connectWs() {
     });
     ws.addEventListener('message',(event)=>{
         const data=JSON.parse(event.data);
-        if (data.type==='message'&&data.channel==currentChannel) {
+        if (data.type==='message'&&data.channel===currentChannel) {
             renderMessage(data.message);
         } else if (data.type==='error') {
             console.error('chat error',data.error);
@@ -62,6 +63,9 @@ async function switchChannel(channel) {
     currentChannel=channel;
     activeChannelName.textContent=channel;
     messageInput.placeholder=`Message #${channel}`;
+    document.querySelectorAll('.channel-item').forEach(i=>{{
+        i.classList.toggle('active',i.dataset.channel===channel);
+    }});
     await loadHistory(channel);
     if (ws&&ws.readyState===WebSocket.OPEN) {
         ws.send(JSON.stringify({type:'join',channel}));
@@ -75,22 +79,69 @@ function sendMessage() {
     messageInput.value='';
 }
 
+async function loadChannels() {
+    const token=getAuthToken();
+    const res=await fetch('/api/chat/channels',{
+        headers:{'Authorization':`Bearer ${token}`}
+    });
+    if (!res.ok) return [];
+    const data=await res.json();
+    return data.channels;
+}
+
+function buildSidebar(channels) {
+    const categories=new Map();
+    channels.forEach((ch)=>{
+        if (!categories.has(ch.category)) categories.set(ch.category,[]);
+        categories.get(ch.category).push(ch);
+    });
+    sidebarScroll.innerHTML='';
+    let first=true;
+    for (const [categoryName,items] of categories) {
+        if (!first) {
+            const divider=document.createElement('div');
+            divider.className='divider';
+            sidebarScroll.appendChild(divider);
+        }
+        first=false;
+        const category=document.createElement('div');
+        category.className='category';
+        const catLabel=document.createElement('div');
+        catLabel.className='cat-label';
+        catLabel.dataset.category=categoryName;
+        catLabel.innerHTML=`<i data-lucide="chevron-down"></i><span>${escapeHtml(categoryName)}</span>`;
+        const channelList=document.createElement('div');
+        channelList.className='channel-list';
+        items.forEach((ch)=>{
+            const item=document.createElement('div');
+            item.className='channel-item';
+            item.dataset.channel=ch.id;
+            item.innerHTML=`<i data-lucide="hash"></i></span>${escapeHtml(ch.name)}</span>`;
+            item.addEventListener('click',()=>switchChannel(ch.id));
+            channelList.appendChild(item);
+        });
+        catLabel.addEventListener('click',()=>{
+            catLabel.classList.toggle('collapsed');
+            channelList.classList.toggle('collapsed');
+        });
+        category.appendChild(catLabel);
+        category.appendChild(channelList);
+        sidebarScroll.appendChild(category);
+    }
+    lucide.createIcons();
+}
+
 sendBtn.addEventListener('click',sendMessage);
 messageInput.addEventListener('keydown',(e)=>{
-    if (e.key==='Emter') sendMessage();
-});
-
-document.querySelectorAll('.channel-item').forEach((el)=>{
-    el.addEventListener('click',()=>{
-        document.querySelectorAll('.channel-item').forEach(i=>i.classList.remove('active'));
-        el.classList.add('active');
-        switchChannel(el.dataset.channel);
-    });
+    if (e.key==='Enter') sendMessage();
 });
 
 requireAuth().then((username)=>{
     if (!username) return;
     myUser=username;
+    const channels=await loadChannels();
+    buildSidebar(channels);
+    const defaultChannel=channels[0]?.id||'general';
     connectWs();
-    loadHistory(currentChannel);
+    switchChannel(defaultChannel);
 });

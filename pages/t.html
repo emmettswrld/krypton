@@ -8,6 +8,50 @@
         <link rel="stylesheet" href="../styles/t.css"></link>
     </head>
     <body>
+        <div class="app">
+            <div class="sidebar">
+                <div class="sidebar-hdr" id="sidebarHeader">
+                    <i data-lucide="globe" class="sidebar-hdr-icon"></i>
+                    <span>Chat</span>
+                    <i data-lucide="chevron-down" class="sidebar-hdr-icon"></i>
+                </div>
+                <div class="sidebar-scroll" id="sidebarScroll"></div>
+            </div>
+            <div class="main">
+                <div class="topbar">
+                    <div class="topbar-tl">
+                        <i data-lucide="hash" class="topbar-icon"></i>
+                        <span id="activeChannelName">general</span>
+                    </div>
+                    <div class="topbar-search">
+                        <i data-lucide="search" class="topbar-search-icon"></i>
+                        <input type="text" class="topbar-search-input" placeholder="Search messages...">
+                    </div>
+                </div>
+                <div class="content" id="contentArea"></div>
+                <div class="prompt-bar">
+                    <div class="prompt-group">
+                        <div class="text-wpr">
+                            <input type="text" class="text-input" id="messageInput" placeholder="Message #general">
+                            <div class="text-actions">
+                                <button class="text-action-btn" id="emojiBtn" title="Emoji">
+                                    <i data-lucide="smile"></i>
+                                </button>
+                                <button class="text-action-btn" id="addBtn" title="Add">
+                                    <i data-lucide="plus"></i>
+                                </button>
+                                <button class="text-action-btn" id="gifBtn" title="GIF">
+                                    <i data-lucide="image-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="send-btn" id="sendBtn">
+                            <i data-lucide="send" class="send-icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script type="module" src="../scripts/chat/t.js"></script>
     </body>
 </html>
