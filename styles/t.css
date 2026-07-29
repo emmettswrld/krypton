@@ -421,7 +421,7 @@ i[data-lucide] svg {
 }
 
 .msg-row:hover {
-    background:rgba(255,255,255,0.4);
+    background:rgba(255,255,255,0.8);
 }
 
 .msg-avatar {
