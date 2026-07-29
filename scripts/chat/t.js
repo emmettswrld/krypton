@@ -11,6 +11,28 @@ let ws=null;
 let currentChannel='general';
 let myUser=null;
 
+const AVATAR_COLOURS=['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#f97316','#ec4899','#14b8a6','#6366f1','#f43f5e'];
+
+function hashString(str) {
+    let hash=0;
+    for (let i=0;i<str.length;i++) {
+        hash=(hash*31+str.charCodeAt(i))>>>0;
+    }
+    return hash;
+}
+
+function getAvatarColour(username) {
+    return AVATAR_COLOURS[hashString(username)%AVATAR_COLOURS.length];
+}
+
+function getIconColour(hex) {
+    const r=parseInt(hex.slice(1,3),16);
+    const g=parseInt(hex.slice(3,5),16);
+    const b=parseInt(hex.slice(5,7),16);
+    const luminance=0.299*r+0.587*g+0.114*b;
+    return luminance>150?'#000':'#fff';
+}
+
 function renderMessage(message) {
     const isMine=message.username===myUser;
     const row=document.createElement('div');

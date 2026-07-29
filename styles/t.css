@@ -429,7 +429,14 @@ i[data-lucide] svg {
     height:36px;
     flex-shrink:0;
     border-radius:50%;
-    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.msg-avatar i[data-lucide] {
+    width:18px;
+    height:18px;
 }
 
 .msg-body {
