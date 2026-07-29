@@ -78,7 +78,7 @@ function formatTime(iso) {
     const d=new Date(iso);
     return d.toLocaleDateString([],{hour:'numeric',minute:'2-digit'});
 }
-
+ 
 async function loadHistory(channel) {
     contentArea.innerHTML='';
     lastMsgUsername=null;
