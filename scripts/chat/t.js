@@ -10,6 +10,7 @@ const sidebarScroll=document.getElementById('sidebarScroll');
 let ws=null;
 let currentChannel='general';
 let myUser=null;
+let lastMsgUsername=null;
 
 const AVATAR_COLOURS=['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#f97316','#ec4899','#14b8a6','#6366f1','#f43f5e'];
 
@@ -35,16 +36,31 @@ function getIconColour(hex) {
 
 function renderMessage(message) {
     const isMine=message.username===myUser;
+    const isGrouped=message.username===lastMsgUsername;
+    lastMsgUsername=message.username;
     const row=document.createElement('div');
-    row.className='msg-row';
-    row.innerHTML=`
-    <div class="msg-avatar"></div>
-    <div class="msg-body">
-        <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
-        <div class="msg-text">${escapeHtml(message.text)}</div>
-    </div>`;
+    row.className=isGrouped?'msg-row grouped':'msg-row';
+    if (isGrouped) {
+        row.innerHTML=`
+        <div class="msg-avatar-spacer"></div>
+        <div class="msg-body">
+            <div class="msg-text">${escapeHtml(message.text)}</div>
+        </div>`;
+    } else {
+        const color=getAvatarColour(message.username);
+        const iconColour=getIconColour(colour);
+        row.innerHTML=`
+        <div class="msg-avatar" style="background:${color}">
+            <i data-lucide="user" style="color:${iconColour}"></i>
+        </div>
+        <div class="msg-body">
+            <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
+            <div class="msg-text">${escapeHtml(message.text)}</div>
+        </div>`;
+    }
     contentArea.appendChild(row);
     contentArea.scrollTop=contentArea.scrollHeight;
+    lucide.createIcons();
 }
 
 function escapeHtml(str) {
@@ -60,6 +76,7 @@ function formatTime(iso) {
 
 async function loadHistory(channel) {
     contentArea.innerHTML='';
+    lastMsgUsername=null;
     const token=getAuthToken();
     const res=await fetch(`/api/chat/messages/${channel}`,{
         headers:{'Authorization':`Bearer ${token}`}
