@@ -16,8 +16,11 @@ function renderMessage(message) {
     const row=document.createElement('div');
     row.className='msg-row';
     row.innerHTML=`
-    <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}</div>
-    <div class="msg-text">${escapeHtml(message.text)}</div>`;
+    <div class="msg-avatar"></div>
+    <div class="msg-body">
+        <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}
+        <div class="msg-text">${escapeHtml(message.text)}</div>
+    </div>`;
     contentArea.appendChild(row);
     contentArea.scrollTop=contentArea.scrollHeight;
 }

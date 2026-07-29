@@ -299,7 +299,8 @@ i[data-lucide] svg {
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:8 8px 10px;
+    flex-shrink:0;
+    padding:8px 20px 22px;
 }
 
 .prompt-group {
@@ -418,19 +419,11 @@ i[data-lucide] svg {
 }
 
 .msg-avatar {
-    display:flex;
-    align-items:center;
-    justify-content:center;
     width:36px;
     height:36px;
     flex-shrink:0;
     border-radius:50%;
-    background:#1a1a1a;
-    color:#f0f0f0;
-    font-size:14px;
-    font-weight:600;
-    text-transform:uppercase;
-    user-select:none;
+    background:#fff;
 }
 
 .msg-body {
