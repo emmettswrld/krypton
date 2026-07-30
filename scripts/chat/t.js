@@ -6,12 +6,14 @@ const messageInput=document.getElementById('messageInput');
 const sendBtn=document.getElementById('sendBtn');
 const activeChannelName=document.getElementById('activeChannelName');
 const sidebarScroll=document.getElementById('sidebarScroll');
+const membersScroll=document.getElementById('membersScroll');
 
 let ws=null;
 let currentChannel='general';
 let myUser=null;
 let lastMsgUsername=null;
 let lastMsgTimestamp=null;
+let currentMembers=[];
 
 const AVATAR_COLOURS=['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#f97316','#ec4899','#14b8a6','#6366f1','#f43f5e'];
 const GROUP_WINDOW_MS=2*60*1000
@@ -34,6 +36,56 @@ function getIconColour(hex) {
     const b=parseInt(hex.slice(5,7),16);
     const luminance=0.299*r+0.587*g+0.114*b;
     return luminance>150?'#000':'#fff';
+}
+
+async function loadMembers() {
+    const token=getAuthToken();
+    const res=await fetch('/api/chat/members',{
+        headers:{'Authorization':`Bearer ${token}`}
+    });
+    if (!res.ok) return [];
+    const data=await res.json();
+    return data.members;
+}
+
+function renderMemberItem(member) {
+    const colour=getAvatarColour(member.username);
+    const iconColour=getIconColour(colour);
+    const intiial=member.username.charAt(0).toUpperCase();
+    return `
+    <div class="member-item ${member.online?'':'offline'}">
+        <div class="member-avatar" style="background:${colour}">
+            <span style="color:${iconColour}">${initial}</span>
+            <div class="member-status-dot ${member.online?'':'offline'}</div>
+        </div>
+        <span class="member-name">${escapeHtml(member.username)}</span>
+    </div>`;
+}
+
+function buildMembers(members) {
+    const online=members.filter(m=>m.online).sort((a,b)=>a.username.localeCompare(b.username));
+    const offline=members.filter(m=>!m.online).sort((a,b)=>a.username.localeCompare(b.username));
+    let html=''
+    if (online.length) {
+        html+=`
+        <div class="members-group">
+            <div class="members-group-label">Online - ${online.length}</div>
+            ${online.map(renderMemberItem).join('')}
+        </div>`;
+    }
+    if (offline.length) {
+        html+=`
+        <div class="members-group">
+            <div class="members-group-label">Offline - ${offline.length}</div>
+            ${offline.map(renderMemberItem).join('')}
+        </div>`;
+    }
+    membersScroll.innerHTML=html;
+}
+
+function applyPresence(onUsers) {
+    currentMembers=currentMembers.map(m=>({...m,online:onUsers.includes(m.username)}));
+    buildSidebar(currentMembers);
 }
 
 function renderMessage(message) {
@@ -129,6 +181,8 @@ function connectWs() {
         const data=JSON.parse(event.data);
         if (data.type==='message'&&data.channel===currentChannel) {
             renderMessage(data.message);
+        } else if (data.type==='presence') {
+            applyPresence('online');
         } else if (data.type==='error') {
             console.error('chat error',data.error);
         }
@@ -220,6 +274,8 @@ requireAuth().then(async(username)=>{
     myUser=username;
     const channels=await loadChannels();
     buildSidebar(channels);
+    currentMembers=await loadMembers();
+    buildMembers(currentMembers);
     const defaultChannel=channels[0]?.id||'general';
     connectWs();
     switchChannel(defaultChannel);
