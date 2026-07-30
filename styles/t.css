@@ -482,11 +482,6 @@ i[data-lucide] svg {
     justify-content:center;
 }
 
-.msg-avatar i[data-lucide] {
-    width:18px;
-    height:18px;
-}
-
 .msg-body {
     display:flex;
     flex-direction:column;
@@ -577,7 +572,6 @@ i[data-lucide] svg {
     font-weight:600;
     letter-spacing:0.3px;
     color:#606060;
-    text-transform:uppercase;
 }
 
 .member-item {

@@ -85,7 +85,7 @@ i[data-lucide] svg {
 
 .field-wpr:focus-within {
     background:#60a5fa;
-    box-shadow:0 0 2px #60a5fa;
+    box-shadow:0 0 0 2px #60a5fa;
     background:#0a0a0a;
 }
 

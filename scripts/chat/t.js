@@ -109,7 +109,7 @@ function renderMessage(message) {
         const iconColour=getIconColour(colour);
         row.innerHTML=`
         <div class="msg-avatar" style="background:${colour}">
-            <i data-lucide="user" style="color:${iconColour}"></i>
+            <span style="color:${iconColour};font-weight:700;font-size:15px;">${message.username.charAt(0).toUpperCase()}</span>
         </div>
         <div class="msg-body">
             <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
