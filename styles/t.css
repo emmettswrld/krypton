@@ -414,6 +414,7 @@ i[data-lucide] svg {
     margin-top:14px;
     border-radius:0px;
     transition:background 0.15s ease;
+    position:relative;
 }
 
 .msg-row:first-child {
@@ -422,6 +423,53 @@ i[data-lucide] svg {
 
 .msg-row:hover {
     background:rgba(255,255,255,0.04);
+}
+
+.msg-row:hover .msg-actions {
+    display:flex;
+}
+
+.msg-actions {
+    display:none;
+    position:absolute;
+    top:-14px;
+    right:20px;
+    align-items:center;
+    gap:2px;
+    background:#0d0d0d;
+    border:1px solid #2a2a2a;
+    border-radius:999px;
+    padding:4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.msg-action-btn {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:28px;
+    height:28px;
+    flex-shrink:0;
+    background:transparent;
+    border:none;
+    border-radius:50%;
+    color:#0a0a0a;
+    cursor:pointer;
+    transition:background 0.15s ease,color 0.15s ease;
+}
+
+.msg-action-btn svg {
+    width:15px;
+    height:15px;
+}
+
+.msg-action-btn:hover {
+    background:#1a1a1a;
+    color:#60a5fa;
+}
+
+.msg-action-btn.danger:hover {
+    color:#ef4444;
 }
 
 .msg-avatar {

@@ -50,7 +50,8 @@ function renderMessage(message) {
         <div class="msg-avatar-spacer"></div>
         <div class="msg-body">
             <div class="msg-text">${escapeHtml(message.text)}</div>
-        </div>`;
+        </div>
+        ${buildActions(message,isMine)}`;
     } else {
         const colour=getAvatarColour(message.username);
         const iconColour=getIconColour(colour);
@@ -61,11 +62,36 @@ function renderMessage(message) {
         <div class="msg-body">
             <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
             <div class="msg-text">${escapeHtml(message.text)}</div>
-        </div>`;
+        </div>
+        ${buildActions(message,isMine)}`;
     }
+    row.querySelector('.msg-actions').addEventListener('click',(e)=>{
+        const btn=e.target.closest('.msg-action-btn');
+        if (!btn) return;
+        handleMsgAction(btn.dataset.action,message);
+    });
     contentArea.appendChild(row);
     contentArea.scrollTop=contentArea.scrollHeight;
     lucide.createIcons();
+}
+
+function handleMsgAction(action,message) {
+    if (action==='react') {
+        console.log('react',message.id);
+    } else if (action==='edit') {
+        console.log('edit',message.id);
+    } else if (action==='delete') {
+        console.log('delete',message.id);
+    }
+}
+
+function buildActions(message,isMine) {
+    return `
+    <div class="msg-actions"?
+        <button class="msg-action-btn" data-action="react" title="React"><i data-lucide="smile"></i></button>
+        ${isMine?`<button class="msg-action-btn" data-action="edit" title="Edit"></i></button>`:''}
+        ${isMine?`<button class="msg-action-btn danger" data-action="delete" title="Delete"><i data-lucide="trash-2"></i></button>`:''}
+    </div>`;
 }
 
 function escapeHtml(str) {
