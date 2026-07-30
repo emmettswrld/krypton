@@ -51,12 +51,12 @@ async function loadMembers() {
 function renderMemberItem(member) {
     const colour=getAvatarColour(member.username);
     const iconColour=getIconColour(colour);
-    const intiial=member.username.charAt(0).toUpperCase();
+    const initial=member.username.charAt(0).toUpperCase();
     return `
     <div class="member-item ${member.online?'':'offline'}">
         <div class="member-avatar" style="background:${colour}">
             <span style="color:${iconColour}">${initial}</span>
-            <div class="member-status-dot ${member.online?'':'offline'}</div>
+            <div class="member-status-dot ${member.online?'':'offline'}"></div>
         </div>
         <span class="member-name">${escapeHtml(member.username)}</span>
     </div>`;
@@ -85,7 +85,7 @@ function buildMembers(members) {
 
 function applyPresence(onUsers) {
     currentMembers=currentMembers.map(m=>({...m,online:onUsers.includes(m.username)}));
-    buildSidebar(currentMembers);
+    buildMembers(currentMembers);
 }
 
 function renderMessage(message) {
@@ -182,7 +182,7 @@ function connectWs() {
         if (data.type==='message'&&data.channel===currentChannel) {
             renderMessage(data.message);
         } else if (data.type==='presence') {
-            applyPresence('online');
+            applyPresence(data.online);
         } else if (data.type==='error') {
             console.error('chat error',data.error);
         }
