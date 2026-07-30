@@ -87,9 +87,9 @@ function handleMsgAction(action,message) {
 
 function buildActions(message,isMine) {
     return `
-    <div class="msg-actions"?
+    <div class="msg-actions">
         <button class="msg-action-btn" data-action="react" title="React"><i data-lucide="smile"></i></button>
-        ${isMine?`<button class="msg-action-btn" data-action="edit" title="Edit"></i></button>`:''}
+        ${isMine?`<button class="msg-action-btn" data-action="edit" title="Edit"><i data-lucide="pencil"></i></button>`:''}
         ${isMine?`<button class="msg-action-btn danger" data-action="delete" title="Delete"><i data-lucide="trash-2"></i></button>`:''}
     </div>`;
 }

@@ -453,7 +453,7 @@ i[data-lucide] svg {
     background:transparent;
     border:none;
     border-radius:50%;
-    color:#0a0a0a;
+    color:#a0a0a0;
     cursor:pointer;
     transition:background 0.15s ease,color 0.15s ease;
 }
