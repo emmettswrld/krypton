@@ -7,6 +7,8 @@ const sendBtn=document.getElementById('sendBtn');
 const activeChannelName=document.getElementById('activeChannelName');
 const sidebarScroll=document.getElementById('sidebarScroll');
 const membersScroll=document.getElementById('membersScroll');
+const messageRows=new Map();
+const messagesById=new Map();
 
 let ws=null;
 let currentChannel='general';
@@ -14,6 +16,8 @@ let myUser=null;
 let lastMsgUsername=null;
 let lastMsgTimestamp=null;
 let currentMembers=[];
+let EMOJI_LIST=['👍','❤️','😂','😮','😢','🔥','🎉','👀','🙏','💯'];
+let openPicker=null;
 
 const AVATAR_COLOURS=['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#f97316','#ec4899','#14b8a6','#6366f1','#f43f5e'];
 const GROUP_WINDOW_MS=2*60*1000
@@ -46,6 +50,122 @@ async function loadMembers() {
     if (!res.ok) return [];
     const data=await res.json();
     return data.members;
+}
+
+function buildReactions(message) {
+    const reactions=message.reactions||{};
+    const entries=Object.entries(reactions);
+    if (!entries.length) return '';
+    return `
+    <div class="msg-reactions">${entries.map(([emoji,users])=>`
+    <button class="reaction-pill${users.includes(myUser)?' mine':''}" data-emoji="${emoji}">
+        <span class="reaction-emoji">${emoji}</span><span class="reaction-count">${users.length}</span>
+    </button>`).join('')}</div>`;
+}
+
+function attachReactionListeners(row,messageId) {
+    const reactionsEl=row.querySelector('.msg-reactions');
+    if (!reactionsEl) return;
+    reactionsEl.querySelectorAll('.reaction-pill').forEach(pill=>{
+        pill.addEventListener('click',()=>{
+            sendReaction(messageId,pill.dataset.emoji);
+        });
+    });
+}
+
+function closeEmojiPicker() {
+    if (openPicker) {
+        openPicker.remove();
+        openPicker=null;
+        document.removeEventListener('click',handleOClick);
+    }
+}
+
+function handleOClick(e) {
+    if (openPicker&&!openPicker.contains(e.target)) closeEmojiPicker();
+}
+
+function openEmojiPicker(anchorBtn,messageId) {
+    closeEmojiPicker();
+    const picker=document.createElement('div');
+    picker.innerHTML=EMOJI_LIST.map(e=>`<button class="emoji-option" data-emoji="${e}">${e}</button>`).join('');
+    document.body.appendChild(picker);
+    const rect=anchorBtn.getBoundingClientRect();
+    picker.style.top=`${rect.bottom+6+window.scrollY}px`;
+    picker.style.left=`${Math.min(rect.left+window.scrollX,window.innerWidth-picker.offsetWidth-16)}px`;
+    picker.querySelectorAll('.emoji-option').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+            sendReaction(messageId,btn.dataset.emoji);
+            closeEmojiPicker();
+        });
+    });
+    openPicker=picker;
+    setTimeout(()=>document.addEventListener('click',handleOClick),0);
+}
+
+function updMsg(message) {
+    if (!messageRows.hass(message.id)) return;
+    messagesById.set(message.id,message);
+    const row=messageRows.get(message.id);
+    const textEl=row.querySelector('.msg-text');
+    const editedTag=message.editedAt?' <span class="msg-edited">(edited)</span>':'';
+    textEl.innerHTML=`${escapeHtml(message.text)}${editedTag}`;
+    let reactionsEl=row.querySelector('.msg-reactions');
+    if (reactionsEl) reactionsEl.remove();
+    const newReactionsHtml=buildReactions(message);
+    if (newReactionsHtml) {
+        row.querySelector('.msg-body').insertAdjacentHTML('beforeend',newReactionsHtml);
+        attachReactionListeners(row,message.id);
+    }
+}
+
+function removeMsg(messageId) {
+    const row=messageRows.get(messageId);
+    if (row) row.remove();
+    messageRows.delete(messageId);
+    messagesById.delete(messageId);
+}
+
+function sendReaction(messageId,emoji) {
+    if (!ws||ws.readyState!==WebSocket.OPEN) return;
+    ws.send(JSON.stringify({type:'reaction',messageId,emoji}));
+}
+
+function sendEdit(messageId,text) {
+    if (!ws||ws.readyState!==WebSocket.open) return;
+    ws.send(JSON.stringify({type:'edit',messageId,text}));
+}
+
+function sendDelete(messageId) {
+    if (!ws||ws.readyState!==WebSocket.OPEN) return;
+    ws.send(JSON.stringify({type:'delete',messageId}));
+}
+
+function enterEditMode(messageId) {
+    const row=messageRows.get(messageId);
+    const message=messagesById.get(messageId);
+    if (!row||!message) return;
+    const textEl=row.querySelector('.msg-text');
+    const original=message.text;
+    textEl.innerHTML=`<input class="msg-edit-input" type="text" value="${escapeHtml(original)}"></div>`;
+    const input=textEl.querySelector('.msg-edit-input');
+    input.focus();
+    input.setSelectionRange(input.value.length,input.value.length);
+    input.addEventListener('keydown',(e)=>{
+        if (e.key==='Enter') {
+            const newText=input.value.trim();
+            if (newText&&newText!==original) {
+                sendEdit(messageId,newText);
+            } else {
+                textEl.innerHTML=escapeHtml(original);
+            }
+        } else if (e.key==='Escape') {
+            textEl.innerHTML=escapeHtml(original);
+        }
+    });
+    input.addEventListener('blur',()=>{
+        if (textEl.querySelector('.msg-edit-input')) textEl.innerHTML=escapeHtml(original);
+    });
 }
 
 function renderMemberItem(member) {
@@ -97,11 +217,15 @@ function renderMessage(message) {
     lastMsgTimestamp=now;
     const row=document.createElement('div');
     row.className=isGrouped?'msg-row grouped':'msg-row';
+    row.dataset.messageId=message.id;
+    const editedTag=message.editedAt?' <span class="msg-edited">(edited)</span>':'';
+    const reactionsHtml=buildReactions(message);
     if (isGrouped) {
         row.innerHTML=`
         <div class="msg-avatar-spacer"></div>
         <div class="msg-body">
-            <div class="msg-text">${escapeHtml(message.text)}</div>
+            <div class="msg-text">${escapeHtml(message.text)}${editedTag}</div>
+            ${reactionsHtml}
         </div>
         ${buildActions(message,isMine)}`;
     } else {
@@ -113,7 +237,8 @@ function renderMessage(message) {
         </div>
         <div class="msg-body">
             <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
-            <div class="msg-text">${escapeHtml(message.text)}</div>
+            <div class="msg-text">${escapeHtml(message.text)}${editedTag}</div>
+            ${reactionsHtml}
         </div>
         ${buildActions(message,isMine)}`;
     }
@@ -122,6 +247,9 @@ function renderMessage(message) {
         if (!btn) return;
         handleMsgAction(btn.dataset.action,message);
     });
+    attachReactionListeners(row,messageId);
+    messageRows.set(message.id,row);
+    messagesById.set(message.id,message);
     contentArea.appendChild(row);
     contentArea.scrollTop=contentArea.scrollHeight;
     lucide.createIcons();
@@ -129,11 +257,11 @@ function renderMessage(message) {
 
 function handleMsgAction(action,message) {
     if (action==='react') {
-        console.log('react',message.id);
+        openEmojiPicker(btn,message.id);
     } else if (action==='edit') {
-        console.log('edit',message.id);
+        enterEditMode(message.id);
     } else if (action==='delete') {
-        console.log('delete',message.id);
+        sendDelete(message.id);
     }
 }
 
@@ -161,6 +289,8 @@ async function loadHistory(channel) {
     contentArea.innerHTML='';
     lastMsgUsername=null;
     lastMsgTimestamp=null;
+    messageRows.clear();
+    messagesById.clear();
     const token=getAuthToken();
     const res=await fetch(`/api/chat/messages/${channel}`,{
         headers:{'Authorization':`Bearer ${token}`}
@@ -181,6 +311,12 @@ function connectWs() {
         const data=JSON.parse(event.data);
         if (data.type==='message'&&data.channel===currentChannel) {
             renderMessage(data.message);
+        } else if (data.type==='message_edited'&&data.channel===currentChannel) {
+            updateMessageInPlace(data.message);
+        } else if (data.type==='message_deleted'&&data.channel===currentChannel) {
+            removeMessageFromDom(data.messageId);
+        } else if (data.type==='message_reaction'&&data.channel===currentChannel) {
+            updateMessageInPlace(data.message);
         } else if (data.type==='presence') {
             applyPresence(data.online);
         } else if (data.type==='error') {
