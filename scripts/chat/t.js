@@ -167,12 +167,10 @@ function enterEditMode(messageId) {
 }
 
 function renderMemberItem(member) {
-    const colour=getAvatarColour(member.username);
-    const iconColour=getIconColour(colour);
     const initial=member.username.charAt(0).toUpperCase();
     return `
     <div class="member-item ${member.online?'':'offline'}">
-        <div class="member-avatar" style="background:${colour}">
+        <div class="member-avatar">
             <img class="member-avatar-img" src="${getAvatarUrl(member.username)}" alt="">
             <div class="member-status-dot ${member.online?'':'offline'}"></div>
         </div>
@@ -228,10 +226,8 @@ function renderMessage(message) {
         </div>
         ${buildActions(message,isMine)}`;
     } else {
-        const colour=getAvatarColour(message.username);
-        const iconColour=getIconColour(colour);
         row.innerHTML=`
-        <div class="msg-avatar" style="background:${colour}">
+        <div class="msg-avatar">
             <img class="msg-avatar-img" src="${getAvatarUrl(message.username)}" alt="">
         </div>
         <div class="msg-body">
