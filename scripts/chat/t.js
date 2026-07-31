@@ -246,7 +246,7 @@ function renderMessage(message) {
     row.querySelector('.msg-actions').addEventListener('click',(e)=>{
         const btn=e.target.closest('.msg-action-btn');
         if (!btn) return;
-        handleMsgAction(btn.dataset.action,message);
+        handleMsgAction(btn.dataset.action,message,btn);
     });
     attachReactionListeners(row,message.id);
     messageRows.set(message.id,row);
@@ -256,7 +256,7 @@ function renderMessage(message) {
     lucide.createIcons();
 }
 
-function handleMsgAction(action,message) {
+function handleMsgAction(action,message,btn) {
     if (action==='react') {
         openEmojiPicker(btn,message.id);
     } else if (action==='edit') {
@@ -317,7 +317,7 @@ function connectWs() {
         } else if (data.type==='message_deleted'&&data.channel===currentChannel) {
             removeMsg(data.messageId);
         } else if (data.type==='message_reaction'&&data.channel===currentChannel) {
-            removeMsg(data.message);
+            updMsg(data.message);
         } else if (data.type==='presence') {
             applyPresence(data.online);
         } else if (data.type==='error') {
