@@ -152,20 +152,27 @@ function enterEditMode(messageId) {
     const input=textEl.querySelector('.msg-edit-input');
     input.focus();
     input.setSelectionRange(input.value.length,input.value.length);
+    function revert() {
+        if (settled) return;
+        settled=true;
+        if (textEl.contains(input)) {
+            textEl.innerHTML=escapeHtml(original);
+        }
+    }
     input.addEventListener('keydown',(e)=>{
         if (e.key==='Enter') {
             const newText=input.value.trim();
             if (newText&&newText!==original) {
                 sendEdit(messageId,newText);
             } else {
-                textEl.innerHTML=escapeHtml(original);
+                revert();
             }
         } else if (e.key==='Escape') {
-            textEl.innerHTML=escapeHtml(original);
+            revert();
         }
     });
     input.addEventListener('blur',()=>{
-        if (textEl.querySelector('.msg-edit-input')) textEl.innerHTML=escapeHtml(original);
+        setTimeout(revert,0);
     });
 }
 
