@@ -88,6 +88,7 @@ function handleOClick(e) {
 function openEmojiPicker(anchorBtn,messageId) {
     closeEmojiPicker();
     const picker=document.createElement('div');
+    picker.className='emoji-picker';
     picker.innerHTML=EMOJI_LIST.map(e=>`<button class="emoji-option" data-emoji="${e}">${e}</button>`).join('');
     document.body.appendChild(picker);
     const rect=anchorBtn.getBoundingClientRect();
@@ -104,7 +105,7 @@ function openEmojiPicker(anchorBtn,messageId) {
 }
 
 function updMsg(message) {
-    if (!messageRows.hass(message.id)) return;
+    if (!messageRows.has(message.id)) return;
     messagesById.set(message.id,message);
     const row=messageRows.get(message.id);
     const textEl=row.querySelector('.msg-text');
@@ -132,7 +133,7 @@ function sendReaction(messageId,emoji) {
 }
 
 function sendEdit(messageId,text) {
-    if (!ws||ws.readyState!==WebSocket.open) return;
+    if (!ws||ws.readyState!==WebSocket.OPEN) return;
     ws.send(JSON.stringify({type:'edit',messageId,text}));
 }
 
@@ -147,7 +148,7 @@ function enterEditMode(messageId) {
     if (!row||!message) return;
     const textEl=row.querySelector('.msg-text');
     const original=message.text;
-    textEl.innerHTML=`<input class="msg-edit-input" type="text" value="${escapeHtml(original)}"></div>`;
+    textEl.innerHTML=`<input class="msg-edit-input" type="text" value="${escapeHtml(original)}">`;
     const input=textEl.querySelector('.msg-edit-input');
     input.focus();
     input.setSelectionRange(input.value.length,input.value.length);
@@ -247,7 +248,7 @@ function renderMessage(message) {
         if (!btn) return;
         handleMsgAction(btn.dataset.action,message);
     });
-    attachReactionListeners(row,messageId);
+    attachReactionListeners(row,message.id);
     messageRows.set(message.id,row);
     messagesById.set(message.id,message);
     contentArea.appendChild(row);
@@ -312,11 +313,11 @@ function connectWs() {
         if (data.type==='message'&&data.channel===currentChannel) {
             renderMessage(data.message);
         } else if (data.type==='message_edited'&&data.channel===currentChannel) {
-            updateMessageInPlace(data.message);
+            updMsg(data.message);
         } else if (data.type==='message_deleted'&&data.channel===currentChannel) {
-            removeMessageFromDom(data.messageId);
+            removeMsg(data.messageId);
         } else if (data.type==='message_reaction'&&data.channel===currentChannel) {
-            updateMessageInPlace(data.message);
+            removeMsg(data.message);
         } else if (data.type==='presence') {
             applyPresence(data.online);
         } else if (data.type==='error') {
