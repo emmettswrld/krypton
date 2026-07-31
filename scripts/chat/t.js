@@ -19,27 +19,10 @@ let currentMembers=[];
 let EMOJI_LIST=['👍','❤️','😂','😮','😢','🔥','🎉','👀','🙏','💯'];
 let openPicker=null;
 
-const AVATAR_COLOURS=['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#f97316','#ec4899','#14b8a6','#6366f1','#f43f5e'];
 const GROUP_WINDOW_MS=2*60*1000
 
-function hashString(str) {
-    let hash=0;
-    for (let i=0;i<str.length;i++) {
-        hash=(hash*31+str.charCodeAt(i))>>>0;
-    }
-    return hash;
-}
-
-function getAvatarColour(username) {
-    return AVATAR_COLOURS[hashString(username)%AVATAR_COLOURS.length];
-}
-
-function getIconColour(hex) {
-    const r=parseInt(hex.slice(1,3),16);
-    const g=parseInt(hex.slice(3,5),16);
-    const b=parseInt(hex.slice(5,7),16);
-    const luminance=0.299*r+0.587*g+0.114*b;
-    return luminance>150?'#000':'#fff';
+function getAvatarUrl(username) {
+    return `https://api.dicebear.com/10.x/thumbs/svg?seed=${encodeURIComponent(username)}`;
 }
 
 async function loadMembers() {
@@ -142,6 +125,13 @@ function sendDelete(messageId) {
     ws.send(JSON.stringify({type:'delete',messageId}));
 }
 
+function getLastMsg() {
+    const lastRow=contentArea.lastElementChild;
+    if (!lastRow) return null;
+    const id=lastRow.dataset.messageId;
+    return messagesById.get(id)||null;
+}
+
 function enterEditMode(messageId) {
     const row=messageRows.get(messageId);
     const message=messagesById.get(messageId);
@@ -183,7 +173,7 @@ function renderMemberItem(member) {
     return `
     <div class="member-item ${member.online?'':'offline'}">
         <div class="member-avatar" style="background:${colour}">
-            <span style="color:${iconColour}">${initial}</span>
+            <img class="member-avatar-img" src="${getAvatarUrl(member.username)}" alt="">
             <div class="member-status-dot ${member.online?'':'offline'}"></div>
         </div>
         <span class="member-name">${escapeHtml(member.username)}</span>
@@ -219,8 +209,9 @@ function applyPresence(onUsers) {
 function renderMessage(message) {
     const isMine=message.username===myUser;
     const now=new Date(message.createdAt).getTime();
+    const lastMsg=getLastMsg();
     const withinWindow=lastMsgTimestamp!==null&&(now-lastMsgTimestamp)<GROUP_WINDOW_MS;
-    const isGrouped=message.username===lastMsgUsername&&withinWindow;
+    const isGrouped=lastMsg&&lastMsg.username===message.username&&withinWindow;
     lastMsgUsername=message.username;
     lastMsgTimestamp=now;
     const row=document.createElement('div');
@@ -241,7 +232,7 @@ function renderMessage(message) {
         const iconColour=getIconColour(colour);
         row.innerHTML=`
         <div class="msg-avatar" style="background:${colour}">
-            <span style="color:${iconColour};font-weight:700;font-size:15px;">${message.username.charAt(0).toUpperCase()}</span>
+            <img class="msg-avatar-img" src="${getAvatarUrl(message.username)}" alt="">
         </div>
         <div class="msg-body">
             <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
