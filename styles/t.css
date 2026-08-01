@@ -493,6 +493,11 @@ i[data-lucide] svg {
     font-size:14px;
     font-weight:600;
     color:#f0f0f0;
+    text-decoration:none;
+}
+
+.msg-author:hover {
+    text-decoration:underline;
 }
 
 .msg-author .msg-time {
@@ -1025,7 +1030,7 @@ i[data-lucide] svg {
     height:76px;
     border-radius:50%;
     background:#141414;
-    border:4p solid #0d0d0d;
+    border:4px solid #0d0d0d;
     overflow:hidden;
 }
 
@@ -1097,6 +1102,16 @@ i[data-lucide] svg {
     background:#1a1a1a;
 }
 
+.modal-btn:disabled {
+    opacity:0.5;
+    cursor:default;
+    background:#141414;
+}
+
+.modal-btn:disabled:hover {
+    background:#141414;
+}
+
 .modal-btn.primary {
     background:#60a5fa;
     border-color:#60a5fa;
@@ -1165,7 +1180,7 @@ i[data-lucide] svg {
     margin-top:16px;
 }
 
-.modal-statys {
+.modal-status {
     font-size:12px;
     margin-top:8px;
     color:#606060;
@@ -1177,4 +1192,44 @@ i[data-lucide] svg {
 
 .modal-status.success {
     color:#3ba55d;
+}
+
+.avatar-upload-row {
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.avatar-upload-input {
+    display:none;
+}
+
+.avatar-upload-btn {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:7px 12px;
+    background:#141414;
+    border:1px solid #2a2a2a;
+    border-radius:8px;
+    color:#e0e0e0;
+    font-size:12px;
+    font-weight:600;
+    font-family:'Inter';
+    cursor:pointer;
+    transition:background 0.15s ease;
+}
+
+.avatar-upload-btn:hover {
+    background:#1a1a1a;
+}
+
+.avatar-upload-btn svg {
+    width:13px;
+    height:13px;
+}
+
+.avatar-upload-hint {
+    font-size:11px;
+    color:#606060;
 }
