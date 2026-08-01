@@ -7,6 +7,15 @@ const sendBtn=document.getElementById('sendBtn');
 const activeChannelName=document.getElementById('activeChannelName');
 const sidebarScroll=document.getElementById('sidebarScroll');
 const membersScroll=document.getElementById('membersScroll');
+const sidebarHeader=document.getElementById('sidebarHeader');
+const viewDropdown=document.getElementById('viewDropdown');
+const sidebarViewLabel=document.getElementById('sidebarViewLabel');
+const dmBadge=document.getElementById('dmBadge');
+const userBar=document.getElementById('userBar');
+const userBarAvatar=document.getElementById('userBarAvatar');
+const userBarName=document.getElementById('userBarName');
+const modalOverlay=document.getElementById('modalOverlay');
+const modalCard=document.getElementById('modalCard');
 const messageRows=new Map();
 const messagesById=new Map();
 
@@ -18,12 +27,23 @@ let lastMsgTimestamp=null;
 let currentMembers=[];
 let EMOJI_LIST=['👍','❤️','😂','😮','😢','🔥','🎉','👀','🙏','💯'];
 let openPicker=null;
+let currentView='chat';
+let currentDmUser=null;
+let dmMessageRows=new Map();
+let friendsData={accepted:[],incoming:[],outgoing:[]};
+let myProfile=null;
+let roleColours=new Map();
+let avatarUrls=new Map();
+let cachedChannels=[];
 
 const GROUP_WINDOW_MS=2*60*1000
 
 function getAvatarUrl(username) {
+    const custom=avatarUrls.get(username);
+    if (custom) return custom;
     return `https://api.dicebear.com/10.x/thumbs/svg?seed=${encodeURIComponent(username)}`;
 }
+
 
 async function loadMembers() {
     const token=getAuthToken();
@@ -32,6 +52,8 @@ async function loadMembers() {
     });
     if (!res.ok) return [];
     const data=await res.json();
+    data.members.forEach(m=>roleColours.set(m.username,m.roleColor||'#f0f0f0'));
+    data.members.forEach(m=>{if (m.avatarUrl) avatarUrls.set(m.username,m.avatarUrl);});
     return data.members;
 }
 
@@ -169,7 +191,7 @@ function enterEditMode(messageId) {
 function renderMemberItem(member) {
     const initial=member.username.charAt(0).toUpperCase();
     return `
-    <div class="member-item ${member.online?'':'offline'}">
+    <div class="member-item ${member.online?'':'offline'}" data-username="${escapeHtml(member.username)}">
         <div class="member-avatar">
             <img class="member-avatar-img" src="${getAvatarUrl(member.username)}" alt="">
             <div class="member-status-dot ${member.online?'':'offline'}"></div>
@@ -197,6 +219,10 @@ function buildMembers(members) {
         </div>`;
     }
     membersScroll.innerHTML=html;
+    membersScroll.querySelectorAll('.member-item').forEach(el=>{
+        el.style.cursor='pointer';
+        el.addEventListener('click',()=>openProfile(el.dataset.username));
+    });
 }
 
 function applyPresence(onUsers) {
@@ -227,7 +253,7 @@ function renderMessage(message) {
         ${buildActions(message,isMine)}`;
     } else {
         row.innerHTML=`
-        <div class="msg-avatar">
+        <div class="msg-avatar" data-username="${escapeHtml(message.username)}">
             <img class="msg-avatar-img" src="${getAvatarUrl(message.username)}" alt="">
         </div>
         <div class="msg-body">
@@ -242,6 +268,8 @@ function renderMessage(message) {
         if (!btn) return;
         handleMsgAction(btn.dataset.action,message,btn);
     });
+    const avatarEl=row.querySelector('.msg-avatar');
+    if (avatarEl) avatarEl.addEventListener('click',()=>openProfile(message.username));
     attachReactionListeners(row,message.id);
     messageRows.set(message.id,row);
     messagesById.set(message.id,message);
@@ -314,6 +342,12 @@ function connectWs() {
             updMsg(data.message);
         } else if (data.type==='presence') {
             applyPresence(data.online);
+        } else if (data.type==='dm') {
+            if (currentView==='dms'&&currentDmUser&&(data.message.from===currentDmUser||data.message.to===currentDmUser)) {
+                renderDmMessage(data.message);
+            }
+        } else if (data.type==='friend_request'||data.type==='friend_accepted') {
+            loadFriends();
         } else if (data.type==='error') {
             console.error('chat error',data.error);
         }
@@ -339,7 +373,12 @@ async function switchChannel(channel) {
 function sendMessage() {
     const text=messageInput.value.trim();
     if (!text||!ws||ws.readyState!==WebSocket.OPEN) return;
-    ws.send(JSON.stringify({type:'message',text}));
+    if (currentView==='dms') {
+        if (!currentDmUser) return;
+        ws.send(JSON.stringify({type:'dm',to:currentDmUser,text}));
+    } else {
+        ws.send(JSON.stringify({type:'message',text}));
+    }
     messageInput.value='';
 }
 
@@ -400,13 +439,319 @@ messageInput.addEventListener('keydown',(e)=>{
     if (e.key==='Enter') sendMessage();
 });
 
+function closeModal() {
+    modalOverlay.classList.remove('open');
+    modalCard.innerHTML='';
+}
+
+modalOverlay.addEventListener('click',(e)=>{
+    if (e.target===modalOverlay) closeModal();
+});
+
+async function openProfile(username) {
+    const token=getAuthToken();
+    const res=await fetch(`/api/chat/profile/${encodeURIComponent(username)}`,{
+        headers:{'Authorization':`Bearer ${token}`}
+    });
+    if (!res.ok) return;
+    const data=await res.json();
+    renderProfile(data.profile,data.friendStatus,data.isSelf);
+    modalOverlay.classList.add('open');
+}
+
+function friendActionHtml(status,username) {
+    if (status==='friends') {
+        return `<button class="modal-btn danger" data-action="remove-friend" data-username="${escapeHtml(username)}"><i data-lucide="user-x"></i>Remove Friend</button>`;
+    }
+    if (status==='outgoing') {
+        return `<button class="modal-btn" disabled><i data-lucide="clock"></i>Request Sent</button>`;
+    }
+    if (status==='incoming') {
+        return `<button class="modal-btn primary" data-action="accept-friend" data-username="${escapeHtml(username)}"><i data-lucide="user-check"></i>Accept Request</button>`;
+    }
+    return `<button class="modal-btn primary" data-action="add-friend" data-username="${escapeHtml(username)}"><i data-lucide="user-plus"></i>Add Friend</button>`;
+}
+
+function renderProfile(profile,friendStatus,isSelf) {
+    modalCard.innerHTML=`
+    <div class="modal-banner"></div>
+    <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
+    <div class="modal-body">
+        <div class="modal-avatar-wrap">
+            <div class="modal-avatar"><img src="${getAvatarUrl(profile.username)} alt=""><div>
+        </div>
+        <div class="modal-username">${escapeHtml(profile.username)}</div>
+        <div class="modal-role" style="color:${profile.roleColor}">
+            <span class="modal-role-dot" style="background:${profile.roleColor}"></span>${escapeHtml(profile.roleName)}
+        </div>
+        <div class="modal-bio">${profile.bio?escapeHtml(profile.bio):'<span style="color:#606060">No bio yet.</span>'}</div>
+        <div class="modal-actions">
+            ${isSelf?`<button class="modal-btn primary" data-action="edit-profile"><i data-lucide="pencil"></i>Edit Profile</button>`:friendActionHtml(friendStatus,profile.username)+ (friendStatus==='friends'?`<button class="modal-btn primary" data-action="open-dm" data-username="${escapeHtml(profile.username)}"><i data-lucide="message-circle"></i>Message</button>`:'')}
+        </div>
+        <div class="modal-status" id="modalStatus"></div>
+    </div>`;
+    lucide.createIcons();
+    document.getElementById('modalCloseBtn').addEventListener('click',closeModal);
+    modalCard.querySelectorAll('[data-action]').forEach(btn=>{
+        btn.addEventListener('click',async()=>{
+            const action=btn.dataset.action;
+            const username=btn.dataset.usernamel
+            const statusEl=document.getElementById('modalStatus');
+            if (action==='edit-profile') return openSettings();
+            if (action==='open-dm') {
+                closeModal();
+                switchToView('dms');
+                openDmThread(username);
+                return;
+            }
+            const endpoint={
+                'add-friend':'/api/chat/friends/request',
+                'accept-friend':'/api/chat/friends/accept',
+                'remove-friend':'/api/chat/friends/remove'
+            }[action];
+            if (!endpoint) return;
+            const token=getAuthToken();
+            const res=await fetch(endpoint,{
+                method:'POST',
+                headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+                body:JSON.stringify({username})
+            });
+            const result=await res.json();
+            if (!res.ok) {
+                if (statusEl) {
+                    statusEl.textContent=result.error||'Something went wrong.';
+                    statusEl.className='modal-status error';
+                }
+                return;
+            }
+            await loadFriends();
+            openProfile(username);
+        });
+    });
+}
+
+async function openSettings() {
+    const token=getAuthToken();
+    const res=await fetch(`/api/chat/profile/${encodeURIComponent(myUser)}`,{
+        headers:{'Authorization':`Bearer ${token}`}
+    });
+    if (!res.ok) return;
+    const data=await res.json();
+    myProfile=data.profile;
+    renderSettings(data.profile);
+    modalOverlay.classList.add('open');
+}
+
+function renderSettings(profile) {
+    modalCard.innerHTML=`
+    <div class="modal-banner"></div>
+    <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
+    <div class="modal-body">
+        <div class="modal-avatar-wrap">
+            <div class="modal-avatar"><img id="settingsAvatarPreview" src="${getAvatarUrl(profile.username)}" alt=""></div>
+        </div>
+        <div class="modal-username">${escapeHtml(profile.username)}</div>
+        <div class="modal-field-label">Avatar URL</div>
+        <input class="modal-input" id="settingsAvatarInput" type="text" placeholder="https://your-image-url-here" value="${escapeHtml(profile.avatarUrl||'')}">
+        <div class="modal-field-label">Bio</div>
+        <textarea class="modal-textarea" id="settingsBioInput" rows="3" maxlength="280" placeholder="Tell people about yourself...">${escapeHtml(profile.bio||'')}</textarea>
+        <div class="modal-save-row">
+            <button class="modal-btn" id="settingsCancelBtn">Cancel</button>
+            <button class="modal-btn primary" id="settingsSaveBtn"><i data-lucide="check"></i>Save</button>
+        </div>
+        <div class="modal-status" id="modalStatus"></div>
+    </div>`;
+    lucide.createIcons();
+    document.getElementById('modalCloseBtn').addEventListener('click',closeModal);
+    document.getElementById('settingsCancelBtn').addEventListener('click',closeModal);
+    const avatarInput=document.getElementById('settingsAvatarInput');
+    avatarInput.addEventListener('input',()=>{
+        const preview=document.getElementById('settingsAvatarPreview');
+        preview.src=avatarInput.value.trim()||getAvatarUrl(profile.username);
+    });
+    document.getElementById('settingsSaveBtn').addEventListener('click',async()=>{
+        const statusEl=document.getElementById('modalStatus');
+        const bio=document.getElementById('settingsBioInput').value;
+        const avatarUrl=avatarInput.value.trim();
+        const token=getAuthToken();
+        const res=await fetch('/api/chat/profile',{
+            method:'PATCH',
+            headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({bio,avatarUrl})
+        });
+        const result=await res.json();
+        if (!res.ok) {
+            statusEl.textContent=result.error||'Something went wrong';
+            statusEl.className='modal-status error';
+            return;
+        }
+        avatarUrls.set(profile.username,avatarUrl);
+        statusEl.textContent='Saved.'
+        statusEl.className='modal-status success';
+        userBarAvatar.innerHTML=`<img class="msg-avatar-img" src="${getAvatarUrl(myUser)}" alt="">`;
+    });
+}
+
+userBar.addEventListener('click',openSettings);
+
+sidebarHeader.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    viewDropdown.classList.toggle('open');
+});
+
+document.addEventListener('click',(e)=>{
+    if (!viewDropdown.contains(e.target)&&!sidebarHeader.contains(e.target)) {
+        viewDropdown.classList.remove('open');
+    }
+});
+
+viewDropdown.querySelectorAll('.view-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+        switchToView(opt.dataset.view);
+        viewDropdown.classList.remove('open');
+    });
+});
+
+function switchToView(view) {
+    currentView=view;
+    viewDropdown.querySelectorAll('.view-opt').forEach(o=>o.classList.toggle('active',o.dataset.view===view));
+    sidebarViewLabel.textContent=view==='dms'?'Direct Messages':'Chat';
+    if (view==='dms') {
+        renderDmSidebar();
+    } else {
+        renderChatSidebar();
+    }
+}
+
+function renderChatSidebar() {
+    buildSidebar(cachedChannels);
+    activeChannelName.textContent=currentChannel;
+    contentArea.style.display='';
+    document.querySelector('.prompt-bar').style.display='';
+    document.querySelector('.topbar-tl i').setAttribute('data-lucide','hash');
+    lucide.createIcons();
+    loadHistory(currentChannel);
+}
+
+async function loadFriends() {
+    const token=getAuthToken();
+    const res=await fetch('/api/chat/friends',{
+        headers:{'Authorization':`Bearer ${token}`}
+    });
+    if (!res.ok) return;
+    friendsData=await res.json();
+    updateDmBadge();
+    if (currentView==='dms') renderDmSidebar();
+}
+
+function updateDmBadge() {
+    const count=friendsData.incoming.length;
+    dmBadge.style.display=count>0?'inline-block':'none';
+    dmBadge.textContent=count;
+}
+
+function renderDmSidebar() {
+    let html='';
+    html+=`
+    <div class="dm-add-row">
+        <input class="dm-add-input" id="dmAddInput" type="text" placeholder="Add friend by username">
+        <button class="dm-add-btn" id="dmAddBtn"><i data-lucide="user-plus"></i></button>
+    </div>`;
+    if (friendsData.incoming.length) {
+        html+=`<div class="dm-section-label">Requests - ${friendsData.incoming.length}</div><div class="dm-list">`;
+        html+=friendsData.incoming.map(f=>`
+        <div class="dm-item" data-username="${escapeHtml(f.username)}">
+            <div class="dm-item-avatar"><img class="msg-avatar-img" src="${getAvatarUrl(f.username)}" alt=""></div>
+            <span class="dm-item-name">${escapeHtml(f.username)}</span>
+            <div class="dm-item-actions">
+                <button class="dm-request-btn accept" data-action="accept" data-username="${escapeHtml(f.username)}"><i data-lucide="check"></i></button>
+                <button class="dm-request-btn decline" data-action="decline" data-username="${escapeHtml(f.username)}"><i data-lucide="x"></i></button>
+            </div>
+        </div>`).join('');
+        html+=`</div>`;
+    }
+    html+=`<div class="dm-section-label">Friends — ${friendsData.accepted.length}</div><div class="dm-list">`;
+    html+=friendsData.accepted.length?friendsData.accepted.map(f=>`
+        <div class="dm-item${currentDmUser===f.username?' active':''}" data-username="${escapeHtml(f.username)}" data-open="1">
+            <div class="dm-item-avatar"><img class="msg-avatar-img" src="${getAvatarUrl(f.username)}" alt=""></div>
+            <span class="dm-item-name">${escapeHtml(f.username)}</span>
+        </div>`).join(''):`<div style="padding:8px;font-size:12px;color:#606060;">No friends yet :(</div>`;
+    html+=`</div>`;
+    sidebarScroll.innerHTML=html;
+    lucide.createIcons();
+    document.getElementById('dmAddBtn').addEventListener('click',sendFriendReq);
+    document.getElementById('dmAddInput').addEventListener('keydown',(e)=>{if (e.key==='Enter') sendFriendReq();});
+    sidebarScroll.querySelectorAll('.dm-request-btn').forEach(btn=>{
+        btn.addEventListener('click',async(e)=>{
+            e.stopPropagation();
+            const action=btn.dataset.action;
+            const username=btn.dataset.username;
+            const token=getAuthToken();
+            await fetch(`/api/chat/friends/${action}`,{
+                method:'POST',
+                headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+                body:JSON.stringify({username})
+            });
+            await loadFriends();
+        });
+    });
+    sidebarScroll.querySelectorAll('.dm-item[data-open]').forEach(el=>{
+        el.addEventListener('click',()=>openDmThread(el.dataset.username));
+    });
+}
+
+async function sendFriendReq() {
+    const input=document.getElementById('dmAddInput');
+    const username=input.value.trim();
+    if (!username) return;
+    const token=getAuthToken();
+    const res=await fetch('/api/chat/friends/request',{
+        method:'POST',
+        headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({username})
+    });
+    if (res.ok) input.value='';
+    await loadFriends();
+}
+
+async function openDmThread(username) {
+    currentDmUser=username;
+    renderDmSidebar();
+    activeChannelName.textContent=username;
+    document.querySelector('.topbar-tl i').setAttribute('data-lucide','user');
+    lucide.createIcons();
+    messageInput.placeholder=`Message @${username}`;
+    contentArea.innerHTML='';
+    dmMessageRows.clear();
+    const token=getAuthToken();
+    const res=await fetch(`/api/chat/dms/${encodeURIComponent(username)}`,{
+        headers:{'Authorization':`Bearer ${token}`}
+    });
+    if (!res.ok) return;
+    const data=await res.json();
+    lastMsgUsername=null;
+    lastMsgTimestamp=null;
+    data.messages.forEach(renderDmsMessage);
+}
+
+function renderDmMessage(message) {
+    const isMine=message.from===myUser;
+    const displayName=isMine?mysUser:messageRows.from;
+    const fakeMsg={username:displayName,text:message.text,createdAt:message.createdAt,editedAt:message.editedAt,id:message.id,reactions:{}};
+    renderMessage(fakeMsg);
+}
+
 requireAuth().then(async(username)=>{
     if (!username) return;
     myUser=username;
     const channels=await loadChannels();
+    cachedChannels=channels;
     buildSidebar(channels);
     currentMembers=await loadMembers();
     buildMembers(currentMembers);
+    await loadFriends()
+    userBarName.textContent=myUser;
+    userBarAvatar.innerHTML=`<img class="msg-avatar-img" src="${getAvatarUrl(myUser)}" alt="">`;
     const defaultChannel=channels[0]?.id||'general';
     connectWs();
     switchChannel(defaultChannel);
