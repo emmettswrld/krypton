@@ -1091,6 +1091,7 @@ i[data-lucide] svg {
     font-weight:600;
     cursor:pointer;
     transition:background 0.15s ease,border-color 0.15s ease;
+    font-family:'Inter';
 }
 
 .modal-btn svg {
