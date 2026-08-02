@@ -33,12 +33,12 @@ document.getElementById('refBtn').addEventListener('click',()=>{
             frame.classList.add('loaded');
             return;
         }
-        frame.onload=()=>{
+        getSFrame(tabId).then(sframe=>{
+            sframe.go(currentUrl);
             loader.classList.remove('active');
             frame.classList.add('loaded');
-            startURLP(frame);
-        };
-        frame.src=browserjet.encodeUrl(currentUrl);
+            startURLP(frame,tabId);
+        });
     }
 });
 
@@ -114,19 +114,26 @@ document.querySelectorAll('.sb-btn').forEach(btn=>{
 });
 
 //scram
-const connection = new BareMux.BareMuxConnection("/browse/baremux/worker.js");
-connection.setTransport("/browse/libcurl/index.mjs",[{websocket:"wss://wisp.classroom.lat/"}]);
+const {Controller}=$scramjetController;
+const {defaultConfig}=$scramjet;
+const EpoxyTransport=self.EpoxyTransport.default;
+let scramjet=null;
 
-const {browserjetController} = $browserjetLoadController();
-const browserjet=new browserjetController({
-    files:{
-        all:"/browse/scram/browserjet.all.js",
-        wasm:"/browse/scram/browserjet.wasm.wasm",
-        sync:"/browse/scram/browserjet.sync.js"
-    },
-    prefix:"/browse/go/"
-});
-browserjet.init();
+async function initScramjet() {
+    await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+    const serviceworker=navigator.serviceWorker.controller??(await navigator.serviceWorker.ready).active;
+    const transport=new EpoxyTransport({wisp:"ws://localhost:5555/"});
+    await transport.init();
+    scramjet=new Controller({
+        serviceworker,
+        transport,
+        scramjetConfig:defaultConfig
+    });
+    await scramjet.wait();
+}
+
+const scramjetReady=initScramjet();
 
 //browsing
 function nav(input) {
@@ -162,11 +169,11 @@ function nav(input) {
     void frame.offsetWidth;
     frame.style.display='block';
     loader.classList.add('active');
-    frame.src=browserjet.encodeUrl(url);
-    tabs[tabId]={url,frame};
+    tabs[tabId]={url,frame,sframe:tabs[tabId]?.sframe||null};
     activeTab.querySelector('.tab-tl').textContent=new URL(url).hostname;
     setUrl(url);
-    frame.onload=()=>{
+    getSFrame(tabId).then(sframe=>{
+        sframe.go(url);
         loader.classList.remove('active');
         requestAnimationFrame(()=>{
             requestAnimationFrame(()=>{
@@ -176,8 +183,8 @@ function nav(input) {
         frame.dataset.navCount=(parseInt(frame.dataset.navCount||'0')+1).toString();
         frame.dataset.fwCount='0';
         updNavBtns(frame);
-        startURLP(frame);
-    };
+        startURLP(frame,tabId);
+    });
 }
 window.nav=nav;
 
@@ -201,7 +208,7 @@ function setUrl(url) {
 let urlPollInt=null;
 let lastHref='';
 
-function startURLP(frame) {
+function startURLP(frame,tabId) {
     if (urlPollInt) clearInterval(urlPollInt);
     lastHref='';
     let firstPoll=true;
@@ -240,7 +247,7 @@ function startURLP(frame) {
                     },5000);
                 }
             }
-            const decoded=browserjet.decodeUrl(href);
+            const decoded=tabs[tabId]?.url||href;
             if (decoded&&decoded!==urlInput.value&&!urlFocused) {
                 setUrl(decoded);
                 frame.dataset.currentUrl=decoded;
@@ -351,6 +358,8 @@ function updNavBtns(frame) {
 document.getElementById('backBtn').addEventListener('click',()=>{
     const frame=getActiveFrame();
     if (!frame) return;
+    const activeTab=document.querySelector('.tab.active');
+    const tabId=activeTab?.dataset.tabId;
     const navCount=parseInt(frame.dataset.navCount||'0');
     if (navCount<=0) return;
     if (navCount===1) {
@@ -387,7 +396,7 @@ document.getElementById('backBtn').addEventListener('click',()=>{
     setTimeout(()=>{
         loader.classList.remove('active');
         frame.classList.add('loaded');
-        startURLP(frame);
+        startURLP(frame,tabId);
         updNavBtns(frame);
     },600);
 });
@@ -395,13 +404,13 @@ document.getElementById('backBtn').addEventListener('click',()=>{
 document.getElementById('fwBtn').addEventListener('click',()=>{
     const frame=getActiveFrame();
     if (!frame) return;
+    const activeTab=document.querySelector('.tab.active');
+    const tabId=activeTab?.dataset.tabId;
     const fwCount=parseInt(frame.dataset.fwCount||'0');
     if (fwCount<=0) return;
     if (urlPollInt) clearInterval(urlPollInt);
     const loader=document.getElementById('bloader');
     if (frame.style.display==='none') {
-        const activeTab=document.querySelector('.tab.active');
-        const tabId=activeTab?.dataset.tabId;
         if (tabs[tabId]?.url) {
             frame.style.display='block';
             document.querySelector('.main').style.display='none';
@@ -412,7 +421,7 @@ document.getElementById('fwBtn').addEventListener('click',()=>{
             setTimeout(()=>{
                 loader.classList.remove('active');
                 frame.classList.add('loaded');
-                startURLP(frame);
+                startURLP(frame,tabId);
                 updNavBtns(frame);
             },600);
         }
@@ -426,7 +435,7 @@ document.getElementById('fwBtn').addEventListener('click',()=>{
     setTimeout(()=>{
         loader.classList.remove('active');
         frame.classList.add('loaded');
-        startURLP(frame);
+        startURLP(frame,tabId);
         updNavBtns(frame);
     },600);
 });
@@ -435,10 +444,16 @@ document.getElementById('fwBtn').addEventListener('click',()=>{
 let tabs={};
 let tabCount=1;
 
-tabs[1] = {
-    url:'',
-    frame:null
-};
+tabs[1]={url:'',frame:null,sframe:null};
+
+async function getSFrame(tabId) {
+    await scramjetReady;
+    const tab=tabs[tabId];
+    if (!tab.sframe) {
+        tab.sframe=scramjet.createFrame(tab.frame);
+    }
+    return tab.sframe;
+}
 
 function createTab(url=null) {
     tabCount++;
@@ -454,7 +469,7 @@ function createTab(url=null) {
     <div class="tab-cl"><i data-lucide="x"></i></div>`;
     tabBar.insertBefore(tab,ntBtn);
     lucide.createIcons();
-    tabs[tabCount]={url:'',frame:null};
+    tabs[tabCount]={url:'',frame:null,sframe:null};
     addTabListeners(tab);
     swTab(tabCount);
     if (url) nav(url);
@@ -472,7 +487,7 @@ function swTab(tabId) {
         showTag();
         setUrl(tab.url);
         if (!tab.url.startsWith('krypton://')) {
-            startURLP();
+            startURLP(tab.frame,tabId);
         }
     } else {
         home.style.display='';
