@@ -228,7 +228,6 @@ function startURLP(frame,tabId) {
     urlPollInt=setInterval(()=>{
         try {
             const href=frame.contentWindow.location.href;
-            if (href!==lastHref) console.log('href changed:',href);
             if (href && href!==lastHref && href!=='about:blank') {
                 const realUrl=extractRealUrl(href);
                 if (realUrl&&tabs[tabId]) {
