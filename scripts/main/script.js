@@ -123,7 +123,7 @@ async function initScramjet() {
     await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
     const serviceworker=navigator.serviceWorker.controller??(await navigator.serviceWorker.ready).active;
-    const transport=new EpoxyTransport({wisp:"ws://localhost:5555/"});
+    const transport=new EpoxyTransport({wisp:"wss://wisp.englishrevision.site/"});
     await transport.init();
     scramjet=new Controller({
         serviceworker,
