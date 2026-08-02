@@ -216,12 +216,10 @@ function startURLP(frame,tabId) {
         try {
             const href=frame.contentWindow.location.href;
             if (href && href!==lastHref && href!=='about:blank') {
-                const oldDecoded=(()=>{try{return browserjet.decodeUrl(lastHref);}catch(e){return lastHref;}})();
-                const newDecoded=(()=>{try{return browserjet.decodeUrl(href);}catch(e){return href;}})();
-                const oldPath=(()=>{try{return new URL(oldDecoded).pathname;}catch(e){return oldDecoded;}})();
-                const newPath=(()=>{try{return new URL(newDecoded).pathname;}catch(e){return newDecoded;}})();
-                const oldHost=(()=>{try{return new URL(oldDecoded).hostname;}catch(e){return '';}})();
-                const newHost=(()=>{try{return new URL(newDecoded).hostname;}catch(e){return '';}})();
+                const oldPath=(()=>{try{return new URL(lastHref).pathname;}catch(e){return lastHref;}})();
+                const newPath=(()=>{try{return new URL(href).pathname;}catch(e){return href;}})();
+                const oldHost=(()=>{try{return new URL(lastHref).hostname;}catch(e){return '';}})();
+                const newHost=(()=>{try{return new URL(href).hostname;}catch(e){return '';}})();
                 const isNewPage=!firstPoll&&(newHost!==oldHost||newPath!==oldPath);
                 lastHref=href;
                 firstPoll=false;
@@ -259,7 +257,6 @@ function startURLP(frame,tabId) {
                         activeTab.querySelector('.tab-tl').textContent=pageTitle;
                         tabs[activeTab.dataset.tabId].title=pageTitle;
                     }
-                    //favicon
                     let faviconUrl=null;
                     const iconLink=iframeDoc.querySelector('link[rel="icon"],link[rel="shortcut icon"],link[rel="apple-touch-icon"]');
                     if (iconLink&&iconLink.href) faviconUrl=iconLink.href;
