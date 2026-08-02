@@ -215,6 +215,7 @@ function startURLP(frame,tabId) {
     urlPollInt=setInterval(()=>{
         try {
             const href=frame.contentWindow.location.href;
+            console.log('poll:',{tabId, tabsUrl:tabs[tabId]?.url, href, urlFocused, currentInputVal:urlInput.value});
             if (href && href!==lastHref && href!=='about:blank') {
                 const oldPath=(()=>{try{return new URL(lastHref).pathname;}catch(e){return lastHref;}})();
                 const newPath=(()=>{try{return new URL(href).pathname;}catch(e){return href;}})();
