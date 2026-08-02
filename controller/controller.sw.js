@@ -179,7 +179,7 @@ class ControllerReference {
                 const ids = [];
                 const promises = [];
                 // Navigation fetches (document/iframe) deliver cookies via the inject
-                // script's embedded cookieJar dump â€” the destination page doesn't have
+                // script's embedded cookieJar dump — the destination page doesn't have
                 // inject.ts loaded yet to ack, so awaiting would deadlock. Broadcast
                 // so any already-loaded clients can update their jars, but don't wait.
                 const isNavigation = options?.destination === "document" || options?.destination === "iframe";
@@ -202,7 +202,7 @@ class ControllerReference {
                 }
                 // Wait for the first client to acknowledge the cookie sync.
                 // Using Promise.any (not Promise.all) so that extra SW clients created by
-                // window.open (e.g. test popup windows) don't cause timeouts â€” only the
+                // window.open (e.g. test popup windows) don't cause timeouts — only the
                 // main controller client needs to respond.
                 if (promises.length > 0) {
                     let timeoutId;
