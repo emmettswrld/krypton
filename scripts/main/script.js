@@ -208,6 +208,19 @@ function setUrl(url) {
 let urlPollInt=null;
 let lastHref='';
 
+function extractRealUrl(rewrittenHref) {
+    try {
+        const u = new URL(rewrittenHref);
+        const parts = u.pathname.split('/').filter(Boolean);
+        const last = parts[parts.length-1];
+        const decoded = decodeURIComponent(last);
+        if (decoded.startsWith('http://')||decoded.startsWith('https://')) {
+            return decoded;
+        }
+    } catch (e) {}
+    return null;
+}
+
 function startURLP(frame,tabId) {
     if (urlPollInt) clearInterval(urlPollInt);
     lastHref='';
@@ -217,6 +230,10 @@ function startURLP(frame,tabId) {
             const href=frame.contentWindow.location.href;
             if (href!==lastHref) console.log('href changed:',href);
             if (href && href!==lastHref && href!=='about:blank') {
+                const realUrl=extractRealUrl(href);
+                if (realUrl&&tabs[tabId]) {
+                    tabs[tabId].url=realUrl;
+                }
                 const oldPath=(()=>{try{return new URL(lastHref).pathname;}catch(e){return lastHref;}})();
                 const newPath=(()=>{try{return new URL(href).pathname;}catch(e){return href;}})();
                 const oldHost=(()=>{try{return new URL(lastHref).hostname;}catch(e){return '';}})();
