@@ -473,19 +473,38 @@ function friendActionHtml(status,username) {
     return `<button class="modal-btn primary" data-action="add-friend" data-username="${escapeHtml(username)}"><i data-lucide="user-plus"></i>Add Friend</button>`;
 }
 
+function roleBadgeHtml(profile) {
+    return `<span class="modal-role-badge" style="background:${profile.roleColor}">${escapeHtml(profile.roleName)}</span>`;
+}
+
+function formatMemberSince(iso) {
+    const d=new Date(iso);
+    return d.toLocaleDateString([],{month:'long',year:'numeric'});
+}
+
 function renderProfile(profile,friendStatus,isSelf) {
     modalCard.innerHTML=`
     <div class="modal-banner"></div>
     <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
     <div class="modal-body">
         <div class="modal-avatar-wrap">
-            <div class="modal-avatar"><img src="${getAvatarUrl(profile.username)}" alt=""></div>
+            <div class="modal-avatar${isSelf?' editable':''}" id="modalAvatarBox">
+                <img src="${getAvatarUrl(profile.username)}" alt="">
+                ${isSelf?`
+                <div class="modal-avatar-overlay">
+                    <div class="modal-avatar-overlay-text">Upload<br>Image</div>
+                </div>
+                <input type="file" id="modalAvatarFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;">
+                `:''}
+            </div>
         </div>
-        <div class="modal-username">${escapeHtml(profile.username)}</div>
-        <div class="modal-role" style="color:${profile.roleColor}">
-            <span class="modal-role-dot" style="background:${profile.roleColor}"></span>${escapeHtml(profile.roleName)}
+        <div class="modal-identity-row">
+            <div class="modal-username">${escapeHtml(profile.username)}</div>
+            ${roleBadgeHtml(profile)}
         </div>
+        <div class="modal-member-since"><i data-lucide="calendar"></i>Member since ${formatMemberSince(profile.createdAt)}</div>
         <div class="modal-bio">${profile.bio?escapeHtml(profile.bio):'<span style="color:#606060">No bio yet.</span>'}</div>
+        <div class="modal-divider"></div>
         <div class="modal-actions">
             ${isSelf?`<button class="modal-btn primary" data-action="edit-profile"><i data-lucide="pencil"></i>Edit Profile</button>`:friendActionHtml(friendStatus,profile.username)+ (friendStatus==='friends'?`<button class="modal-btn primary" data-action="open-dm" data-username="${escapeHtml(profile.username)}"><i data-lucide="message-circle"></i>Message</button>`:'')}
         </div>
@@ -493,6 +512,17 @@ function renderProfile(profile,friendStatus,isSelf) {
     </div>`;
     lucide.createIcons();
     document.getElementById('modalCloseBtn').addEventListener('click',closeModal);
+    if (isSelf) {
+        const avatarBox=document.getElementById('modalAvatarBox');
+        const fileInput=document.getElementById('modalAvatarFileInput');
+        avatarBox.addEventListener('click',()=>fileInput.click());
+        fileInput.addEventListener('change',async()=>{
+            const file=fileInput.files?.[0];
+            if (!file) return;
+            await uploadAvatarFile(file);
+            openProfile(profile.username);
+        });
+    }
     modalCard.querySelectorAll('[data-action]').forEach(btn=>{
         btn.addEventListener('click',async()=>{
             const action=btn.dataset.action;
@@ -549,16 +579,12 @@ function renderSettings(profile) {
     <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
     <div class="modal-body">
         <div class="modal-avatar-wrap">
-            <div class="modal-avatar"><img id="settingsAvatarPreview" src="${getAvatarUrl(profile.username)}" alt=""></div>
+            <div class="modal-avatar">
+                <img id="settingsAvatarPreview" src="${getAvatarUrl(profile.username)}" alt="">
+            </div>
         </div>
-        <div class="modal-username">${escapeHtml(profile.username)}</div>
-        <div class="modal-field-label">Avatar</div>
-        <div class="avatar-upload-row">
-            <label class="avatar-upload-btn" for="settingsAvatarInput">
-                <i data-lucide="upload"></i><span>Choose image</span>
-            </label>
-            <input class="avatar-upload-input" id="settingsAvatarInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
-            <span class="avatar-upload-hint" id="avatarFileHint">No file selected</span>
+        <div class="modal-identity-row">
+            <div class="modal-username">${escapeHtml(profile.username)}</div>
         </div>
         <div class="modal-field-label">Bio</div>
         <textarea class="modal-textarea" id="settingsBioInput" rows="3" maxlength="280" placeholder="Tell people about yourself...">${escapeHtml(profile.bio||'')}</textarea>
@@ -571,28 +597,12 @@ function renderSettings(profile) {
     lucide.createIcons();
     document.getElementById('modalCloseBtn').addEventListener('click',closeModal);
     document.getElementById('settingsCancelBtn').addEventListener('click',closeModal);
-    const fileInput=document.getElementById('settingsAvatarInput');
-    const fileHint=document.getElementById('avatarFileHint');
-    let selectedFile=null;
-    fileInput.addEventListener('change',()=>{
-        const file=fileInput.files?.[0];
-        if (!file) {
-            selectedFile=null;
-            fileHint.textContent='No file selected';
-            return;
-        }
-        selectedFile=file;
-        fileHint.textContent=file.name;
-        const preview=document.getElementById('settingsAvatarPreview');
-        preview.src=URL.createObjectURL(file);
-    });
     document.getElementById('settingsSaveBtn').addEventListener('click',async()=>{
         const statusEl=document.getElementById('modalStatus');
         const bio=document.getElementById('settingsBioInput').value;
         const token=getAuthToken();
         const formData=new FormData();
         formData.append('bio',bio);
-        if (selectedFile) formData.append('avatar',selectedFile);
         const res=await fetch('/api/chat/profile',{
             method:'PATCH',
             headers:{'Authorization':`Bearer ${token}`},
@@ -604,11 +614,26 @@ function renderSettings(profile) {
             statusEl.className='modal-status error';
             return;
         }
-        avatarUrls.set(profile.username,result.profile.avatarUrl);
         statusEl.textContent='Saved.';
         statusEl.className='modal-status success';
-        userBarAvatar.innerHTML=`<img class="msg-avatar-img" src="${getAvatarUrl(myUser)}" alt="">`;
     });
+}
+
+async function uploadAvatarFile(file) {
+    const token=getAuthToken();
+    const formData=new FormData();
+    formData.append('avatar',file);
+    const res=await fetch('/api/chat/profile',{
+        method:'PATCH',
+        headers:{'Authorization':`Bearer ${token}`},
+        body:formData 
+    });
+    const result=await res.json();
+    if (res.ok) {
+        avatarUrls.set(myUser,result.profile.avatarUrl);
+        userBarAvatar.innerHTML=`<img class="msg-avatar-img" src="${getAvatarUrl(myUser)}" alt="">`;
+    }
+    return res.ok;
 }
 
 userBar.addEventListener('click',openSettings);
