@@ -44,6 +44,15 @@ function getAvatarUrl(username) {
     return `https://api.dicebear.com/10.x/thumbs/svg?seed=${encodeURIComponent(username)}`;
 }
 
+function isLightColour(hex) {
+    const c=hex.replace('#','');
+    if (c.length!==6) return false;
+    const r=parseInt(c.substring(0,2),16);
+    const g=parseInt(c.substring(2,4),16);
+    const b=parseInt(c.substring(4,6),16);
+    const luminance=(0.299*r+0.587*g+0.114*b)/255;
+    return luminance>0.7;
+}
 
 async function loadMembers() {
     const token=getAuthToken();
@@ -474,7 +483,8 @@ function friendActionHtml(status,username) {
 }
 
 function roleBadgeHtml(profile) {
-    return `<span class="modal-role-badge" style="background:${profile.roleColor}">${escapeHtml(profile.roleName)}</span>`;
+    const lightClass=isLightColour(profile.roleColor)?' on-light':'';
+    return `<span class="modal-role-badge${lightClass}" style="background:${profile.roleColor}">${escapeHtml(profile.roleName)}</span>`;
 }
 
 function formatMemberSince(iso) {
@@ -501,6 +511,9 @@ function renderProfile(profile,friendStatus,isSelf) {
         <div class="modal-identity-row">
             <div class="modal-username">${escapeHtml(profile.username)}</div>
             ${roleBadgeHtml(profile)}
+        </div>
+        <div class="modal-role-line" style="color:${profile.roleColor}">
+            <span class="modal-role-dot" style="background:${profile.roleColor}"></span>${escapeHtml(profile.roleName)}
         </div>
         <div class="modal-member-since"><i data-lucide="calendar"></i>Member since ${formatMemberSince(profile.createdAt)}</div>
         <div class="modal-bio">${profile.bio?escapeHtml(profile.bio):'<span style="color:#606060">No bio yet.</span>'}</div>
