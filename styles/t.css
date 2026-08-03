@@ -1019,7 +1019,7 @@ i[data-lucide] svg {
 }
 
 .modal-body {
-    padding:0 20px 20px;
+    padding:0 20px 16px;
 }
 
 .modal-avatar-wrap {
@@ -1145,13 +1145,14 @@ i[data-lucide] svg {
 .modal-divider {
     height:1px;
     background:#1a1a1a;
-    margin:16px 0;
+    margin:12px 0;
 }
 
 .modal-actions {
     display:flex;
     gap:8px;
     flex-wrap:wrap;
+    margin-bottom:2px;
 }
 
 .modal-btn {
@@ -1281,9 +1282,9 @@ i[data-lucide] svg {
 
 .modal-status {
     font-size:12px;
-    margin-top:8px;
+    margin-top:6px;
     color:#606060;
-    min-height:14px;
+    min-height:0;
 }
 
 .modal-status.error {

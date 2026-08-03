@@ -592,8 +592,12 @@ function renderSettings(profile) {
     <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
     <div class="modal-body">
         <div class="modal-avatar-wrap">
-            <div class="modal-avatar">
+            <div class="modal-avatar editable" id="modalAvatarBox">
                 <img id="settingsAvatarPreview" src="${getAvatarUrl(profile.username)}" alt="">
+                <div class="modal-avatar-overlay">
+                    <div class="modal-avatar-overlay-text">Upload<br>Image</div>
+                </div>
+                <input type="file" id="modalAvatarFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;">
             </div>
         </div>
         <div class="modal-identity-row">
@@ -610,6 +614,25 @@ function renderSettings(profile) {
     lucide.createIcons();
     document.getElementById('modalCloseBtn').addEventListener('click',closeModal);
     document.getElementById('settingsCancelBtn').addEventListener('click',closeModal);
+    const avatarBox=document.getElementById('modalAvatarBox');
+    const fileInput=document.getElementById('modalAvatarFileInput');
+    avatarBox.addEventListener('click',()=>fileInput.click());
+    fileInput.addEventListener('change',async()=>{
+        const file=fileInput.files?.[0];
+        if (!file) return;
+        const statusEl=document.getElementById('modalStatus');
+        statusEl.textContent='Uploading...';
+        statusEl.className='modal-status';
+        const result=await uploadAvatarFile(file);
+        if (!result.ok) {
+            statusEl.textContent=result.error;
+            statusEl.className='modal-status error';
+            return;
+        }
+        document.getElementById('settingsAvatarPreview').src=result.avatarUrl;
+        statusEl.textContent='Avatar updated.';
+        statusEl.className='modal-status success';
+    });
     document.getElementById('settingsSaveBtn').addEventListener('click',async()=>{
         const statusEl=document.getElementById('modalStatus');
         const bio=document.getElementById('settingsBioInput').value;
