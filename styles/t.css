@@ -1151,11 +1151,11 @@ i[data-lucide] svg {
 .modal-actions {
     display:flex;
     gap:8px;
-    flex-wrap:wrap;
     margin-bottom:2px;
 }
 
 .modal-btn {
+    flex:1;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -1171,6 +1171,7 @@ i[data-lucide] svg {
     font-family:'Inter';
     cursor:pointer;
     transition:background 0.15s ease,border-color 0.15s ease;
+    white-space:nowrap;
 }
 
 .modal-btn svg {
@@ -1309,4 +1310,22 @@ i[data-lucide] svg {
     height:7px;
     border-radius:50%;
     flex-shrink:0;
+}
+
+.role-tag {
+    display:inline-flex;
+    align-items:center;
+    padding:1px 6px;
+    border-radius:4px;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:0.3px;
+    color:#fff;
+    text-transform:uppercase;
+    margin-left:6px;
+    vertical-align:middle;
+}
+
+.role-tag.on-light {
+    color:#0a0a0a;
 }

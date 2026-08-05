@@ -33,6 +33,7 @@ let dmMessageRows=new Map();
 let friendsData={accepted:[],incoming:[],outgoing:[]};
 let myProfile=null;
 let roleColours=new Map();
+let roleNames=new Map();
 let avatarUrls=new Map();
 let cachedChannels=[];
 
@@ -63,6 +64,7 @@ async function loadMembers() {
     const data=await res.json();
     data.members.forEach(m=>roleColours.set(m.username,m.roleColor||'#f0f0f0'));
     data.members.forEach(m=>{if (m.avatarUrl) avatarUrls.set(m.username,m.avatarUrl);});
+    data.members.forEach(m=>roleNames.set(m.username,m.roleName||''));
     return data.members;
 }
 
@@ -198,14 +200,13 @@ function enterEditMode(messageId) {
 }
 
 function renderMemberItem(member) {
-    const initial=member.username.charAt(0).toUpperCase();
     return `
     <div class="member-item ${member.online?'':'offline'}" data-username="${escapeHtml(member.username)}">
         <div class="member-avatar">
             <img class="member-avatar-img" src="${getAvatarUrl(member.username)}" alt="">
             <div class="member-status-dot ${member.online?'':'offline'}"></div>
         </div>
-        <span class="member-name">${escapeHtml(member.username)}</span>
+        <span class="member-name">${escapeHtml(member.username)}${roleTagHtml(member.username)}</span>
     </div>`;
 }
 
@@ -266,7 +267,7 @@ function renderMessage(message) {
             <img class="msg-avatar-img" src="${getAvatarUrl(message.username)}" alt="">
         </div>
         <div class="msg-body">
-            <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
+            <div class="msg-author">${escapeHtml(message.username)}${isMine?' (you)':''}${roleTagHtml(message.username)}<span class="msg-time">${formatTime(message.createdAt)}</span></div>
             <div class="msg-text">${escapeHtml(message.text)}${editedTag}</div>
             ${reactionsHtml}
         </div>
@@ -482,9 +483,24 @@ function friendActionHtml(status,username) {
     return `<button class="modal-btn primary" data-action="add-friend" data-username="${escapeHtml(username)}"><i data-lucide="user-plus"></i>Add Friend</button>`;
 }
 
+function messageActionHtml(status,username) {
+    if (status==='friends') {
+        return `<button class="modal-btn primary" data-action="open-dm" data-username="${escapeHtml(username)}"><i data-lucide="message-circle"></i>Message</button>`;
+    }
+    return `<button class="modal-btn" disabled><i data-lucide="message-circle"></i>Message</button>`;
+}
+
 function roleBadgeHtml(profile) {
     const lightClass=isLightColour(profile.roleColor)?' on-light':'';
     return `<span class="modal-role-badge${lightClass}" style="background:${profile.roleColor}">${escapeHtml(profile.roleName)}</span>`;
+}
+
+function roleTagHtml(username) {
+    const colour=roleColours.get(username);
+    const name=roleNames.get(username);
+    if (!colour||!name) return '';
+    const lightClass=isLightColour(colour)?' on-light':'';
+    return `<span class="role-tag"${lightClass}" style="background:${colour}">${escapeHtml(name)}</span>`;
 }
 
 function formatMemberSince(iso) {
@@ -519,7 +535,7 @@ function renderProfile(profile,friendStatus,isSelf) {
         <div class="modal-bio">${profile.bio?escapeHtml(profile.bio):'<span style="color:#606060">No bio yet.</span>'}</div>
         <div class="modal-divider"></div>
         <div class="modal-actions">
-            ${isSelf?`<button class="modal-btn primary" data-action="edit-profile"><i data-lucide="pencil"></i>Edit Profile</button>`:friendActionHtml(friendStatus,profile.username)+ (friendStatus==='friends'?`<button class="modal-btn primary" data-action="open-dm" data-username="${escapeHtml(profile.username)}"><i data-lucide="message-circle"></i>Message</button>`:'')}
+            ${isSelf?`<button class="modal-btn primary" data-action="edit-profile"><i data-lucide="pencil"></i>Edit Profile</button>`:friendActionHtml(friendStatus,profile.username)+messageActionHtml(friendStatus,profile.username)}
         </div>
         <div class="modal-status" id="modalStatus"></div>
     </div>`;
