@@ -1,5 +1,8 @@
 lucide.createIcons();
 
+import {setAuth} from "./guard.js";
+import { getDeviceFingerprint } from "./fingerprint.js";
+
 const API_BASE='';
 
 const authForm=document.getElementById('authForm');
@@ -95,18 +98,18 @@ authForm.addEventListener('submit',async(e)=>{
     const endpoint=mode==='login'?'/api/auth/login':'/api/auth/signup';
     setLoading(true);
     try {
+        const fingerprint=await getDeviceFingerprint();
         const res=await fetch(`${API_BASE}${endpoint}`,{
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({username,password})
+            body:JSON.stringify({username,password,fingerprint})
         });
         const data=await res.json();
         if (!res.ok) {
-            showError(data.errpr||'Something went wrong. Please try again.');
+            showError(data.error||'Something went wrong. Please try again.');
             return;
         }
-        localStorage.setItem('authToken',data.token);
-        localStorage.setItem('authUsername',data.username);
+        setAuth(data.token,data.username);
         window.location.href='t.html';
     } catch (err) {
         console.error(`${mode} failed`,err);

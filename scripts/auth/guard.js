@@ -40,3 +40,8 @@ export async function requireAuth() {
         return null;
     }
 }
+
+export function setAuth(token,username) {
+    localStorage.setItem('authToken',token);
+    localStorage.setItem('authUsername',username);
+}

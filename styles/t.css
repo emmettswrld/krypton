@@ -1329,3 +1329,226 @@ i[data-lucide] svg {
 .role-tag.on-light {
     color:#0a0a0a;
 }
+
+.mod-panel {
+    position:absolute;
+    width:280px;
+    max-width:85vw;
+    background:#0a0a0a;
+    border:1px solid #1a1a1a;
+    border-radius:10px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.6);
+    padding:16px;
+    transform:scale(0.96);
+    opacity:0;
+    pointer-events:none;
+    transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1),opacity 0.15s ease;
+}
+
+.mod-panel.open {
+    transform:scale(1);
+    opacity:1;
+    pointer-events:all;
+}
+
+.mod-panel-title {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:700;
+    color:#a855f7;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin-bottom:12px;
+}
+
+.mod-panel-title svg {
+    width:14px;
+    height:14px;
+}
+
+.mod-status-row {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:8px 10px;
+    background:#050505;
+    border:1px solid #1a1a1a;
+    border-radius:8px;
+    margin-bottom:12px;
+    font-size:11.5px;
+    color:#a0a0a0;
+}
+
+.mod-status-row strong {
+    color:#e0e0e0;
+}
+
+.mod-status-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:1px 7px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+    width:fit-content;
+}
+
+.mod-status-badge.banned {
+    background:rgba(239,68,68,0.15);
+    color:#ef4444;
+    border:1px solid #ef4444;
+}
+
+.mod-status-badge.muted {
+    background:rgba(59,165,93,0.15);
+    color:#3ba55d;
+    border:1px solid #3ba55d;
+}
+
+.mod-section-label {
+    font-size:10.5px;
+    font-weight:700;
+    color:#606060;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
+    margin:12px 0 6px;
+}
+
+.mod-section-label:first-of-type {
+    margin-top:0;
+}
+
+.mod-actions-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+}
+
+.mod-action-btn {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    height:30px;
+    border-radius:999px;
+    border:1px solid #2a2a2a;
+    background:#141414;
+    color:#fff;
+    font-size:11px;
+    font-weight:600;
+    font-family:'Inter';
+    cursor:pointer;
+    transition:background 0.15s ease,border-color 0.15s ease;
+}
+
+.mod-action-btn svg {
+    width:12px;
+    height:12px;
+    color:#a855f7;
+    flex-shrink:0;
+}
+
+.mod-action-btn:hover {
+    background:#1a1a1a;
+    border-color:#3a3a3a;
+}
+
+.mod-action-btn.danger svg {
+    color:#ef4444;
+}
+
+.mod-action-btn.danger:hover {
+    background:#241414;
+    border-color:#ef4444; 
+}
+
+.mod-action-btn.warn svg {
+    color:#f59e0b;
+}
+
+.mod-action-btn.ful {
+    grid-column:1/-1;
+}
+
+.mod-warnings-list {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:120px;
+    overflow-y:auto;
+}
+
+.mod-warning-item {
+    padding:6px 8px;
+    background:#050505;
+    border:1px solid #1a1a1a;
+    border-radius:6px;
+    font-size:11px;
+    color:#a0a0a0;
+}
+
+.mod-warning-item .mod-warning-meta {
+    color:#606060;
+    font-size:10px;
+    margin-top:2px;
+}
+
+.mod-role-select {
+    width:100%;
+    background:#050505;
+    border:1px solid #2a2a2a;
+    border-radius:8px;
+    padding:7px 10px;
+    color:#fff;
+    font-size:12px;
+    font-family:'Inter';
+    outline:none;
+    margin-bottom:8px;
+}
+
+.mod-form-row {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:10px;
+}
+
+.mod-form-row input,
+.mod-form-row select {
+    background:#050505;
+    border:1px solid #2a2a2a;
+    border-radius:8px;
+    padding:7px 10px;
+    color:#fff;
+    font-size:12px;
+    font-family:'Inter';
+    outline:none;
+}
+
+.mod-form-row input:focus,
+.mod-form-row select:focus {
+    border-color:#a855f7;
+}
+
+.mod-checkbox-row {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    color:#a0a0a0;
+}
+
+.typing-indicator {
+    height:18px;
+    padding:0 24px;
+    font-size:11.5px;
+    color:#606060;
+    font-style:italic;
+    display:flex;
+    align-items:center;
+    flex-shrink:0;
+}

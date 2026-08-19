@@ -1,4 +1,4 @@
-import { requireAuth,getAuthToken,clearAuth,redirect } from "../auth/guard.js";
+import { requireAuth,getAuthToken,clearAuth,redirect,setAuth } from "../auth/guard.js";
 lucide.createIcons();
 
 const contentArea=document.getElementById('contentArea');
@@ -16,6 +16,8 @@ const userBarAvatar=document.getElementById('userBarAvatar');
 const userBarName=document.getElementById('userBarName');
 const modalOverlay=document.getElementById('modalOverlay');
 const modalCard=document.getElementById('modalCard');
+const modPanel=document.getElementById('modPanel');
+const typingIndicator=document.getElementById('typingIndicator');
 const messageRows=new Map();
 const messagesById=new Map();
 
@@ -36,6 +38,12 @@ let roleColours=new Map();
 let roleNames=new Map();
 let avatarUrls=new Map();
 let cachedChannels=[];
+let canModerate=false;
+let myRole='member';
+let typingTimeout=null;
+let isCurrentlyTyping=false;
+let dmTypingTimeout=null;
+let channelMeta=new Map();
 
 const GROUP_WINDOW_MS=2*60*1000
 
@@ -356,6 +364,20 @@ function connectWs() {
             if (currentView==='dms'&&currentDmUser&&(data.message.from===currentDmUser||data.message.to===currentDmUser)) {
                 renderDmMessage(data.message);
             }
+        } else if (data.type==='typing'&&data.channel===currentChannel&&currentView==='chat') {
+            renderTypingIndicator(data.usernames.filter(u=>u!==myUser));
+        } else if (data.type==='dm_typing'&&currentView==='dms'&&currentDmUser===data.from) {
+            renderTypingIndicator(data.isTyping?[data.from]:[]);
+        } else if (data.type==='banned') {
+            alert(`You have been banned: ${data.reason}`);
+            clearAuth();
+            redirect();
+        } else if (data.type==='muted') {
+            typingIndicator.textContent=`You are muted: ${data.reason}`;
+        } else if (data.type==='warned') {
+            alert(`You received a warning from ${data.moderator}: ${data.reason}`);
+        } else if (data.type==='role_changed') {
+            location.reload();
         } else if (data.type==='friend_request'||data.type==='friend_accepted') {
             loadFriends();
         } else if (data.type==='error') {
@@ -367,10 +389,30 @@ function connectWs() {
     });
 }
 
+function renderTypingIndicator(usernames) {
+    if (!usernames.length) {
+        typingIndicator.textContent='';
+        return;
+    }
+    if (usernames.length===1) {
+        typingIndicator.textContent=`${usernames[0]} is typing...`;
+    } else if (usernames.length===2) {
+        typingIndicator.textContent=`${usernames[0]} and ${usernames[1]} are typing...`;
+    } else {
+        typingIndicator.textContent='Several people are typing...';
+    }
+}
+
 async function switchChannel(channel) {
     currentChannel=channel;
+    typingIndicator.textContent='';
     activeChannelName.textContent=channel;
-    messageInput.placeholder=`Message #${channel}`;
+    const meta=channelMeta.get(channel);
+    const canPost=meta?meta.canPost:true;
+    messageInput.disabled=!canPost;
+    messageInput.placeholder=canPost?`Message #${channel}`:`You don't have permission to send messages in #${channel}`;
+    sendBtn.disabled=!canPost;
+    sendBtn.style.opacity=canPost?'1':'0.4';
     document.querySelectorAll('.channel-item').forEach(i=>{{
         i.classList.toggle('active',i.dataset.channel===channel);
     }});
@@ -386,8 +428,14 @@ function sendMessage() {
     if (currentView==='dms') {
         if (!currentDmUser) return;
         ws.send(JSON.stringify({type:'dm',to:currentDmUser,text}));
+        clearTimeout(dmTypingTimeout);
+        isCurrentlyTyping=false;
+        ws.send(JSON.stringify({type:'dm_typing',to:currentDmUser,isTyping:false}));
     } else {
         ws.send(JSON.stringify({type:'message',text}));
+        clearTimeout(typingTimeout);
+        isCurrentlyTyping=false;
+        ws.send(JSON.stringify({type:'typing',isTyping:false}));
     }
     messageInput.value='';
 }
@@ -403,6 +451,8 @@ async function loadChannels() {
 }
 
 function buildSidebar(channels) {
+    channelMeta.clear();
+    channels.forEach(ch=>channelMeta.set(ch.id,{readOnly:ch.readOnly,canPost:ch.canPost}));
     const categories=new Map();
     channels.forEach((ch)=>{
         if (!categories.has(ch.category)) categories.set(ch.category,[]);
@@ -429,7 +479,8 @@ function buildSidebar(channels) {
             const item=document.createElement('div');
             item.className='channel-item';
             item.dataset.channel=ch.id;
-            item.innerHTML=`<i data-lucide="hash"></i><span>${escapeHtml(ch.name)}</span>`;
+            const icon=ch.readOnly?'lock':'hash';
+            item.innerHTML=`<i data-lucide="${icon}"></i><span>${escapeHtml(ch.name)}</span>`;
             item.addEventListener('click',()=>switchChannel(ch.id));
             channelList.appendChild(item);
         });
@@ -449,6 +500,32 @@ messageInput.addEventListener('keydown',(e)=>{
     if (e.key==='Enter') sendMessage();
 });
 
+messageInput.addEventListener('input',()=>{
+    if (currentView==='dms') {
+        if (!currentDmUser||!ws||ws.readyState!==WebSocket.OPEN) return;
+        if (!isCurrentlyTyping) {
+            isCurrentlyTyping=true;
+            ws.send(JSON.stringify({type:'dm_typing',to:currentDmUser,isTyping:true}));
+        }
+        clearTimeout(dmTypingTimeout);
+        dmTypingTimeout=setTimeout(()=>{
+            isCurrentlyTyping=false;
+            ws.send(JSON.stringify({type:'dm_typing',to:currentDmUser,isTyping:false}));
+        },3000);
+    } else {
+        if (!ws||ws.readyState!==WebSocket.OPEN) return;
+        if (!isCurrentlyTyping) {
+            isCurrentlyTyping=true;
+            ws.send(JSON.stringify({type:'typing',isTyping:true}));
+        }
+        clearTimeout(typingTimeout);
+        typingTimeout=setTimeout(()=>{
+            isCurrentlyTyping=false;
+            ws.send(JSON.stringify({type:'typing',isTyping:false}));
+        },3000);
+    }
+});
+
 function closeModal() {
     modalOverlay.classList.remove('open');
     modalCard.innerHTML='';
@@ -466,6 +543,7 @@ async function openProfile(username) {
     if (!res.ok) return;
     const data=await res.json();
     if (data.profile.avatarUrl) avatarUrls.set(data.profile.username,data.profile.avatarUrl);
+    canModerate=data.canModerate;
     renderProfile(data.profile,data.friendStatus,data.isSelf);
     modalOverlay.classList.add('open');
 }
@@ -500,7 +578,7 @@ function roleTagHtml(username) {
     const name=roleNames.get(username);
     if (!colour||!name) return '';
     const lightClass=isLightColour(colour)?' on-light':'';
-    return `<span class="role-tag"${lightClass}" style="background:${colour}">${escapeHtml(name)}</span>`;
+    return `<span class="role-tag${lightClass}" style="background:${colour}">${escapeHtml(name)}</span>`;
 }
 
 function formatMemberSince(iso) {
@@ -537,6 +615,7 @@ function renderProfile(profile,friendStatus,isSelf) {
         <div class="modal-actions">
             ${isSelf?`<button class="modal-btn primary" data-action="edit-profile"><i data-lucide="pencil"></i>Edit Profile</button>`:friendActionHtml(friendStatus,profile.username)+messageActionHtml(friendStatus,profile.username)}
         </div>
+        ${!isSelf&&canModerate?`<button class="modal-btn" data-action="moderate" data-username="${escapeHtml(profile.username)}" style="width:100%;margin-top:8px"><i data-lucide="shield"></i>Moderate</button>`:''}
         <div class="modal-status" id="modalStatus"></div>
     </div>`;
     lucide.createIcons();
@@ -562,6 +641,10 @@ function renderProfile(profile,friendStatus,isSelf) {
                 closeModal();
                 switchToView('dms');
                 openDmThread(username);
+                return;
+            }
+            if (action==='moderate') {
+                openModPanel(username,btn);
                 return;
             }
             const endpoint={
@@ -619,6 +702,11 @@ function renderSettings(profile) {
         <div class="modal-identity-row">
             <div class="modal-username">${escapeHtml(profile.username)}</div>
         </div>
+        <div class="modal-field-label">Username</div>
+        <div class="mod-form-row" style="margin-bottom:4px;">
+            <input class="modal-input" id="settingsUsernameInput" type="text" value="${escapeHtml(profile.username)}">
+        </div>
+        <button class="modal-btn" id="settingsUsernameSaveBtn" style="width:100%;margin-bottom:10px;"><i data-lucide="at-sign"></i>Change username</button>
         <div class="modal-field-label">Bio</div>
         <textarea class="modal-textarea" id="settingsBioInput" rows="3" maxlength="280" placeholder="Tell people about yourself...">${escapeHtml(profile.bio||'')}</textarea>
         <div class="modal-save-row">
@@ -837,6 +925,171 @@ function renderDmMessage(message) {
     renderMessage(fakeMsg);
 }
 
+function closeModPanel() {
+    modPanel.classList.remove('open');
+    modPanel.innerHTML='';
+}
+
+async function openModPanel(username,anchorEl) {
+    const token=getAuthToken();
+    const res=await fetch(`/api/chat/moderation/${encodeURIComponent(username)}`,{
+        headers:{'Authorization':`Bearer ${token}`}
+    });
+    if (!res.ok) return;
+    const data=await res.json();
+    renderModPanel(data,anchorEl);
+}
+
+function modStatusBadgeHtml(data) {
+    if (data.ban) return `<span class="mod-status-badge banned"><i data-lucide="ban"></i>Banned</span>`;
+    if (data.mute) return `<span class="mod-status-badge muted"><i data-lucide="mic-off"></i>Muted</span>`;
+    return `<span class="mod-status-badge clean"><i data-lucide="check"></i>No Action</span>`;
+}
+
+function renderModPanel(data,anchorEl) {
+    const isOwnerViewer=myRole==='owner';
+    const roleOptions=Object.keys(ROLE_NAMES_LOCAL).map(r=>`<option value="${r}"${data.role===r?' selected':''}>${ROLE_NAMES_LOCAL[r]}</option>`).join('');
+    modPanel.innerHTML=`
+    <div class="mod-panel-title"><i data-lucide="shield"></i>Moderate @${escapeHtml(data.username)}</div>
+    <div class="mod-status-row">
+        ${modStatusBadgeHtml(data)}
+        ${data.ban?`<span>Reason: ${escapeHtml(data.ban.reason)}</span><span>${data.ban.expiresAt?`Expires: ${new Date(data.ban.expiresAt).toLocaleString()}`:'Permanent'}</span>`:''}
+        ${data.mute?`<span>Muted: ${escapeHtml(data.mute.reason)}</span><span>${data.mute.expiresAt?`Expires: ${new Date(data.mute.expiresAt).toLocaleString()}`:'Permanent'}</span>`:''}
+        <span>Known devices: <strong>${data.fingerprintCount}</strong></span>
+    </div>
+    ${isOwnerViewer?`<div class="mod-section-label">Role</div>
+    <select class="mod-role-select" id="modRoleSelect">${roleOptions}</select>
+    <button class="mod-action-btn full" id="modRoleSaveBtn" style="margin-bottom:12px;"><i data-lucide="save"></i>Update Role</button>`:''}
+    <div class="mod-section-label">Warn</div>
+    <div class="mod-form-row">
+        <input type="text" id="modWarnReason" placeholder="Reason for warning">
+    </div>
+    <button class="mod-action-btn warn full" id="modWarnBtn" style="margin-bottom:12px;"><i data-lucide="alert-triangle"></i>Send warning</button>
+    <div class="mod-section-label">Mute</div>
+    <div class="mod-form-row">
+        <input type="text" id="modMuteReason" placeholder="Reason for mute">
+        <select id="modMuteDuration">
+            <option value="">Permanent</option>
+            <option value="10">10 minutes</option>
+            <option value="60">1 hour</option>
+            <option value="1440">1 day</option>
+            <option value="10080">1 week<option>
+        </select>
+    </div>
+    <div class="mod-actions-grid" style="margin-bottom:12px;">
+        <button class="mod-action-btn danger" id="modBanBtn"><i data-lucide="ban"></i>Ban</button>
+        <button class="mod-action-btn" id="modUnbanBtn"><i data-lucide="undo-2"></i>Unban</button>
+    </div>
+    <div class="mod-section-label">Ban</div>
+    <div class="mod-form-row">
+        <input type="text" id="modBanReason" placeholder="Reason for ban">
+        <select id="modBanDuration">
+            <option value="">Permanent</option>
+            <option value="60">1 hour</option>
+            <option value="1440">1 day</option>
+            <option value="10080">1 week</option>
+        </select>
+        <label class="mod-checkbox-row"><input type="checkbox" id="modFingerprintBan">Also fingerprint ban known devices</label>
+    </div>
+    <div class="mod-actions-grid">
+        <button class="mod-action-btn danger" id="modBanBtn"><i data-lucide="ban"></i>Ban</button>
+        <button class="mod-action-btn" id="modUnbanBtn"><i data-lucide="undo-2"></i>Unban</button>
+    </div>
+    ${data.warnings.length?`
+    <div class="mod-section-label">Warning history</div>
+    <div class="mod-warnings-list">
+        ${data.warnings.slice().reverse().map(w=>`
+        <div class="mod-warning-item">
+            ${escapeHtml(w.reason)}
+            <div class="mod-warning-meta">by ${escapeHtml(w.moderator)} · ${new Date(w.createdAt).toLocaleString()}</div>
+        </div>`).join('')}
+    </div>
+    `:''}
+    `;
+    lucide.createIcons();
+    positionModPanel(anchorEl);
+    modPanel.classList.add('open');
+    if (isOwnerViewer) {
+        document.getElementById('modRoleSaveBtn').addEventListener('click',async()=>{
+            const role=document.getElementById('modRoleSelect').value;
+            const token=getAuthToken();
+            const res=await fetch('/api/chat/moderation/role',{
+                method:'POST',
+                headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+                body:JSON.stringify({username:data.username,role})
+            });
+            if (res.ok) {await loadMembers();buildMembers(currentMembers);openModPanel(data.username,anchorEl);}
+        });
+    }
+    document.getElementById('modWarnBtn').addEventListener('click',async()=>{
+        const reason=document.getElementById('modWarnReason').value.trim();
+        if (!reason) return;
+        const token=getAuthToken();
+        const res=await fetch('/api/chat/moderation/warn',{
+            method:'POST',
+            headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({username:data.username,reason})
+        });
+        if (res.ok) openModPanel(data.username,anchorEl);
+    });
+    document.getElementById('modMuteBtn').addEventListener('click',async()=>{
+        const reason=document.getElementById('modMuteReason').value.trim();
+        const durationMinutes=document.getElementById('modMuteDuration').value||null;
+        const token=getAuthToken();
+        const res=await fetch('/api/chat/moderation/mute',{
+            method:'POST',
+            headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({username:data.username,reason,durationMinutes})
+        });
+        if (res.ok) openModPanel(data.username,anchorEl);
+    });
+    document.getElementById('modUnmuteBtn').addEventListener('click',async()=>{
+        const token=getAuthToken();
+        const res=await fetch('/api/chat/moderation/unmute',{
+            method:'POST',
+            headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({username:data.username})
+        });
+        if (res.ok) openModPanel(data.username,anchorEl);
+    });
+    document.getElementById('modBanBtn').addEventListener('click',async()=>{
+        const reason=document.getElementById('modBanReason').value.trim();
+        const durationMinutes=document.getElementById('modBanDuration').value||null;
+        const fingerprintBan=document.getElementById('modFingerprintBan').checked;
+        const token=getAuthToken();
+        const res=await fetch('/api/chat/moderation/ban',{
+            method:'POST',
+            headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({username:data.username,reason,durationMinutes,fingerprintBan})
+        });
+        if (res.ok) openModPanel(data.username,anchorEl);
+    });
+    document.getElementById('modUnbanBtn').addEventListener('click',async()=>{
+        const token=getAuthToken();
+        const res=await fetch('/api/chat/moderation/unban',{
+            method:'POST',
+            headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({username:data.username})
+        });
+        if (res.ok) openModPanel(data.username,anchorEl);
+    });
+}
+
+function positionModPanel(anchorEl) {
+    if (!anchorEl) {modPanel.style.top='80px';modPanel.style.left='calc(50% + 190px)';return;}
+    const rect=anchorEl.getBoundingClientRect();
+    modPanel.style.top=`${Math.min(rect.top,window.innerHeight-500)}px`;
+    modPanel.style.left=`${Math.min(rect.right+12,window.innerWidth-300)}px`;
+}
+
+const ROLE_NAMES_LOCAL={member:'Member',admin:'Admin',owner:'Owner'}
+
+document.addEventListener('click',(e)=>{
+    if (modPanel.classList.contains('open')&&!modPanel.contains(e.target)&&!e.target.closest('[data-action="moderate"]')) {
+        closeModPanel();
+    }
+});
+
 requireAuth().then(async(username)=>{
     if (!username) return;
     myUser=username;
@@ -844,8 +1097,11 @@ requireAuth().then(async(username)=>{
     cachedChannels=channels;
     buildSidebar(channels);
     currentMembers=await loadMembers();
+    myRole=roleColours.has(myUser)?myRole:myRole;
+    const myMember=currentMembers.find(m=>m.username===myUser);
+    if (myMember) myRole=myMember.role;
     buildMembers(currentMembers);
-    await loadFriends()
+    await loadFriends();
     userBarName.textContent=myUser;
     userBarAvatar.innerHTML=`<img class="msg-avatar-img" src="${getAvatarUrl(myUser)}" alt="">`;
     const defaultChannel=channels[0]?.id||'general';
