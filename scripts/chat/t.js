@@ -586,11 +586,17 @@ function formatMemberSince(iso) {
     return d.toLocaleDateString([],{month:'long',year:'numeric'});
 }
 
+function roleTagLine(profile) {
+    const lightClass=isLightColour(profile.roleColor)?' on-light':'';
+    return `<span class="modal-role-badge${lightClass}" style="background:${profile.roleColor}">${escapeHtml(profile.roleName)}</span>`;
+}
+
 function renderProfile(profile,friendStatus,isSelf) {
+    modalCard.classList.remove('settings-card');
     modalCard.innerHTML=`
-    <div class="modal-banner"></div>
     <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
-    <div class="modal-body">
+    <div class="modal-left">
+        <div class="modal-banner-card"></div>
         <div class="modal-avatar-wrap">
             <div class="modal-avatar${isSelf?' editable':''}" id="modalAvatarBox">
                 <img src="${getAvatarUrl(profile.username)}" alt="">
@@ -602,24 +608,43 @@ function renderProfile(profile,friendStatus,isSelf) {
                 `:''}
             </div>
         </div>
-        <div class="modal-identity-row">
-            <div class="modal-username">${escapeHtml(profile.username)}</div>
-            ${roleBadgeHtml(profile)}
+        <div class="modal-identity-block">
+            <div class="modal-identity-row">
+                <div class="modal-username">${escapeHtml(profile.username)}</div>
+                ${roleTagLine(profile)}
+            </div>
+            <div class="modal-divider"></div>
+            <div class="modal-actions">
+                ${isSelf?`<button class="modal-btn primary" data-action="edit-profile"><i data-lucide="pencil"></i>Edit Profile</button>`:friendActionHtml(friendStatus,profile.username)+messageActionHtml(friendStatus,profile.username)}
+            </div>
+            ${!isSelf&&canModerate?`<button class="modal-btn" data-action="moderate" data-username="${escapeHtml(profile.username)}" style="width:100%;margin-top:6px;"><i data-lucide="shield"></i>Moderate</button>`:''}
+            <div class="modal-info-block">
+                <div class="modal-member-since"><i data-lucide="calendar"></i>Member since ${formatMemberSince(profile.createdAt)}</div>
+            </div>
+            ${profile.bio?`
+            <div class="modal-field-label">About</div>
+            <div class="modal-bio">${escapeHtml(profile.bio)}</div>
+            `:''}
+            <div class="modal-status" id="modalStatus"></div>
         </div>
-        <div class="modal-role-line" style="color:${profile.roleColor}">
-            <span class="modal-role-dot" style="background:${profile.roleColor}"></span>${escapeHtml(profile.roleName)}
+    </div>
+    <div class="modal-right">
+        <div class="modal-tabs">
+            <div class="modal-tab active" data-tab="activity">Activity</div>
+            <div class="modal-tab" data-tab="mutual">Mutual Friends</div>
         </div>
-        <div class="modal-member-since"><i data-lucide="calendar"></i>Member since ${formatMemberSince(profile.createdAt)}</div>
-        <div class="modal-bio">${profile.bio?escapeHtml(profile.bio):'<span style="color:#606060">No bio yet.</span>'}</div>
-        <div class="modal-divider"></div>
-        <div class="modal-actions">
-            ${isSelf?`<button class="modal-btn primary" data-action="edit-profile"><i data-lucide="pencil"></i>Edit Profile</button>`:friendActionHtml(friendStatus,profile.username)+messageActionHtml(friendStatus,profile.username)}
-        </div>
-        ${!isSelf&&canModerate?`<button class="modal-btn" data-action="moderate" data-username="${escapeHtml(profile.username)}" style="width:100%;margin-top:8px"><i data-lucide="shield"></i>Moderate</button>`:''}
-        <div class="modal-status" id="modalStatus"></div>
+        <div class="modal-tab-panel" id="modalTabPanel"></div>
     </div>`;
     lucide.createIcons();
     document.getElementById('modalCloseBtn').addEventListener('click',closeModal);
+    renderProfileTab('activity',profile,isSelf);
+    modalCard.querySelectorAll('.modal-tab').forEach(tab=>{
+        tab.addEventListener('click',()=>{
+            modalCard.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+            tab.classList.add('active');
+            renderProfileTab(tab.dataset.tab,profile,isSelf);
+        });
+    });
     if (isSelf) {
         const avatarBox=document.getElementById('modalAvatarBox');
         const fileInput=document.getElementById('modalAvatarFileInput');
@@ -673,6 +698,24 @@ function renderProfile(profile,friendStatus,isSelf) {
     });
 }
 
+function renderProfileTab(tab,profile,isSelf) {
+    const panel=document.getElementById('modalTabPanel');
+    if (tab==='activity') {
+        panel.innerHTML=`
+        <div class="modal-empty-state">
+            <i data-lucide="activity" style="width:32px;height:32px;color:#3a3a3a;"></i>
+            <div class="modal-empty-text">${escapeHtml(profile.username)} doesn't have any activity to share yet.</div>
+        </div>`;
+    } else {
+        panel.innerHTML=`
+        <div class="modal-empty-state">
+            <i data-lucide="users" style="width:32px;height:32px;color:#3a3a3a;"></i>
+            <div class="modal-empty-text">No mutual friends to show yet.</div>
+        </div>`;
+    }
+    lucide.createIcons();
+}
+
 async function openSettings() {
     const token=getAuthToken();
     const res=await fetch(`/api/chat/profile/${encodeURIComponent(myUser)}`,{
@@ -686,11 +729,11 @@ async function openSettings() {
 }
 
 function renderSettings(profile) {
+    modalCard.classList.add('settings-card');
     modalCard.innerHTML=`
-    <div class="modal-banner"></div>
     <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
-    <div class="modal-body">
-        <div class="modal-avatar-wrap">
+    <div class="modal-settings-body">
+        <div class="modal-avatar-wrap" style="margin-top:0;margin-left:0;">
             <div class="modal-avatar editable" id="modalAvatarBox">
                 <img id="settingsAvatarPreview" src="${getAvatarUrl(profile.username)}" alt="">
                 <div class="modal-avatar-overlay">
@@ -736,6 +779,25 @@ function renderSettings(profile) {
         document.getElementById('settingsAvatarPreview').src=result.avatarUrl;
         statusEl.textContent='Avatar updated.';
         statusEl.className='modal-status success';
+    });
+    document.getElementById('settingsUsernameSaveBtn').addEventListener('click',async()=>{
+        const statusEl=document.getElementById('modalStatus');
+        const newUsername=document.getElementById('settingsUsernameInput').value.trim();
+        if (!newUsername||newUsername===profile.username) return;
+        const token=getAuthToken();
+        const res=await fetch('/api/auth/username',{
+            method:'POST',
+            headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({username:newUsername})
+        });
+        const result=await res.json();
+        if (!res.ok) {
+            statusEl.textContent=result.error||'Something went wrong.';
+            statusEl.className='modal-status error';
+            return;
+        }
+        setAuth(result.token,result.username);
+        location.reload();
     });
     document.getElementById('settingsSaveBtn').addEventListener('click',async()=>{
         const statusEl=document.getElementById('modalStatus');
