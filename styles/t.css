@@ -1022,11 +1022,12 @@ i[data-lucide] svg {
 }
 
 .modal-card.settings-card {
-    width:400px;
+    width:420px;
     height:auto;
     max-height:88vh;
     display:block;
     overflow-y:auto;
+    padding:0;
 }
 
 .modal-left {
@@ -1482,6 +1483,130 @@ i[data-lucide] svg {
     height:7px;
     border-radius:50%;
     flex-shrink:0;
+}
+
+.modal-empty-icon {
+    width:32px;
+    height:32px;
+    color:#333;
+}
+
+.settings-preview {
+    background:#000;
+    border-bottom:1px solid #1a1a1a;
+    padding:20px;
+}
+
+.settings-preview-card {
+    background:#0a0a0a;
+    border:1px solid #1a1a1a;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.settings-preview-banner {
+    height:70px;
+    background:#0d0d0d;
+    border-bottom:1px solid #1a1a1a;
+}
+
+.settings-preview-body {
+    padding:0 14px 14px;
+}
+
+.settings-preview-avatar-wrap {
+    margin-top:-30px;
+    margin-bottom:8px;
+}
+
+.settings-preview-avatar {
+    position:relative;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:#0d0d0d;
+    border:4px solid #0a0a0a;
+    overflow:hidden;
+    cursor:pointer;
+}
+
+.settings-preview-avatar img {
+    position:relative;
+    z-index:1;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.settings-preview-avatar .modal-avatar-overlay {
+    position:absolute;
+    inset:0;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    background:rgba(0,0,0,0.72);
+    opacity:0;
+    transition:opacity 0.18s ease;
+    pointer-events:none;
+    border-radius:50%;
+}
+
+.settings-preview-avatar:hover .modal-avatar-overlay {
+    opacity:1;
+}
+
+.settings-preview-avatar .modal-avatar-overlay svg {
+    width:14px;
+    height:14px;
+    color:#fff;
+}
+
+.settings-preview-avatar .modal-avatar-overlay-text {
+    font-size:8px;
+    font-weight:600;
+    color:#fff;
+}
+
+.settings-preview-name {
+    font-size:14px;
+    font-weight:700;
+    color:#f0f0f0;
+}
+
+.settings-preview-bio {
+    margin-top:6px;
+    font-size:12px;
+    line-height:1.5;
+    color:#808080;
+}
+
+.settings-preview-bio:empty::before {
+    content:'No bio yet.';
+    color:#505050;
+}
+
+.settings-tabs {
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding:16px 12px;
+    border-bottom:1px solid #1a1a1a;
+}
+
+.settings-section {
+    padding:16px 20px 20px;
+}
+
+.settings-row {
+    margin-bottom:14px;
+}
+
+.settings-row:last-child {
+    margin-bottom:0;
 }
 
 .role-tag {

@@ -703,13 +703,13 @@ function renderProfileTab(tab,profile,isSelf) {
     if (tab==='activity') {
         panel.innerHTML=`
         <div class="modal-empty-state">
-            <i data-lucide="activity" style="width:32px;height:32px;color:#3a3a3a;"></i>
+            <i data-lucide="activity" class="modal-empty-icon"></i>
             <div class="modal-empty-text">${escapeHtml(profile.username)} doesn't have any activity to share yet.</div>
         </div>`;
     } else {
         panel.innerHTML=`
         <div class="modal-empty-state">
-            <i data-lucide="users" style="width:32px;height:32px;color:#3a3a3a;"></i>
+            <i data-lucide="users" class="modal-empty-icon"></i>
             <div class="modal-empty-text">No mutual friends to show yet.</div>
         </div>`;
     }
@@ -732,26 +732,37 @@ function renderSettings(profile) {
     modalCard.classList.add('settings-card');
     modalCard.innerHTML=`
     <button class="modal-close" id="modalCloseBtn"><i data-lucide="x"></i></button>
-    <div class="modal-settings-body">
-        <div class="modal-avatar-wrap" style="margin-top:0;margin-left:0;">
-            <div class="modal-avatar editable" id="modalAvatarBox">
-                <img id="settingsAvatarPreview" src="${getAvatarUrl(profile.username)}" alt="">
-                <div class="modal-avatar-overlay">
-                    <div class="modal-avatar-overlay-text">Upload<br>Image</div>
+    <div class="settings-preview">
+        <div class="settings-preview-card">
+            <div class="settings-preview-banner"></div>
+            <div class="settings-preview-body">
+                <div class="settings-preview-avatar-wrap">
+                    <div class="settings-preview-avatar" id="modalAvatarBox">
+                        <img id="settingsAvatarPreview" src="${getAvatarUrl(profile.username)}" alt="">
+                        <div class="modal-avatar-overlay">
+                            <i data-lucide="upload"></i>
+                            <div class="modal-avatar-overlay-text">Change</div>
+                        </div>
+                        <input type="file" id="modalAvatarFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;">
+                    </div>
                 </div>
-                <input type="file" id="modalAvatarFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;">
+                <div class="settings-preview-name">${escapeHtml(profile.username)}</div>
+                <div class="settings-preview-bio" id="settingsPreviewBio">${escapeHtml(profile.bio||'')}</div>
             </div>
         </div>
-        <div class="modal-identity-row">
-            <div class="modal-username">${escapeHtml(profile.username)}</div>
-        </div>
-        <div class="modal-field-label">Username</div>
-        <div class="mod-form-row" style="margin-bottom:4px;">
+    </div>
+    <div class="settings-section">
+        <div class="settings-row">
+            <div class="modal-field-label">Username</div>
             <input class="modal-input" id="settingsUsernameInput" type="text" value="${escapeHtml(profile.username)}">
         </div>
-        <button class="modal-btn" id="settingsUsernameSaveBtn" style="width:100%;margin-bottom:10px;"><i data-lucide="at-sign"></i>Change username</button>
-        <div class="modal-field-label">Bio</div>
-        <textarea class="modal-textarea" id="settingsBioInput" rows="3" maxlength="280" placeholder="Tell people about yourself...">${escapeHtml(profile.bio||'')}</textarea>
+        <div class="settings-row">
+            <button class="modal-btn" id="settingsUsernameSaveBtn" style="width:100%;"><i data-lucide="at-sign"></i>Change username</button>
+        </div>
+        <div class="settings-row">
+            <div class="modal-field-label">Bio</div>
+            <textarea class="modal-textarea" id="settingsBioInput" rows="3" maxlength="280" placeholder="Tell people about yourself...">${escapeHtml(profile.bio||'')}</textarea>
+        </div>
         <div class="modal-save-row">
             <button class="modal-btn" id="settingsCancelBtn">Cancel</button>
             <button class="modal-btn primary" id="settingsSaveBtn"><i data-lucide="check"></i>Save</button>
@@ -759,8 +770,16 @@ function renderSettings(profile) {
         <div class="modal-status" id="modalStatus"></div>
     </div>`;
     lucide.createIcons();
+
     document.getElementById('modalCloseBtn').addEventListener('click',closeModal);
     document.getElementById('settingsCancelBtn').addEventListener('click',closeModal);
+
+    const bioInput=document.getElementById('settingsBioInput');
+    const previewBio=document.getElementById('settingsPreviewBio');
+    bioInput.addEventListener('input',()=>{
+        previewBio.textContent=bioInput.value;
+    });
+
     const avatarBox=document.getElementById('modalAvatarBox');
     const fileInput=document.getElementById('modalAvatarFileInput');
     avatarBox.addEventListener('click',()=>fileInput.click());
@@ -780,6 +799,7 @@ function renderSettings(profile) {
         statusEl.textContent='Avatar updated.';
         statusEl.className='modal-status success';
     });
+
     document.getElementById('settingsUsernameSaveBtn').addEventListener('click',async()=>{
         const statusEl=document.getElementById('modalStatus');
         const newUsername=document.getElementById('settingsUsernameInput').value.trim();
@@ -799,9 +819,10 @@ function renderSettings(profile) {
         setAuth(result.token,result.username);
         location.reload();
     });
+
     document.getElementById('settingsSaveBtn').addEventListener('click',async()=>{
         const statusEl=document.getElementById('modalStatus');
-        const bio=document.getElementById('settingsBioInput').value;
+        const bio=bioInput.value;
         const token=getAuthToken();
         const formData=new FormData();
         formData.append('bio',bio);
@@ -1037,10 +1058,6 @@ function renderModPanel(data,anchorEl) {
             <option value="1440">1 day</option>
             <option value="10080">1 week<option>
         </select>
-    </div>
-    <div class="mod-actions-grid" style="margin-bottom:12px;">
-        <button class="mod-action-btn danger" id="modBanBtn"><i data-lucide="ban"></i>Ban</button>
-        <button class="mod-action-btn" id="modUnbanBtn"><i data-lucide="undo-2"></i>Unban</button>
     </div>
     <div class="mod-section-label">Ban</div>
     <div class="mod-form-row">
