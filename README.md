@@ -8,24 +8,24 @@ here is a rundown of all the features:
 
 ## features:
 ### games 
--> custom providers
--> loading wheel 
--> cool anims
+- custom providers
+- loading wheel 
+- cool anims
 ### cloud gaming
--> technology utilising Raccoon Games and an autofill to create accounts to play games
+- technology utilising Raccoon Games and an autofill to create accounts to play games
 ### ai
--> cool UI
+- cool UI
 ### movies
--> custom krypton movies interface instead of using cineby.gd
+- custom krypton movies interface instead of using cineby.gd
 ### music
--> custom tech using ytdlp
--> clean lyrics with timestamping
+- custom tech using ytdlp
+- clean lyrics with timestamping
 ### chat
--> role system
--> moderation system
-    -> fingerprinted bans
--> reactions
--> authentication system
--> channel system
--> wip dm system, emojis, file uploading
--> profile system
+- role system
+- moderation system
+    - fingerprinted bans
+- reactions
+- authentication system
+- channel system
+- wip dm system, emojis, file uploading
+- profile system
