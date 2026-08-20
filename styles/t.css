@@ -1028,7 +1028,7 @@ i[data-lucide] svg {
     width:300px;
     flex-shrink:0;
     background:#050505;
-    border-radius:1px solid #1a1a1a;
+    border-right:1px solid #1a1a1a;
     padding:14px;
     display:flex;
     flex-direction:column;
@@ -1232,6 +1232,13 @@ i[data-lucide] svg {
 
 .modal-info-line a:hover {
     text-decoration:underline;
+}
+
+.modal-info-block {
+    margin-top:14px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
 }
 
 .modal-field-label {
