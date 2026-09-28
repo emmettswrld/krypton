@@ -17,7 +17,7 @@ document.getElementById('refBtn').addEventListener('click',()=>{
     const tabData=tabs[tabId];
     frame.classList.remove('loaded');
     loader.classList.add('active');
-    const isInternal=tabData?.url?.startsWith('krypton://');
+    const isInternal=tabData?.url?.startsWith('quackmath://');
     if (isInternal) {
         const currentSrc=frame.dataset.internalSrc||frame.src;
         frame.src='';
@@ -500,7 +500,7 @@ function swTab(tabId) {
         home.style.display='none';
         showTag();
         setUrl(tab.url);
-        if (!tab.url.startsWith('krypton://')) {
+        if (!tab.url.startsWith('quackmath://')) {
             startURLP(tab.frame,tabId);
         }
     } else {
@@ -567,7 +567,7 @@ document.querySelectorAll('.shortcut').forEach(sc=>{
 });
 
 //sidebar handling
-function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
+function loadInternal(path,quackmathUrl='quackmath://internal',sidebarId=null) {
     const pageCont=document.getElementById('pageCont');
     const home=document.querySelector('.main');
     const activeTab=document.querySelector('.tab.active');
@@ -585,8 +585,8 @@ function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
     void frame.offsetWidth;
     frame.style.display='block';
     frame.src=path;
-    tabs[tabId]={url:kryptonUrl,frame};
-    const label=kryptonUrl.replace('krypton://','');
+    tabs[tabId]={url:quackmathUrl,frame};
+    const label=quackmathUrl.replace('quackmath://','');
     const specialLabels={ai:'AI'};
     activeTab.querySelector('.tab-tl').textContent=specialLabels[label]??(label.charAt(0).toUpperCase()+label.slice(1));
     activeTab.querySelector('.tab-fav').innerHTML='<i data-lucide="atom"></i>';
@@ -598,8 +598,8 @@ function loadInternal(path,kryptonUrl='krypton://internal',sidebarId=null) {
             });
         });
     };
-    urlInput.value=kryptonUrl;
-    urlDisplay.innerHTML=formatUrl(kryptonUrl);
+    urlInput.value=quackmathUrl;
+    urlDisplay.innerHTML=formatUrl(quackmathUrl);
     urlDisplay.style.display='block';
     urlInput.style.display='none';
     if (urlPollInt) clearInterval(urlPollInt);
@@ -654,27 +654,27 @@ function setSidebarActive(id) {
 }
 
 document.getElementById('gmBtn').addEventListener('click',()=>{
-    loadInternal('../../pages/g.html','krypton://games','gmBtn');
+    loadInternal('../../pages/g.html','quackmath://games','gmBtn');
 });
 
 document.getElementById('mvBtn').addEventListener('click',()=>{
-    loadInternal('../../pages/m.html','krypton://movies','mvBtn');
+    loadInternal('../../pages/m.html','quackmath://movies','mvBtn');
 });
 
 document.getElementById('cdBtn').addEventListener('click',()=>{
-    loadInternal('../pages/c.html','krypton://cloud','cdBtn');
+    loadInternal('../pages/c.html','quackmath://cloud','cdBtn');
 });
 
 document.getElementById('aiBtn').addEventListener('click',()=>{
-    loadInternal('../pages/a.html','krypton://ai','aiBtn');
+    loadInternal('../pages/a.html','quackmath://ai','aiBtn');
 });
 
 document.getElementById('msBtn').addEventListener('click',()=>{
-    loadInternal('../pages/l.html','krypton://music','msBtn');
+    loadInternal('../pages/l.html','quackmath://music','msBtn');
 });
 
 document.getElementById('chBtn').addEventListener('click',()=>{
-    loadInternal('../pages/t.html','krypton://chat','chBtn');
+    loadInternal('../pages/t.html','quackmath://chat','chBtn');
 });
 
 let isLG=false;

@@ -128,7 +128,7 @@ textInput.addEventListener('keydown',(e)=>{
 });
 
 //chat state
-const STORAGE_KEY="krypton_chats";
+const STORAGE_KEY="quackmath_chats";
 let chats=loadChats();
 let activeChatId=chats.length?chats[0].id:createChat();
 
