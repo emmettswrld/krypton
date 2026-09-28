@@ -42,7 +42,7 @@ document.getElementById('refBtn').addEventListener('click',()=>{
     }
 });
 
-const tl='krypton';
+const tl='quackmath';
 const mText=document.getElementById('mainTl');
 [...tl].forEach((char,i)=>{
     const span=document.createElement('span');
